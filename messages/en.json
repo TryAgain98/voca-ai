@@ -1,0 +1,20 @@
+{
+  "home": {
+    "title": "Voca AI — Library Demo",
+    "subtitle": "All configured libraries are running here",
+    "counter": "Counter",
+    "counterValue": "Count: {count}",
+    "form": "Contact Form",
+    "name": "Name",
+    "email": "Email",
+    "submit": "Submit",
+    "query": "React Query",
+    "queryFetch": "Fetch Posts",
+    "datetime": "Date & Currency",
+    "motion": "Framer Motion",
+    "clickMe": "Click me",
+    "toastSuccess": "Action completed!",
+    "toastError": "Something went wrong.",
+    "switchLocale": "Switch to Vietnamese"
+  }
+}

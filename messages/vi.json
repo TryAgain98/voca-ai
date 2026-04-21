@@ -1,0 +1,20 @@
+{
+  "home": {
+    "title": "Voca AI — Demo Thư Viện",
+    "subtitle": "Tất cả thư viện đã cấu hình đang chạy ở đây",
+    "counter": "Bộ đếm",
+    "counterValue": "Số đếm: {count}",
+    "form": "Form Liên hệ",
+    "name": "Tên",
+    "email": "Email",
+    "submit": "Gửi",
+    "query": "React Query",
+    "queryFetch": "Tải bài viết",
+    "datetime": "Ngày & Tiền tệ",
+    "motion": "Framer Motion",
+    "clickMe": "Nhấn vào đây",
+    "toastSuccess": "Hành động thành công!",
+    "toastError": "Có lỗi xảy ra.",
+    "switchLocale": "Chuyển sang Tiếng Anh"
+  }
+}

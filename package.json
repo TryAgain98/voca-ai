@@ -6,20 +6,55 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.2.3",
+    "@conform-to/react": "^1.19.0",
+    "@conform-to/zod": "^1.19.0",
+    "@tanstack/react-query": "^5.99.2",
+    "clsx": "^2.1.1",
+    "currency.js": "^2.0.4",
+    "dayjs": "^1.11.20",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.8.0",
     "next": "16.2.4",
+    "next-intl": "^4.9.1",
+    "nprogress": "^0.2.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nprogress": "^0.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

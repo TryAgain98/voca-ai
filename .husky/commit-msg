@@ -1,0 +1,15 @@
+npx --no -- commitlint --edit "$1" || {
+  echo ""
+  echo "  Commit message format must follow Conventional Commits:"
+  echo "  <type>(<scope>): <subject>"
+  echo ""
+  echo "  Types: feat | fix | docs | style | refactor | test | chore | perf | ci | build | revert"
+  echo ""
+  echo "  Examples:"
+  echo "    feat(auth): add login with Google"
+  echo "    fix(api): handle null response from server"
+  echo "    chore: init app"
+  echo "    docs(readme): update setup instructions"
+  echo ""
+  exit 1
+}
