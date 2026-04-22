@@ -1,14 +1,14 @@
 'use client'
 
-import { BookOpen, LayoutDashboard } from 'lucide-react'
+import { BookOpen, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
 import { cn } from '~/lib/cn'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/lessons', label: 'Lessons', icon: BookOpen },
+  { href: '/admin/lessons', label: 'Lessons', icon: BookOpen },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -16,16 +16,12 @@ export function Sidebar() {
   const params = useParams()
   const locale = params.locale as string
 
-  const isActive = (href: string) => {
-    const full = `/${locale}${href}`
-    if (href === '/dashboard') return pathname === full
-    return pathname.startsWith(full)
-  }
+  const isActive = (href: string) => pathname.startsWith(`/${locale}${href}`)
 
   return (
-    <aside className="border-sidebar-border bg-sidebar flex h-full w-60 shrink-0 flex-col border-r">
-      <div className="flex h-16 items-center px-6">
-        <span className="text-primary text-lg font-bold">Voca AI</span>
+    <aside className="border-sidebar-border bg-sidebar flex h-full w-56 shrink-0 flex-col border-r">
+      <div className="flex h-14 items-center px-5">
+        <span className="text-base font-bold tracking-tight">Voca AI</span>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-2">
@@ -34,13 +30,13 @@ export function Sidebar() {
             key={href}
             href={`/${locale}${href}`}
             className={cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
               isActive(href)
-                ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground font-medium',
             )}
           >
-            <Icon size={18} />
+            <Icon size={16} strokeWidth={isActive(href) ? 2.5 : 2} />
             {label}
           </Link>
         ))}

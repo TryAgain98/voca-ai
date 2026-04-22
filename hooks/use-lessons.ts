@@ -3,28 +3,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { supabase } from '~/lib/supabase'
-
-import type { Lesson } from '~/types'
+import { lessonsService } from '~/services/lessons.service'
 
 export function useLessons() {
   return useQuery({
     queryKey: ['lessons'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('lessons').select('*')
-      if (error) throw error
-      return data as Lesson[]
-    },
+    queryFn: () => lessonsService.findAll(),
   })
 }
 
 export function useCreateLesson() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (payload: { name: string; description?: string }) => {
-      const { error } = await supabase.from('lessons').insert(payload)
-      if (error) throw error
-    },
+    mutationFn: (payload: { name: string; description?: string }) =>
+      lessonsService.create(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lessons'] })
       toast.success('Lesson created')
@@ -36,20 +28,14 @@ export function useCreateLesson() {
 export function useUpdateLesson() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       id,
       ...payload
     }: {
       id: string
       name: string
       description?: string
-    }) => {
-      const { error } = await supabase
-        .from('lessons')
-        .update(payload)
-        .eq('id', id)
-      if (error) throw error
-    },
+    }) => lessonsService.update(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lessons'] })
       toast.success('Lesson updated')
@@ -61,10 +47,7 @@ export function useUpdateLesson() {
 export function useDeleteLesson() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('lessons').delete().eq('id', id)
-      if (error) throw error
-    },
+    mutationFn: (id: string) => lessonsService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lessons'] })
       toast.success('Lesson deleted')
