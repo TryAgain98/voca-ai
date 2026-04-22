@@ -4,3 +4,9 @@ export interface Post {
   body: string
   userId: number
 }
+
+export interface Lesson {
+  id: string
+  name: string
+  description: string | null
+}
