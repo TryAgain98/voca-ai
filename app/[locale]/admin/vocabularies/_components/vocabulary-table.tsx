@@ -1,6 +1,7 @@
 'use client'
 
 import { BookMarked, Pencil, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 import {
@@ -31,13 +32,16 @@ export function VocabularyTable({
   onEdit,
   onDelete,
 }: VocabularyTableProps) {
+  const t = useTranslations('Vocabularies')
+  const tCommon = useTranslations('Common')
+
   const lessonName = (id: string) =>
     lessons.find((l) => l.id === id)?.name ?? id
 
   if (isLoading) {
     return (
       <div className="text-muted-foreground flex items-center justify-center py-20 text-sm">
-        Loading...
+        {tCommon('loading')}
       </div>
     )
   }
@@ -47,9 +51,7 @@ export function VocabularyTable({
       <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 py-20">
         <BookMarked size={36} className="opacity-30" />
         <p className="text-sm">
-          {wordFilter
-            ? 'No words match your filter'
-            : 'No vocabularies yet — add one!'}
+          {wordFilter ? t('emptyFiltered') : t('emptyAll')}
         </p>
       </div>
     )
@@ -59,10 +61,10 @@ export function VocabularyTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="px-5">Word</TableHead>
-          <TableHead className="px-5">Meaning</TableHead>
-          <TableHead className="px-5">Example</TableHead>
-          <TableHead className="px-5">Lesson</TableHead>
+          <TableHead className="px-5">{t('colWord')}</TableHead>
+          <TableHead className="px-5">{t('colMeaning')}</TableHead>
+          <TableHead className="px-5">{t('colExample')}</TableHead>
+          <TableHead className="px-5">{t('colLesson')}</TableHead>
           <TableHead className="w-20 px-5" />
         </TableRow>
       </TableHeader>

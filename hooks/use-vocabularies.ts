@@ -1,6 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { vocabulariesService } from '~/services/vocabularies.service'
@@ -17,6 +18,7 @@ export function useVocabularies(lessonId?: string) {
 }
 
 export function useCreateVocabulary() {
+  const t = useTranslations('Vocabularies')
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: {
@@ -28,13 +30,14 @@ export function useCreateVocabulary() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lesson_id] })
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
-      toast.success('Vocabulary created')
+      toast.success(t('createSuccess'))
     },
-    onError: () => toast.error('Failed to create vocabulary'),
+    onError: () => toast.error(t('createError')),
   })
 }
 
 export function useUpdateVocabulary() {
+  const t = useTranslations('Vocabularies')
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (vars: {
@@ -52,13 +55,14 @@ export function useUpdateVocabulary() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lessonId] })
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
-      toast.success('Vocabulary updated')
+      toast.success(t('updateSuccess'))
     },
-    onError: () => toast.error('Failed to update vocabulary'),
+    onError: () => toast.error(t('updateError')),
   })
 }
 
 export function useDeleteVocabulary() {
+  const t = useTranslations('Vocabularies')
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id }: { id: string; lessonId: string }) =>
@@ -66,8 +70,8 @@ export function useDeleteVocabulary() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lessonId] })
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
-      toast.success('Vocabulary deleted')
+      toast.success(t('deleteSuccess'))
     },
-    onError: () => toast.error('Failed to delete vocabulary'),
+    onError: () => toast.error(t('deleteError')),
   })
 }

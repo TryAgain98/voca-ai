@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -54,6 +55,9 @@ export function VocabularyFormDialog({
   isPending,
   onSubmit,
 }: VocabularyFormDialogProps) {
+  const t = useTranslations('Vocabularies')
+  const tCommon = useTranslations('Common')
+
   const [form, setForm] = useState<FormState>({
     lesson_id: editing?.lesson_id ?? '',
     word: editing?.word ?? '',
@@ -64,9 +68,9 @@ export function VocabularyFormDialog({
 
   const validate = (): boolean => {
     const next: FieldError = {}
-    if (!form.lesson_id) next.lesson_id = 'Lesson is required'
-    if (!form.word.trim()) next.word = 'Word is required'
-    if (!form.meaning.trim()) next.meaning = 'Meaning is required'
+    if (!form.lesson_id) next.lesson_id = t('lessonRequired')
+    if (!form.word.trim()) next.word = t('wordRequired')
+    if (!form.meaning.trim()) next.meaning = t('meaningRequired')
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -91,15 +95,13 @@ export function VocabularyFormDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onOpenChange(false)}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {editing ? 'Edit Vocabulary' : 'Add Vocabulary'}
-          </DialogTitle>
+          <DialogTitle>{editing ? t('editTitle') : t('addTitle')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label>
-              Lesson <span className="text-destructive">*</span>
+              {t('lessonLabel')} <span className="text-destructive">*</span>
             </Label>
             <Select
               value={form.lesson_id}
@@ -107,7 +109,7 @@ export function VocabularyFormDialog({
               disabled={!!editing}
             >
               <SelectTrigger aria-invalid={!!errors.lesson_id}>
-                <SelectValue placeholder="Select a lesson" />
+                <SelectValue placeholder={t('lessonPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {lessons.map((l) => (
@@ -124,7 +126,7 @@ export function VocabularyFormDialog({
 
           <div className="space-y-1.5">
             <Label htmlFor="word">
-              Word <span className="text-destructive">*</span>
+              {t('wordLabel')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="word"
@@ -141,7 +143,7 @@ export function VocabularyFormDialog({
 
           <div className="space-y-1.5">
             <Label htmlFor="meaning">
-              Meaning <span className="text-destructive">*</span>
+              {t('meaningLabel')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="meaning"
@@ -156,7 +158,7 @@ export function VocabularyFormDialog({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="example">Example</Label>
+            <Label htmlFor="example">{t('exampleLabel')}</Label>
             <Textarea
               id="example"
               value={form.example}
@@ -172,10 +174,14 @@ export function VocabularyFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? 'Saving...' : editing ? 'Save Changes' : 'Create'}
+              {isPending
+                ? tCommon('saving')
+                : editing
+                  ? tCommon('saveChanges')
+                  : tCommon('create')}
             </Button>
           </DialogFooter>
         </form>

@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -25,25 +27,28 @@ export function VocabularyDeleteDialog({
   onConfirm,
   onCancel,
 }: VocabularyDeleteDialogProps) {
+  const t = useTranslations('Vocabularies')
+  const tCommon = useTranslations('Common')
+
   return (
     <Dialog open={!!voca} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Vocabulary</DialogTitle>
+          <DialogTitle>{t('deleteTitle')}</DialogTitle>
           <DialogDescription>
-            Delete &quot;{voca?.word}&quot;? This action cannot be undone.
+            {t('deleteDescription', { word: voca?.word ?? '' })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button
             variant="destructive"
             disabled={isPending}
             onClick={onConfirm}
           >
-            {isPending ? 'Deleting...' : 'Delete'}
+            {isPending ? tCommon('deleting') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

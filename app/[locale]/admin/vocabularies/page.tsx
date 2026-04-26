@@ -1,6 +1,7 @@
 'use client'
 
 import { Plus, Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -29,6 +30,7 @@ import type { Vocabulary } from '~/types'
 const ALL = '__all__'
 
 export default function VocabulariesPage() {
+  const t = useTranslations('Vocabularies')
   const { data: lessons = [] } = useLessons()
   const [lessonFilter, setLessonFilter] = useState(ALL)
   const [wordFilter, setWordFilter] = useState('')
@@ -86,9 +88,9 @@ export default function VocabulariesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Vocabularies</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
-            {vocabularies.length} word{vocabularies.length !== 1 ? 's' : ''}
+            {t('wordCount', { count: vocabularies.length })}
           </p>
         </div>
         <Button
@@ -98,7 +100,7 @@ export default function VocabulariesPage() {
           }}
         >
           <Plus />
-          Add Vocabulary
+          {t('addButton')}
         </Button>
       </div>
 
@@ -108,10 +110,10 @@ export default function VocabulariesPage() {
           onValueChange={(v) => v && setLessonFilter(v)}
         >
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="All lessons" />
+            <SelectValue placeholder={t('filterLesson')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>All lessons</SelectItem>
+            <SelectItem value={ALL}>{t('filterLesson')}</SelectItem>
             {lessons.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.name}
@@ -126,7 +128,7 @@ export default function VocabulariesPage() {
             className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
           />
           <Input
-            placeholder="Filter by word..."
+            placeholder={t('filterWord')}
             value={wordFilter}
             onChange={(e) => setWordFilter(e.target.value)}
             className="pl-8"
