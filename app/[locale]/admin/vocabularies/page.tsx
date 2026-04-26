@@ -1,17 +1,9 @@
 'use client'
 
-import { BookMarked, Pencil, Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import {
   Select,
@@ -20,14 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
 import { useLessons } from '~/hooks/use-lessons'
 import {
   useCreateVocabulary,
@@ -36,7 +20,9 @@ import {
   useVocabularies,
 } from '~/hooks/use-vocabularies'
 
+import { VocabularyDeleteDialog } from './_components/vocabulary-delete-dialog'
 import { VocabularyFormDialog } from './_components/vocabulary-form-dialog'
+import { VocabularyTable } from './_components/vocabulary-table'
 
 import type { Vocabulary } from '~/types'
 
@@ -65,19 +51,6 @@ export default function VocabulariesPage() {
     [vocabularies, wordFilter],
   )
 
-  const lessonName = (id: string) =>
-    lessons.find((l) => l.id === id)?.name ?? id
-
-  const openAdd = () => {
-    setEditing(null)
-    setFormOpen(true)
-  }
-
-  const openEdit = (voca: Vocabulary) => {
-    setEditing(voca)
-    setFormOpen(true)
-  }
-
   const handleSubmit = async (data: {
     lesson_id: string
     word: string
@@ -98,6 +71,15 @@ export default function VocabulariesPage() {
     setFormOpen(false)
   }
 
+  const handleDelete = async () => {
+    if (!deletingVoca) return
+    await deleteVocabulary.mutateAsync({
+      id: deletingVoca.id,
+      lessonId: deletingVoca.lesson_id,
+    })
+    setDeletingVoca(null)
+  }
+
   const isPending = createVocabulary.isPending || updateVocabulary.isPending
 
   return (
@@ -109,7 +91,12 @@ export default function VocabulariesPage() {
             {vocabularies.length} word{vocabularies.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button onClick={openAdd}>
+        <Button
+          onClick={() => {
+            setEditing(null)
+            setFormOpen(true)
+          }}
+        >
           <Plus />
           Add Vocabulary
         </Button>
@@ -148,69 +135,17 @@ export default function VocabulariesPage() {
       </div>
 
       <div className="rounded-xl border">
-        {isLoading ? (
-          <div className="text-muted-foreground flex items-center justify-center py-20 text-sm">
-            Loading...
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 py-20">
-            <BookMarked size={36} className="opacity-30" />
-            <p className="text-sm">
-              {wordFilter
-                ? 'No words match your filter'
-                : 'No vocabularies yet — add one!'}
-            </p>
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-5">Word</TableHead>
-                <TableHead className="px-5">Meaning</TableHead>
-                <TableHead className="px-5">Example</TableHead>
-                <TableHead className="px-5">Lesson</TableHead>
-                <TableHead className="w-20 px-5" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((voca) => (
-                <TableRow key={voca.id} className="group">
-                  <TableCell className="px-5 font-medium">
-                    {voca.word}
-                  </TableCell>
-                  <TableCell className="px-5">{voca.meaning}</TableCell>
-                  <TableCell className="text-muted-foreground max-w-xs truncate px-5">
-                    {voca.example ?? (
-                      <span className="italic opacity-40">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground px-5 text-sm">
-                    {lessonName(voca.lesson_id)}
-                  </TableCell>
-                  <TableCell className="px-5">
-                    <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => openEdit(voca)}
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setDeletingVoca(voca)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        <VocabularyTable
+          vocabularies={filtered}
+          lessons={lessons}
+          wordFilter={wordFilter}
+          isLoading={isLoading}
+          onEdit={(v) => {
+            setEditing(v)
+            setFormOpen(true)
+          }}
+          onDelete={setDeletingVoca}
+        />
       </div>
 
       <VocabularyFormDialog
@@ -223,40 +158,12 @@ export default function VocabulariesPage() {
         onSubmit={handleSubmit}
       />
 
-      <Dialog
-        open={!!deletingVoca}
-        onOpenChange={(open) => !open && setDeletingVoca(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Vocabulary</DialogTitle>
-            <DialogDescription>
-              Delete &quot;{deletingVoca?.word}&quot;? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeletingVoca(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={deleteVocabulary.isPending}
-              onClick={async () => {
-                if (deletingVoca) {
-                  await deleteVocabulary.mutateAsync({
-                    id: deletingVoca.id,
-                    lessonId: deletingVoca.lesson_id,
-                  })
-                  setDeletingVoca(null)
-                }
-              }}
-            >
-              {deleteVocabulary.isPending ? 'Deleting...' : 'Delete'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <VocabularyDeleteDialog
+        voca={deletingVoca}
+        isPending={deleteVocabulary.isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingVoca(null)}
+      />
     </div>
   )
 }
