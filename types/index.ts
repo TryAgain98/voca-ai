@@ -10,3 +10,11 @@ export interface Lesson {
   name: string
   description: string | null
 }
+
+export interface Vocabulary {
+  id: string
+  lesson_id: string
+  word: string
+  meaning: string
+  example: string | null
+}
