@@ -1,14 +1,14 @@
 'use client'
 
-import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
 
 import { NProgressProvider } from './nprogress-provider'
 import { QueryProvider } from './query-provider'
+import { ThemeProvider } from './theme-provider'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider defaultTheme="dark">
       <QueryProvider>
         <NProgressProvider />
         {children}
