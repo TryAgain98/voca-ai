@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Separator } from '~/components/ui/separator'
 
+import { TtsSettingsCard } from './_components/tts-settings-card'
+
 export default async function SettingsPage() {
   const user = await currentUser()
   if (!user) return null
@@ -20,6 +22,8 @@ export default async function SettingsPage() {
           Manage your account information
         </p>
       </div>
+
+      <TtsSettingsCard />
 
       <Card>
         <CardHeader>

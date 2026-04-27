@@ -3,6 +3,7 @@
 import { Eye, Pencil, BookMarked, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { SpeakButton } from '~/components/layout/speak-button'
 import { Button } from '~/components/ui/button'
 import {
   Table,
@@ -142,6 +143,7 @@ export function VocabularyTable({
 
             <TableCell className="px-5" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <SpeakButton text={voca.word} />
                 <Button
                   variant="ghost"
                   size="icon-sm"

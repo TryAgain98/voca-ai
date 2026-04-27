@@ -2,6 +2,7 @@
 
 import { BookOpen, CalendarClock, CalendarPlus, Hash } from 'lucide-react'
 
+import { SpeakButton } from '~/components/layout/speak-button'
 import { Badge } from '~/components/ui/badge'
 import { Separator } from '~/components/ui/separator'
 import {
@@ -68,9 +69,12 @@ export function VocabularyDetailSheet({
               <SheetHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <SheetTitle className="text-3xl font-bold tracking-tight">
-                      {voca.word}
-                    </SheetTitle>
+                    <div className="flex items-center gap-2">
+                      <SheetTitle className="text-3xl font-bold tracking-tight">
+                        {voca.word}
+                      </SheetTitle>
+                      <SpeakButton text={voca.word} className="mt-1 shrink-0" />
+                    </div>
                     {voca.phonetic && (
                       <p className="text-primary/70 mt-1 font-mono text-sm">
                         {voca.phonetic}
