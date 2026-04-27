@@ -1,6 +1,12 @@
 'use client'
 
-import { BookMarked, BookOpen, ImagePlus, Settings } from 'lucide-react'
+import {
+  BookMarked,
+  BookOpen,
+  BrainCircuit,
+  ImagePlus,
+  Settings,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -19,6 +25,7 @@ export function Sidebar() {
     { href: '/admin/lessons', label: t('lessons'), icon: BookOpen },
     { href: '/admin/vocabularies', label: t('vocabularies'), icon: BookMarked },
     { href: '/admin/import', label: t('import'), icon: ImagePlus },
+    { href: '/admin/quiz', label: t('quiz'), icon: BrainCircuit },
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ]
 

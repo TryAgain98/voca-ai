@@ -19,7 +19,7 @@ export function LocaleSwitcher() {
 
   return (
     <Button variant="ghost" size="sm" onClick={toggle} className="font-medium">
-      {locale === 'en' ? 'VI' : 'EN'}
+      {locale === 'en' ? 'EN' : 'VI'}
     </Button>
   )
 }
