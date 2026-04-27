@@ -5,7 +5,7 @@ import { routing } from '~/i18n/routing'
 
 const intlMiddleware = createIntlMiddleware(routing)
 
-const isProtectedRoute = createRouteMatcher(['/:locale/dashboard(.*)'])
+const isProtectedRoute = createRouteMatcher(['/:locale/admin(.*)'])
 
 export const proxy = clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
