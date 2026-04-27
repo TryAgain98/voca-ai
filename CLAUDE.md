@@ -1,4 +1,4 @@
-@AGENTS.md
+@.claude/rules/nextjs.md
 
 @.claude/rules/project-structure.md
 @.claude/rules/code-style.md

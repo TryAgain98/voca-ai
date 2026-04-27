@@ -24,7 +24,24 @@
     "delete": "Xóa",
     "deleting": "Đang xóa...",
     "saveChanges": "Lưu thay đổi",
-    "create": "Tạo mới"
+    "create": "Tạo mới",
+    "apply": "Áp dụng",
+    "suggesting": "Đang gợi ý...",
+    "speakWord": "Nghe phát âm",
+    "stop": "Dừng"
+  },
+  "Settings": {
+    "ttsTitle": "Đọc văn bản",
+    "ttsDescription": "Cấu hình cách phát âm từ vựng",
+    "webSpeechTab": "Web Speech (Trình duyệt)",
+    "openaiTab": "OpenAI TTS",
+    "voiceLabel": "Giọng đọc",
+    "defaultVoice": "Giọng hệ thống mặc định",
+    "speedLabel": "Tốc độ",
+    "pitchLabel": "Cao độ",
+    "testButton": "Kiểm tra phát âm",
+    "openaiNote": "OpenAI TTS sử dụng tín dụng API và yêu cầu kết nối internet. Chất lượng cao hơn giọng trình duyệt.",
+    "playsWord": "Phát từ \"{word}\""
   },
   "Vocabularies": {
     "title": "Từ vựng",

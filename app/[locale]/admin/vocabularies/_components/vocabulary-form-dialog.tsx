@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { WordMeaningFields } from '~/app/[locale]/admin/vocabularies/_components/word-meaning-fields'
+import { useVocabularySuggestions } from '~/app/[locale]/admin/vocabularies/_hooks/use-vocabulary-suggestions'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -11,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import {
   Select,
@@ -21,10 +22,6 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
-
-import { useTranslationSuggestion } from '../_hooks/use-translation-suggestion'
-
-import { SuggestionHint } from './suggestion-hint'
 
 import type { Lesson, Vocabulary } from '~/types'
 
@@ -70,19 +67,15 @@ export function VocabularyFormDialog({
   })
   const [errors, setErrors] = useState<FieldError>({})
 
-  // Suggest meaning from word only when meaning field is empty
-  const wordToMeaning = useTranslationSuggestion(
+  const { wordToMeaning, meaningToWord } = useVocabularySuggestions(
     form.word,
-    'word-to-meaning',
-    form.meaning.trim().length === 0,
+    form.meaning,
   )
 
-  // Suggest word from meaning only when word field is empty
-  const meaningToWord = useTranslationSuggestion(
-    form.meaning,
-    'meaning-to-word',
-    form.word.trim().length === 0,
-  )
+  const set = (field: keyof FormState, value: string) => {
+    setForm((f) => ({ ...f, [field]: value }))
+    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }))
+  }
 
   const validate = (): boolean => {
     const next: FieldError = {}
@@ -102,21 +95,6 @@ export function VocabularyFormDialog({
       meaning: form.meaning.trim(),
       example: form.example.trim() || undefined,
     })
-  }
-
-  const set = (field: keyof FormState, value: string) => {
-    setForm((f) => ({ ...f, [field]: value }))
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }))
-  }
-
-  const applyMeaning = (value: string) => {
-    set('meaning', value)
-    wordToMeaning.clear()
-  }
-
-  const applyWord = (value: string) => {
-    set('word', value)
-    meaningToWord.clear()
   }
 
   return (
@@ -152,48 +130,28 @@ export function VocabularyFormDialog({
             )}
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="word">
-              {t('wordLabel')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="word"
-              value={form.word}
-              onChange={(e) => set('word', e.target.value)}
-              placeholder='e.g. "render"'
-              aria-invalid={!!errors.word}
-              autoFocus
-            />
-            <SuggestionHint
-              suggestion={meaningToWord.suggestion}
-              isLoading={meaningToWord.isLoading}
-              onApply={applyWord}
-            />
-            {errors.word && (
-              <p className="text-destructive text-xs">{errors.word}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="meaning">
-              {t('meaningLabel')} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="meaning"
-              value={form.meaning}
-              onChange={(e) => set('meaning', e.target.value)}
-              placeholder='e.g. "kết xuất giao diện"'
-              aria-invalid={!!errors.meaning}
-            />
-            <SuggestionHint
-              suggestion={wordToMeaning.suggestion}
-              isLoading={wordToMeaning.isLoading}
-              onApply={applyMeaning}
-            />
-            {errors.meaning && (
-              <p className="text-destructive text-xs">{errors.meaning}</p>
-            )}
-          </div>
+          <WordMeaningFields
+            wordConfig={{
+              value: form.word,
+              error: errors.word,
+              suggestion: meaningToWord,
+              onChange: (v) => set('word', v),
+              onApply: (v) => {
+                set('word', v)
+                meaningToWord.clear()
+              },
+            }}
+            meaningConfig={{
+              value: form.meaning,
+              error: errors.meaning,
+              suggestion: wordToMeaning,
+              onChange: (v) => set('meaning', v),
+              onApply: (v) => {
+                set('meaning', v)
+                wordToMeaning.clear()
+              },
+            }}
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="example">{t('exampleLabel')}</Label>

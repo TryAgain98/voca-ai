@@ -8,7 +8,7 @@ interface SuggestionState {
   isLoading: boolean
 }
 
-interface UseSuggestionReturn {
+export interface UseSuggestionReturn {
   suggestion: string | null
   isLoading: boolean
   clear: () => void

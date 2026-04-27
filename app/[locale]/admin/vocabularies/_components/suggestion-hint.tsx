@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2, Sparkles } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 
@@ -15,6 +16,8 @@ export function SuggestionHint({
   isLoading,
   onApply,
 }: SuggestionHintProps) {
+  const t = useTranslations('Common')
+
   if (!isLoading && !suggestion) return null
 
   return (
@@ -25,7 +28,9 @@ export function SuggestionHint({
             size={12}
             className="text-muted-foreground shrink-0 animate-spin"
           />
-          <span className="text-muted-foreground text-xs">Suggesting...</span>
+          <span className="text-muted-foreground text-xs">
+            {t('suggesting')}
+          </span>
         </>
       ) : (
         <>
@@ -40,7 +45,7 @@ export function SuggestionHint({
             className="h-6 shrink-0 px-2 text-xs"
             onClick={() => onApply(suggestion!)}
           >
-            Apply
+            {t('apply')}
           </Button>
         </>
       )}

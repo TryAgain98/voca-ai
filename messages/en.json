@@ -24,7 +24,24 @@
     "delete": "Delete",
     "deleting": "Deleting...",
     "saveChanges": "Save Changes",
-    "create": "Create"
+    "create": "Create",
+    "apply": "Apply",
+    "suggesting": "Suggesting...",
+    "speakWord": "Speak word",
+    "stop": "Stop"
+  },
+  "Settings": {
+    "ttsTitle": "Text-to-Speech",
+    "ttsDescription": "Configure how vocabulary words are pronounced",
+    "webSpeechTab": "Web Speech (Browser)",
+    "openaiTab": "OpenAI TTS",
+    "voiceLabel": "Voice",
+    "defaultVoice": "Default system voice",
+    "speedLabel": "Speed",
+    "pitchLabel": "Pitch",
+    "testButton": "Test pronunciation",
+    "openaiNote": "OpenAI TTS uses API credits and requires an internet connection. Higher quality than browser voices.",
+    "playsWord": "Plays the word \"{word}\""
   },
   "Vocabularies": {
     "title": "Vocabularies",

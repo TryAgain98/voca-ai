@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2, Volume2, VolumeX } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 import { useTTS } from '~/hooks/use-tts'
@@ -12,13 +13,14 @@ interface SpeakButtonProps {
 }
 
 export function SpeakButton({ text, className }: SpeakButtonProps) {
+  const t = useTranslations('Common')
   const { speak, isSpeaking, isLoading } = useTTS(text)
 
   return (
     <Button
       variant="ghost"
       size="icon-sm"
-      title={isSpeaking ? 'Dừng' : 'Nghe phát âm'}
+      title={isSpeaking ? t('stop') : t('speakWord')}
       className={cn(isSpeaking && 'text-primary', className)}
       onClick={(e) => {
         e.stopPropagation()
