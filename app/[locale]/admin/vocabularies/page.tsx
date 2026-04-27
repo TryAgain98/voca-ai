@@ -121,7 +121,7 @@ export default function VocabulariesPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>Tất cả bài học</SelectItem>
+            <SelectItem value={ALL}>{t('filterLesson')}</SelectItem>
             {lessons.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.name}
@@ -136,7 +136,7 @@ export default function VocabulariesPage() {
             className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
           />
           <Input
-            placeholder="Tìm theo từ hoặc nghĩa..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"

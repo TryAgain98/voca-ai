@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2, PlusCircle, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -27,45 +28,18 @@ interface VocabularyEditorProps {
   onBack: () => void
 }
 
-const COLUMNS: {
-  field: keyof DraftVocabulary
-  label: string
-  width: string
-}[] = [
-  { field: 'word', label: 'Từ', width: 'w-28' },
-  { field: 'word_type', label: 'Loại', width: 'w-16' },
-  { field: 'phonetic', label: 'Phiên âm', width: 'w-28' },
-  { field: 'meaning', label: 'Nghĩa', width: 'w-32' },
-  { field: 'example', label: 'Ví dụ', width: 'w-48' },
-  { field: 'description', label: 'Mô tả', width: '' },
+const COLUMN_FIELDS: { field: keyof DraftVocabulary; width: string }[] = [
+  { field: 'word', width: 'w-28' },
+  { field: 'word_type', width: 'w-16' },
+  { field: 'phonetic', width: 'w-28' },
+  { field: 'meaning', width: 'w-32' },
+  { field: 'example', width: 'w-48' },
+  { field: 'description', width: '' },
 ]
 
 const EDITABLE_FIELDS = new Set<keyof DraftVocabulary>(
-  COLUMNS.map((c) => c.field),
+  COLUMN_FIELDS.map((c) => c.field),
 )
-
-function StatusBadge({ status }: { status?: DraftStatus }) {
-  if (!status || status === 'new') return null
-  if (status === 'duplicate')
-    return (
-      <Badge
-        variant="secondary"
-        className="shrink-0 cursor-default text-[10px]"
-        title="Nội dung giống hệt DB — sẽ bỏ qua, không lưu lại"
-      >
-        Giống DB
-      </Badge>
-    )
-  return (
-    <Badge
-      variant="outline"
-      className="shrink-0 cursor-default border-amber-500 text-[10px] text-amber-600"
-      title="AI phát hiện nội dung khác DB — sẽ tự động cập nhật. Bạn có thể sửa thêm trước khi lưu"
-    >
-      AI cập nhật
-    </Badge>
-  )
-}
 
 function rowBg(status?: DraftStatus) {
   if (status === 'duplicate') return 'bg-muted/40 opacity-60'
@@ -83,37 +57,71 @@ export function VocabularyEditor({
   onConfirm,
   onBack,
 }: VocabularyEditorProps) {
+  const t = useTranslations('Import')
+  const tCommon = useTranslations('Common')
+
   const newCount = vocabularies.filter(
     (v) => v.word.trim() && v.status !== 'duplicate',
   ).length
   const dupCount = vocabularies.filter(
     (v) => v.word.trim() && v.status === 'duplicate',
   ).length
+  const modCount = vocabularies.filter((v) => v.status === 'modified').length
+
+  const colLabels: Record<string, string> = {
+    word: t('colWord'),
+    word_type: t('colType'),
+    phonetic: t('colPhonetic'),
+    meaning: t('colMeaning'),
+    example: t('colExample'),
+    description: t('colDescription'),
+  }
+
+  function StatusBadge({ status }: { status?: DraftStatus }) {
+    if (!status || status === 'new') return null
+    if (status === 'duplicate')
+      return (
+        <Badge
+          variant="secondary"
+          className="shrink-0 cursor-default text-[10px]"
+          title={t('duplicateTitle')}
+        >
+          {t('duplicateBadge')}
+        </Badge>
+      )
+    return (
+      <Badge
+        variant="outline"
+        className="shrink-0 cursor-default border-amber-500 text-[10px] text-amber-600"
+        title={t('modifiedTitle')}
+      >
+        {t('modifiedBadge')}
+      </Badge>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <p className="text-muted-foreground text-sm">
-            {vocabularies.length} từ — chỉnh sửa trước khi lưu
+            {t('wordCount', { count: vocabularies.length })}
           </p>
           {isCheckingDuplicates && (
             <span className="text-muted-foreground flex items-center gap-1 text-xs">
               <Loader2 size={12} className="animate-spin" />
-              Đang so sánh với DB…
+              {t('checkingDuplicates')}
             </span>
           )}
           {!isCheckingDuplicates && dupCount > 0 && (
             <span className="text-muted-foreground text-xs">
-              ({dupCount} giống DB — bỏ qua,{' '}
-              {vocabularies.filter((v) => v.status === 'modified').length} AI
-              cập nhật, {newCount} từ mới)
+              {t('duplicateStats', { dupCount, modCount, newCount })}
             </span>
           )}
         </div>
         <Button variant="outline" size="sm" onClick={onAdd} className="gap-1">
           <PlusCircle size={14} />
-          Thêm dòng
+          {t('addRow')}
         </Button>
       </div>
 
@@ -122,9 +130,9 @@ export function VocabularyEditor({
           <TableHeader>
             <TableRow>
               <TableHead className="w-6" />
-              {COLUMNS.map((c) => (
+              {COLUMN_FIELDS.map((c) => (
                 <TableHead key={c.field} className={c.width}>
-                  {c.label}
+                  {colLabels[c.field]}
                 </TableHead>
               ))}
               <TableHead className="w-10" />
@@ -133,12 +141,11 @@ export function VocabularyEditor({
           <TableBody>
             {vocabularies.map((v) => (
               <TableRow key={v._id} className={rowBg(v.status)}>
-                {/* Status indicator cell */}
                 <TableCell className="p-1">
                   <StatusBadge status={v.status} />
                 </TableCell>
 
-                {COLUMNS.map((c) => (
+                {COLUMN_FIELDS.map((c) => (
                   <TableCell key={c.field} className="p-1">
                     <Input
                       value={String(v[c.field] ?? '')}
@@ -174,20 +181,18 @@ export function VocabularyEditor({
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onBack}>
-          Quay lại
+          {tCommon('back')}
         </Button>
         <Button
           onClick={onConfirm}
           disabled={isSaving || newCount === 0}
-          title={
-            newCount === 0 ? 'Không có từ mới hoặc từ đã chỉnh sửa để lưu' : ''
-          }
+          title={newCount === 0 ? t('noSavableWords') : ''}
         >
           {isSaving
-            ? 'Đang lưu...'
+            ? tCommon('saving')
             : newCount > 0
-              ? `Lưu ${newCount} từ vựng`
-              : 'Không có từ mới'}
+              ? t('saveButton', { count: newCount })
+              : t('noNewWords')}
         </Button>
       </div>
     </div>

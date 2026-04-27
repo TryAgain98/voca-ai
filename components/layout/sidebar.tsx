@@ -3,22 +3,24 @@
 import { BookMarked, BookOpen, ImagePlus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '~/lib/cn'
 
-const navItems = [
-  { href: '/admin/lessons', label: 'Lessons', icon: BookOpen },
-  { href: '/admin/vocabularies', label: 'Vocabularies', icon: BookMarked },
-  { href: '/admin/import', label: 'Import', icon: ImagePlus },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-]
-
 export function Sidebar() {
+  const t = useTranslations('Nav')
   const pathname = usePathname()
   const params = useParams()
   const locale = params.locale as string
 
   const isActive = (href: string) => pathname.startsWith(`/${locale}${href}`)
+
+  const navItems = [
+    { href: '/admin/lessons', label: t('lessons'), icon: BookOpen },
+    { href: '/admin/vocabularies', label: t('vocabularies'), icon: BookMarked },
+    { href: '/admin/import', label: t('import'), icon: ImagePlus },
+    { href: '/admin/settings', label: t('settings'), icon: Settings },
+  ]
 
   return (
     <aside className="border-sidebar-border bg-sidebar flex h-full w-56 shrink-0 flex-col border-r">

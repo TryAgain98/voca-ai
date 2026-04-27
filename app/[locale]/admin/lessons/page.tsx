@@ -9,6 +9,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -43,6 +44,9 @@ import type { Lesson } from '~/types'
 type SortOrder = 'asc' | 'desc'
 
 export default function LessonsPage() {
+  const t = useTranslations('Lessons')
+  const tCommon = useTranslations('Common')
+
   const { data: lessons = [], isLoading } = useLessons()
   const createLesson = useCreateLesson()
   const updateLesson = useUpdateLesson()
@@ -85,7 +89,7 @@ export default function LessonsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) {
-      setNameError('Name is required')
+      setNameError(t('nameRequired'))
       return
     }
     const payload = {
@@ -104,21 +108,19 @@ export default function LessonsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Lessons</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
-            {lessons.length} lesson{lessons.length !== 1 ? 's' : ''}
+            {t('lessonCount', { count: lessons.length })}
           </p>
         </div>
         <Button onClick={openAdd}>
           <Plus />
-          Add Lesson
+          {t('addButton')}
         </Button>
       </div>
 
-      {/* Toolbar */}
       <div className="flex items-center gap-3">
         <div className="relative max-w-xs flex-1">
           <Search
@@ -126,7 +128,7 @@ export default function LessonsPage() {
             className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
           />
           <Input
-            placeholder="Filter by name..."
+            placeholder={t('filterPlaceholder')}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="pl-8"
@@ -137,31 +139,28 @@ export default function LessonsPage() {
           onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}
         >
           {sort === 'asc' ? <ArrowDownAZ size={15} /> : <ArrowUpAZ size={15} />}
-          {sort === 'asc' ? 'A → Z' : 'Z → A'}
+          {sort === 'asc' ? t('sortAZ') : t('sortZA')}
         </Button>
       </div>
 
-      {/* Table */}
       <div className="rounded-xl border">
         {isLoading ? (
           <div className="text-muted-foreground flex items-center justify-center py-20 text-sm">
-            Loading...
+            {tCommon('loading')}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-muted-foreground flex flex-col items-center justify-center gap-3 py-20">
             <BookOpen size={36} className="opacity-30" />
             <p className="text-sm">
-              {filter
-                ? 'No lessons match your filter'
-                : 'No lessons yet — add one!'}
+              {filter ? t('emptyFiltered') : t('emptyAll')}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-5">Name</TableHead>
-                <TableHead className="px-5">Description</TableHead>
+                <TableHead className="px-5">{t('colName')}</TableHead>
+                <TableHead className="px-5">{t('colDescription')}</TableHead>
                 <TableHead className="w-20 px-5" />
               </TableRow>
             </TableHeader>
@@ -173,7 +172,9 @@ export default function LessonsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground px-5">
                     {lesson.description ?? (
-                      <span className="italic opacity-40">No description</span>
+                      <span className="italic opacity-40">
+                        {t('noDescription')}
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="px-5">
@@ -181,6 +182,7 @@ export default function LessonsPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        title={tCommon('edit')}
                         onClick={() => openEdit(lesson)}
                       >
                         <Pencil size={14} />
@@ -189,6 +191,7 @@ export default function LessonsPage() {
                         variant="ghost"
                         size="icon-sm"
                         className="text-destructive hover:text-destructive"
+                        title={tCommon('delete')}
                         onClick={() => setDeletingId(lesson.id)}
                       >
                         <Trash2 size={14} />
@@ -209,12 +212,14 @@ export default function LessonsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? 'Edit Lesson' : 'Add Lesson'}</DialogTitle>
+            <DialogTitle>
+              {editing ? t('editTitle') : t('addTitle')}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">
-                Name <span className="text-destructive">*</span>
+                {t('nameLabel')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"
@@ -223,7 +228,7 @@ export default function LessonsPage() {
                   setForm((f) => ({ ...f, name: e.target.value }))
                   if (nameError) setNameError('')
                 }}
-                placeholder="Enter lesson name"
+                placeholder={t('namePlaceholder')}
                 aria-invalid={!!nameError}
                 autoFocus
               />
@@ -233,14 +238,14 @@ export default function LessonsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('descriptionLabel')}</Label>
               <Textarea
                 id="description"
                 value={form.description}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, description: e.target.value }))
                 }
-                placeholder="Enter description (optional)"
+                placeholder={t('descriptionPlaceholder')}
                 rows={3}
               />
             </div>
@@ -251,10 +256,14 @@ export default function LessonsPage() {
                 variant="outline"
                 onClick={() => setFormOpen(false)}
               >
-                Cancel
+                {tCommon('cancel')}
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? 'Saving...' : editing ? 'Save Changes' : 'Create'}
+                {isPending
+                  ? tCommon('saving')
+                  : editing
+                    ? tCommon('saveChanges')
+                    : tCommon('create')}
               </Button>
             </DialogFooter>
           </form>
@@ -268,15 +277,12 @@ export default function LessonsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Lesson</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. Are you sure you want to delete this
-              lesson?
-            </DialogDescription>
+            <DialogTitle>{t('deleteTitle')}</DialogTitle>
+            <DialogDescription>{t('deleteDescription')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingId(null)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -288,7 +294,7 @@ export default function LessonsPage() {
                 }
               }}
             >
-              {deleteLesson.isPending ? 'Deleting...' : 'Delete'}
+              {deleteLesson.isPending ? tCommon('deleting') : tCommon('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

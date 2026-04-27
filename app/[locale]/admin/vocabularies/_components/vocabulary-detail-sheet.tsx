@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen, CalendarClock, CalendarPlus, Hash } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { SpeakButton } from '~/components/layout/speak-button'
 import { Badge } from '~/components/ui/badge'
@@ -55,6 +56,8 @@ export function VocabularyDetailSheet({
   lessons,
   onClose,
 }: VocabularyDetailSheetProps) {
+  const t = useTranslations('Vocabularies')
+
   const lessonName = voca
     ? (lessons.find((l) => l.id === voca.lesson_id)?.name ?? voca.lesson_id)
     : ''
@@ -94,7 +97,7 @@ export function VocabularyDetailSheet({
               {/* Meaning */}
               <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
                 <p className="text-xs font-semibold tracking-wider text-blue-500 uppercase dark:text-blue-400">
-                  Nghĩa
+                  {t('detailMeaning')}
                 </p>
                 <p className="mt-1 text-base font-semibold">{voca.meaning}</p>
               </div>
@@ -103,7 +106,7 @@ export function VocabularyDetailSheet({
               {voca.example && (
                 <div className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/30">
                   <p className="text-xs font-semibold tracking-wider text-violet-500 uppercase dark:text-violet-400">
-                    Ví dụ
+                    {t('detailExample')}
                   </p>
                   <p className="mt-1 text-sm leading-relaxed italic">
                     {voca.example}
@@ -115,7 +118,7 @@ export function VocabularyDetailSheet({
               {voca.description && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
                   <p className="text-xs font-semibold tracking-wider text-amber-600 uppercase dark:text-amber-400">
-                    Mô tả / Ghi chú
+                    {t('detailDescription')}
                   </p>
                   <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
                     {voca.description}
@@ -129,12 +132,12 @@ export function VocabularyDetailSheet({
               <div className="space-y-4">
                 <MetaRow
                   icon={<BookOpen size={14} />}
-                  label="Bài học"
+                  label={t('detailLesson')}
                   value={<span className="font-medium">{lessonName}</span>}
                 />
                 <MetaRow
                   icon={<CalendarPlus size={14} />}
-                  label="Ngày tạo"
+                  label={t('detailCreatedAt')}
                   value={
                     <span className="text-muted-foreground">
                       {formatDate(voca.created_at)}
@@ -143,7 +146,7 @@ export function VocabularyDetailSheet({
                 />
                 <MetaRow
                   icon={<CalendarClock size={14} />}
-                  label="Cập nhật lần cuối"
+                  label={t('detailUpdatedAt')}
                   value={
                     <span className="text-muted-foreground">
                       {formatDate(voca.updated_at)}
@@ -152,7 +155,7 @@ export function VocabularyDetailSheet({
                 />
                 <MetaRow
                   icon={<Hash size={14} />}
-                  label="ID"
+                  label={t('detailId')}
                   value={
                     <code className="text-muted-foreground text-xs break-all">
                       {voca.id}

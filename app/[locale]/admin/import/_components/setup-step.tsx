@@ -2,6 +2,7 @@
 
 import { ImageIcon, PlusCircle, Upload } from 'lucide-react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
 
 import { Button } from '~/components/ui/button'
@@ -39,6 +40,8 @@ export function SetupStep({
   onNewLessonNameChange,
   onExtract,
 }: SetupStepProps) {
+  const t = useTranslations('Import')
+  const tCommon = useTranslations('Common')
   const inputRef = useRef<HTMLInputElement>(null)
   const { data: lessons = [] } = useLessons()
 
@@ -76,9 +79,7 @@ export function SetupStep({
         ) : (
           <>
             <ImageIcon size={40} className="text-muted-foreground" />
-            <p className="text-muted-foreground text-sm">
-              Kéo thả hoặc click để chọn ảnh bài học
-            </p>
+            <p className="text-muted-foreground text-sm">{t('dropzone')}</p>
           </>
         )}
         <input
@@ -91,7 +92,7 @@ export function SetupStep({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Bài học</Label>
+        <Label>{t('lessonLabel')}</Label>
         {!isNewLesson ? (
           <div className="flex gap-2">
             <Select
@@ -99,7 +100,7 @@ export function SetupStep({
               onValueChange={(v) => v && onLessonChange(v)}
             >
               <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Chọn bài học..." />
+                <SelectValue placeholder={t('lessonPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {lessons.map((l) => (
@@ -120,13 +121,13 @@ export function SetupStep({
         ) : (
           <div className="flex gap-2">
             <Input
-              placeholder="Tên bài học mới..."
+              placeholder={t('newLessonPlaceholder')}
               value={newLessonName}
               onChange={(e) => onNewLessonNameChange(e.target.value)}
               autoFocus
             />
             <Button variant="outline" onClick={() => onToggleNewLesson(false)}>
-              Hủy
+              {tCommon('cancel')}
             </Button>
           </div>
         )}
@@ -138,7 +139,7 @@ export function SetupStep({
         className="w-full gap-2"
       >
         <Upload size={16} />
-        Đọc từ ảnh
+        {t('extractButton')}
       </Button>
     </div>
   )

@@ -97,12 +97,12 @@ export function VocabularyTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-36 px-5">Từ</TableHead>
-          <TableHead className="w-24 px-4">Phiên âm</TableHead>
-          <TableHead className="w-12 px-2">Loại</TableHead>
-          <TableHead className="px-4">Nghĩa</TableHead>
-          <TableHead className="px-4">Bài học</TableHead>
-          <TableHead className="w-28 px-4">Cập nhật</TableHead>
+          <TableHead className="w-36 px-5">{t('colWord')}</TableHead>
+          <TableHead className="w-24 px-4">{t('colPhonetic')}</TableHead>
+          <TableHead className="w-12 px-2">{t('colType')}</TableHead>
+          <TableHead className="px-4">{t('colMeaning')}</TableHead>
+          <TableHead className="px-4">{t('colLesson')}</TableHead>
+          <TableHead className="w-28 px-4">{t('colUpdated')}</TableHead>
           <TableHead className="w-28 px-5" />
         </TableRow>
       </TableHeader>
@@ -147,7 +147,7 @@ export function VocabularyTable({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  title="Xem chi tiết"
+                  title={tCommon('viewDetails')}
                   onClick={() => onView(voca)}
                 >
                   <Eye size={14} />
@@ -155,7 +155,7 @@ export function VocabularyTable({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  title="Chỉnh sửa"
+                  title={tCommon('edit')}
                   onClick={() => onEdit(voca)}
                 >
                   <Pencil size={14} />
@@ -164,7 +164,7 @@ export function VocabularyTable({
                   variant="ghost"
                   size="icon-sm"
                   className="text-destructive hover:text-destructive"
-                  title="Xóa"
+                  title={tCommon('delete')}
                   onClick={() => onDelete(voca)}
                 >
                   <Trash2 size={14} />
