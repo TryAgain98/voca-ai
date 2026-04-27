@@ -22,6 +22,10 @@ import {
 } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
 
+import { useTranslationSuggestion } from '../_hooks/use-translation-suggestion'
+
+import { SuggestionHint } from './suggestion-hint'
+
 import type { Lesson, Vocabulary } from '~/types'
 
 interface VocabularyFormDialogProps {
@@ -66,6 +70,20 @@ export function VocabularyFormDialog({
   })
   const [errors, setErrors] = useState<FieldError>({})
 
+  // Suggest meaning from word only when meaning field is empty
+  const wordToMeaning = useTranslationSuggestion(
+    form.word,
+    'word-to-meaning',
+    form.meaning.trim().length === 0,
+  )
+
+  // Suggest word from meaning only when word field is empty
+  const meaningToWord = useTranslationSuggestion(
+    form.meaning,
+    'meaning-to-word',
+    form.word.trim().length === 0,
+  )
+
   const validate = (): boolean => {
     const next: FieldError = {}
     if (!form.lesson_id) next.lesson_id = t('lessonRequired')
@@ -89,6 +107,16 @@ export function VocabularyFormDialog({
   const set = (field: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [field]: value }))
     if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }))
+  }
+
+  const applyMeaning = (value: string) => {
+    set('meaning', value)
+    wordToMeaning.clear()
+  }
+
+  const applyWord = (value: string) => {
+    set('word', value)
+    meaningToWord.clear()
   }
 
   return (
@@ -136,6 +164,11 @@ export function VocabularyFormDialog({
               aria-invalid={!!errors.word}
               autoFocus
             />
+            <SuggestionHint
+              suggestion={meaningToWord.suggestion}
+              isLoading={meaningToWord.isLoading}
+              onApply={applyWord}
+            />
             {errors.word && (
               <p className="text-destructive text-xs">{errors.word}</p>
             )}
@@ -151,6 +184,11 @@ export function VocabularyFormDialog({
               onChange={(e) => set('meaning', e.target.value)}
               placeholder='e.g. "kết xuất giao diện"'
               aria-invalid={!!errors.meaning}
+            />
+            <SuggestionHint
+              suggestion={wordToMeaning.suggestion}
+              isLoading={wordToMeaning.isLoading}
+              onApply={applyMeaning}
             />
             {errors.meaning && (
               <p className="text-destructive text-xs">{errors.meaning}</p>
