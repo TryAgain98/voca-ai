@@ -61,6 +61,18 @@ export function useUpdateVocabulary() {
   })
 }
 
+export function useBulkCreateVocabularies() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (items: Parameters<typeof vocabulariesService.bulkCreate>[0]) =>
+      vocabulariesService.bulkCreate(items),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['vocabularies'] })
+    },
+    onError: () => toast.error('Failed to import vocabularies'),
+  })
+}
+
 export function useDeleteVocabulary() {
   const t = useTranslations('Vocabularies')
   const qc = useQueryClient()

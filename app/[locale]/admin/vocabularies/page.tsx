@@ -22,21 +22,23 @@ import {
 } from '~/hooks/use-vocabularies'
 
 import { VocabularyDeleteDialog } from './_components/vocabulary-delete-dialog'
+import { VocabularyDetailSheet } from './_components/vocabulary-detail-sheet'
 import { VocabularyFormDialog } from './_components/vocabulary-form-dialog'
 import { VocabularyTable } from './_components/vocabulary-table'
 
 import type { Vocabulary } from '~/types'
 
-const ALL = '__all__'
+const ALL = 'all'
 
 export default function VocabulariesPage() {
   const t = useTranslations('Vocabularies')
   const { data: lessons = [] } = useLessons()
   const [lessonFilter, setLessonFilter] = useState(ALL)
-  const [wordFilter, setWordFilter] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Vocabulary | null>(null)
   const [deletingVoca, setDeletingVoca] = useState<Vocabulary | null>(null)
+  const [viewingVoca, setViewingVoca] = useState<Vocabulary | null>(null)
 
   const lessonId = lessonFilter === ALL ? undefined : lessonFilter
   const { data: vocabularies = [], isLoading } = useVocabularies(lessonId)
@@ -45,13 +47,15 @@ export default function VocabulariesPage() {
   const updateVocabulary = useUpdateVocabulary()
   const deleteVocabulary = useDeleteVocabulary()
 
-  const filtered = useMemo(
-    () =>
-      vocabularies.filter((v) =>
-        v.word.toLowerCase().includes(wordFilter.toLowerCase()),
-      ),
-    [vocabularies, wordFilter],
-  )
+  // Search across both word AND meaning
+  const filtered = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) return vocabularies
+    return vocabularies.filter(
+      (v) =>
+        v.word.toLowerCase().includes(q) || v.meaning.toLowerCase().includes(q),
+    )
+  }, [vocabularies, searchQuery])
 
   const handleSubmit = async (data: {
     lesson_id: string
@@ -90,7 +94,10 @@ export default function VocabulariesPage() {
         <div>
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
-            {t('wordCount', { count: vocabularies.length })}
+            {t('wordCount', { count: filtered.length })}
+            {filtered.length !== vocabularies.length && (
+              <span> / {t('wordCount', { count: vocabularies.length })}</span>
+            )}
           </p>
         </div>
         <Button
@@ -104,16 +111,17 @@ export default function VocabulariesPage() {
         </Button>
       </div>
 
+      {/* Filters */}
       <div className="flex items-center gap-3">
         <Select
           value={lessonFilter}
           onValueChange={(v) => v && setLessonFilter(v)}
         >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder={t('filterLesson')} />
+          <SelectTrigger className="w-52">
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t('filterLesson')}</SelectItem>
+            <SelectItem value={ALL}>Tất cả bài học</SelectItem>
             {lessons.map((l) => (
               <SelectItem key={l.id} value={l.id}>
                 {l.name}
@@ -122,26 +130,28 @@ export default function VocabulariesPage() {
           </SelectContent>
         </Select>
 
-        <div className="relative max-w-xs flex-1">
+        <div className="relative max-w-sm flex-1">
           <Search
             size={14}
             className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
           />
           <Input
-            placeholder={t('filterWord')}
-            value={wordFilter}
-            onChange={(e) => setWordFilter(e.target.value)}
+            placeholder="Tìm theo từ hoặc nghĩa..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"
           />
         </div>
       </div>
 
+      {/* Table */}
       <div className="rounded-xl border">
         <VocabularyTable
           vocabularies={filtered}
           lessons={lessons}
-          wordFilter={wordFilter}
+          searchQuery={searchQuery}
           isLoading={isLoading}
+          onView={setViewingVoca}
           onEdit={(v) => {
             setEditing(v)
             setFormOpen(true)
@@ -149,6 +159,13 @@ export default function VocabulariesPage() {
           onDelete={setDeletingVoca}
         />
       </div>
+
+      {/* Detail sheet */}
+      <VocabularyDetailSheet
+        voca={viewingVoca}
+        lessons={lessons}
+        onClose={() => setViewingVoca(null)}
+      />
 
       <VocabularyFormDialog
         key={`${formOpen}-${editing?.id ?? 'new'}`}

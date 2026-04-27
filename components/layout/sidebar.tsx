@@ -1,6 +1,6 @@
 'use client'
 
-import { BookMarked, BookOpen, Settings } from 'lucide-react'
+import { BookMarked, BookOpen, ImagePlus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
@@ -9,6 +9,7 @@ import { cn } from '~/lib/cn'
 const navItems = [
   { href: '/admin/lessons', label: 'Lessons', icon: BookOpen },
   { href: '/admin/vocabularies', label: 'Vocabularies', icon: BookMarked },
+  { href: '/admin/import', label: 'Import', icon: ImagePlus },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 

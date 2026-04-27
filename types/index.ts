@@ -17,4 +17,10 @@ export interface Vocabulary {
   word: string
   meaning: string
   example: string | null
+  word_type: string | null
+  phonetic: string | null
+  description: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
 }
