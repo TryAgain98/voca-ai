@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@clerk/nextjs'
 import { BookOpen, Shuffle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -9,7 +10,7 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useLessons } from '~/hooks/use-lessons'
-import { useVocabulariesByLessons } from '~/hooks/use-vocabularies'
+import { useReviewWords } from '~/hooks/use-word-review-progress'
 
 import type {
   ExerciseType,
@@ -30,15 +31,20 @@ interface ReviewSetupProps {
 
 export function ReviewSetup({ onStart }: ReviewSetupProps) {
   const t = useTranslations('Review')
+  const { user } = useUser()
   const { data: lessons = [] } = useLessons()
   const [selectedLessons, setSelectedLessons] = useState<string[]>([])
 
-  const { data: rawVocab = [], isLoading: isVocabLoading } =
-    useVocabulariesByLessons(
-      selectedLessons.length > 0 ? selectedLessons : undefined,
-    )
+  const effectiveLessonIds =
+    selectedLessons.length > 0 ? selectedLessons : lessons.map((l) => l.id)
 
-  const vocab: ReviewVocab[] = rawVocab.map((v) => ({
+  const { data: reviewWords = [], isLoading: isVocabLoading } = useReviewWords({
+    userId: user?.id ?? '',
+    lessonIds: effectiveLessonIds,
+    enabled: !!user?.id && effectiveLessonIds.length > 0,
+  })
+
+  const vocab: ReviewVocab[] = reviewWords.map((v) => ({
     id: v.id,
     word: v.word,
     meaning: v.meaning,
@@ -109,6 +115,7 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
           size="lg"
           onClick={() =>
             onStart({
+              userId: user?.id ?? '',
               lessonIds: selectedLessons,
               exerciseTypes: ALL_EXERCISE_TYPES,
               vocab,

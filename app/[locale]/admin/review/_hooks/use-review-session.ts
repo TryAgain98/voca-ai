@@ -8,8 +8,6 @@ import type {
   ReviewVocab,
 } from '../_types/review.types'
 
-const SESSION_SIZE = 20
-
 function pickDistractors(vocab: ReviewVocab, pool: ReviewVocab[]): string[] {
   const sameType = pool.filter(
     (v) => v.id !== vocab.id && v.word_type === vocab.word_type,
@@ -49,8 +47,7 @@ function buildInitialQueue(
   vocab: ReviewVocab[],
   types: ExerciseType[],
 ): Exercise[] {
-  const size = Math.min(SESSION_SIZE, vocab.length)
-  const selected = [...vocab].sort(() => Math.random() - 0.5).slice(0, size)
+  const selected = [...vocab]
   return selected.map((v) => {
     const type = types[Math.floor(Math.random() * types.length)]
     return makeExercise(v, type, vocab)

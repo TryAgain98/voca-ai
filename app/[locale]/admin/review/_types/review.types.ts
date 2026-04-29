@@ -41,6 +41,7 @@ export interface ExerciseResult {
 }
 
 export interface ReviewSetup {
+  userId: string
   lessonIds: string[]
   exerciseTypes: ExerciseType[]
   vocab: ReviewVocab[]
