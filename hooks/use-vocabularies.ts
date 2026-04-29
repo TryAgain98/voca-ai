@@ -17,6 +17,13 @@ export function useVocabularies(lessonId?: string) {
   })
 }
 
+export function useVocabulariesByLessons(lessonIds?: string[]) {
+  return useQuery({
+    queryKey: ['vocabularies', 'by-lessons', lessonIds ?? []],
+    queryFn: () => vocabulariesService.findByLessonIds(lessonIds),
+  })
+}
+
 export function useCreateVocabulary() {
   const t = useTranslations('Vocabularies')
   const qc = useQueryClient()

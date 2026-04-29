@@ -8,6 +8,7 @@ import { useReviewSession } from '../_hooks/use-review-session'
 
 import { MCQExerciseCard } from './exercises/mcq-exercise'
 import { TypingExerciseCard } from './exercises/typing-exercise'
+import { ExitConfirmDialog } from './exit-confirm-dialog'
 import { ReviewResults } from './review-results'
 
 import type { ReviewSetup } from '../_types/review.types'
@@ -61,9 +62,12 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
           <span className="text-muted-foreground">
             {t('progress', { current: currentIndex + 1, total: totalQueued })}
           </span>
-          {currentExercise.isReinforcement && (
-            <span className="text-amber-400">{t('reinforcement')}</span>
-          )}
+          <div className="flex items-center gap-3">
+            {currentExercise.isReinforcement && (
+              <span className="text-amber-400">{t('reinforcement')}</span>
+            )}
+            <ExitConfirmDialog onConfirm={onExit} />
+          </div>
         </div>
         <div className="bg-muted h-1.5 w-full rounded-full">
           <motion.div

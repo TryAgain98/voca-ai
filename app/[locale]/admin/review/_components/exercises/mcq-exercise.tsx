@@ -5,10 +5,11 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { SpeakButton } from '~/components/layout/speak-button'
-import { Button } from '~/components/ui/button'
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
+
+import { ExerciseFeedback } from './exercise-feedback'
 
 import type { MCQExercise } from '../../_types/review.types'
 
@@ -98,30 +99,11 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
         ))}
       </div>
 
-      <AnimatePresence>
-        {selected !== null && isCorrect && (
-          <motion.p
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            className="text-center text-lg font-semibold text-green-400"
-          >
-            {t('correct')}
-          </motion.p>
-        )}
-        {selected !== null && !isCorrect && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center"
-          >
-            <Button onClick={() => onAnswer(false)} className="w-full">
-              {t('continueBtn')}
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ExerciseFeedback
+        show={selected !== null}
+        isCorrect={isCorrect}
+        onContinue={() => onAnswer(false)}
+      />
     </div>
   )
 }

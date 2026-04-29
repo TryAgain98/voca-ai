@@ -34,6 +34,16 @@ class VocabulariesService extends BaseService<
     return data as Vocabulary[]
   }
 
+  async findByLessonIds(lessonIds?: string[]): Promise<Vocabulary[]> {
+    let query = supabase.from('vocabularies').select('*').order('word')
+    if (lessonIds && lessonIds.length > 0) {
+      query = query.in('lesson_id', lessonIds)
+    }
+    const { data, error } = await query
+    if (error) throw error
+    return data as Vocabulary[]
+  }
+
   async findByWords(words: string[]): Promise<Vocabulary[]> {
     const { data, error } = await supabase
       .from('vocabularies')

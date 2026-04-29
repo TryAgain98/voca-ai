@@ -12,6 +12,8 @@ import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 
+import { ExerciseFeedback } from './exercise-feedback'
+
 import type { TypingExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
@@ -139,38 +141,12 @@ export function TypingExerciseCard({
           </Button>
         </div>
 
-        <AnimatePresence>
-          {submitted && isCorrect && (
-            <motion.p
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              className="text-center text-lg font-semibold text-green-400"
-            >
-              {t('correct')}
-            </motion.p>
-          )}
-          {submitted && !isCorrect && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col gap-3"
-            >
-              <p className="text-sm">
-                <span className="text-muted-foreground">
-                  {t('correctAnswer')}:{' '}
-                </span>
-                <span className="font-semibold text-green-400">
-                  {exercise.vocab.word}
-                </span>
-              </p>
-              <Button onClick={() => onAnswer(false)} className="w-full">
-                {t('continueBtn')}
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <ExerciseFeedback
+          show={submitted}
+          isCorrect={isCorrect}
+          onContinue={() => onAnswer(false)}
+          correctAnswer={exercise.vocab.word}
+        />
 
         {!submitted && !showFirstLetter && (
           <Button

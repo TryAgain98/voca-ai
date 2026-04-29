@@ -51,11 +51,10 @@ function buildInitialQueue(
 ): Exercise[] {
   const size = Math.min(SESSION_SIZE, vocab.length)
   const selected = [...vocab].sort(() => Math.random() - 0.5).slice(0, size)
-  return types.flatMap((type) =>
-    [...selected]
-      .sort(() => Math.random() - 0.5)
-      .map((v) => makeExercise(v, type, vocab)),
-  )
+  return selected.map((v) => {
+    const type = types[Math.floor(Math.random() * types.length)]
+    return makeExercise(v, type, vocab)
+  })
 }
 
 interface UseReviewSessionReturn {

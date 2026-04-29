@@ -66,7 +66,11 @@
     "changeSetup": "Change Setup",
     "playAgain": "Try Again",
     "continueBtn": "Continue",
-    "correct": "Correct!"
+    "correct": "Correct!",
+    "exitConfirmTitle": "Exit session?",
+    "exitConfirmDesc": "Your progress will be lost. You'll go back to lesson selection.",
+    "exitConfirmCancel": "Keep going",
+    "exitConfirmOk": "Exit"
   },
   "Quiz": {
     "setupTitle": "Vocabulary Quiz",

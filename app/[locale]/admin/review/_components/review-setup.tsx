@@ -2,13 +2,13 @@
 
 import { BookOpen, Shuffle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
 import { useLessons } from '~/hooks/use-lessons'
-import { useVocabularies } from '~/hooks/use-vocabularies'
+import { useVocabulariesByLessons } from '~/hooks/use-vocabularies'
 
 import type {
   ExerciseType,
@@ -31,20 +31,17 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
   const { data: lessons = [] } = useLessons()
   const [selectedLessons, setSelectedLessons] = useState<string[]>([])
 
-  const { data: allVocab = [] } = useVocabularies()
+  const { data: rawVocab = [] } = useVocabulariesByLessons(
+    selectedLessons.length > 0 ? selectedLessons : undefined,
+  )
 
-  const vocab = useMemo((): ReviewVocab[] => {
-    const base =
-      selectedLessons.length === 0
-        ? allVocab
-        : allVocab.filter((v) => selectedLessons.includes(v.lesson_id))
-    return base.map((v) => ({
-      id: v.id,
-      word: v.word,
-      meaning: v.meaning,
-      word_type: v.word_type,
-    }))
-  }, [allVocab, selectedLessons])
+  const vocab: ReviewVocab[] = rawVocab.map((v) => ({
+    id: v.id,
+    word: v.word,
+    meaning: v.meaning,
+    word_type: v.word_type,
+  }))
+  console.log({ vocab })
 
   const toggleLesson = (id: string) => {
     setSelectedLessons((prev) =>
