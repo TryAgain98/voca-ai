@@ -70,7 +70,18 @@
     "exitConfirmTitle": "Exit session?",
     "exitConfirmDesc": "Your progress will be lost. You'll go back to lesson selection.",
     "exitConfirmCancel": "Keep going",
-    "exitConfirmOk": "Exit"
+    "exitConfirmOk": "Exit",
+    "speakInstructions": "Listen to the word, then say it clearly",
+    "speakBtn": "Speak",
+    "listeningLabel": "Listening...",
+    "retrySpeak": "Try again",
+    "speakUnsupported": "Speech recognition is not available in your browser",
+    "youSaid": "You said",
+    "stressError": "{expected} syllable(s) expected — check stress",
+    "speechPerfect": "Perfect!",
+    "speechClose": "Almost there",
+    "speechWrong": "Keep practicing",
+    "speakError": "Couldn't hear you — try again"
   },
   "Quiz": {
     "setupTitle": "Vocabulary Quiz",

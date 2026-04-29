@@ -1,10 +1,7 @@
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
-import { LocaleSwitcher } from '~/components/layout/locale-switcher'
-import { Sidebar } from '~/components/layout/sidebar'
-import { ThemeToggle } from '~/components/layout/theme-toggle'
-import { UserButtonClient } from '~/components/layout/user-button-client'
+import { AdminShell } from '~/components/layout/admin-shell'
 
 export default async function AdminLayout({
   children,
@@ -17,17 +14,5 @@ export default async function AdminLayout({
   const user = await currentUser()
   if (!user) redirect(`/${locale}/sign-in`)
 
-  return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="border-border bg-background flex h-14 shrink-0 items-center justify-end gap-2 border-b px-5">
-          <LocaleSwitcher />
-          <ThemeToggle />
-          <UserButtonClient />
-        </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
-      </div>
-    </div>
-  )
+  return <AdminShell>{children}</AdminShell>
 }

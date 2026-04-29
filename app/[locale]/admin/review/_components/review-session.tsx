@@ -7,11 +7,41 @@ import { useEffect, useRef, useState } from 'react'
 import { useReviewSession } from '../_hooks/use-review-session'
 
 import { MCQExerciseCard } from './exercises/mcq-exercise'
+import { SpeechExerciseCard } from './exercises/speech-exercise'
 import { TypingExerciseCard } from './exercises/typing-exercise'
 import { ExitConfirmDialog } from './exit-confirm-dialog'
 import { ReviewResults } from './review-results'
 
-import type { ReviewSetup } from '../_types/review.types'
+import type { Exercise, ReviewSetup } from '../_types/review.types'
+
+function renderExercise(
+  exercise: Exercise,
+  index: number,
+  onAnswer: (ok: boolean) => void,
+) {
+  switch (exercise.type) {
+    case 'word-to-meaning':
+      return (
+        <MCQExerciseCard key={index} exercise={exercise} onAnswer={onAnswer} />
+      )
+    case 'speak-word':
+      return (
+        <SpeechExerciseCard
+          key={index}
+          exercise={exercise}
+          onAnswer={onAnswer}
+        />
+      )
+    default:
+      return (
+        <TypingExerciseCard
+          key={index}
+          exercise={exercise}
+          onAnswer={onAnswer}
+        />
+      )
+  }
+}
 
 interface ReviewSessionViewProps {
   setup: ReviewSetup
@@ -78,19 +108,7 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
         </div>
       </div>
 
-      {currentExercise.type === 'word-to-meaning' ? (
-        <MCQExerciseCard
-          key={currentIndex}
-          exercise={currentExercise}
-          onAnswer={submitAnswer}
-        />
-      ) : (
-        <TypingExerciseCard
-          key={currentIndex}
-          exercise={currentExercise}
-          onAnswer={submitAnswer}
-        />
-      )}
+      {renderExercise(currentExercise, currentIndex, submitAnswer)}
     </div>
   )
 }

@@ -70,7 +70,18 @@
     "exitConfirmTitle": "Thoát phiên ôn tập?",
     "exitConfirmDesc": "Tiến trình sẽ bị mất. Bạn sẽ quay lại chọn bài.",
     "exitConfirmCancel": "Tiếp tục",
-    "exitConfirmOk": "Thoát"
+    "exitConfirmOk": "Thoát",
+    "speakInstructions": "Nghe từ rồi phát âm rõ ràng",
+    "speakBtn": "Nói",
+    "listeningLabel": "Đang nghe...",
+    "retrySpeak": "Thử lại",
+    "speakUnsupported": "Trình duyệt không hỗ trợ nhận dạng giọng nói",
+    "youSaid": "Bạn nói",
+    "stressError": "Cần {expected} âm tiết — kiểm tra trọng âm",
+    "speechPerfect": "Hoàn hảo!",
+    "speechClose": "Gần đúng rồi",
+    "speechWrong": "Hãy luyện tập thêm",
+    "speakError": "Không nghe thấy — thử lại"
   },
   "Quiz": {
     "setupTitle": "Kiểm tra từ vựng",

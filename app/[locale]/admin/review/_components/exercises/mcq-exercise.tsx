@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
-import { SpeakButton } from '~/components/layout/speak-button'
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
@@ -47,42 +46,52 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
 
   const getOptionStyle = (idx: number): string => {
     if (selected === null)
-      return 'border-border hover:border-primary/60 hover:bg-primary/5'
+      return 'border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/5'
     if (idx === exercise.correctIndex)
-      return 'border-green-500 bg-green-950/40 text-green-300'
-    if (idx === selected) return 'border-red-400 bg-red-950/40 text-red-400'
-    return 'border-border opacity-40'
+      return 'border-green-500/60 bg-green-950/40 text-green-300'
+    if (idx === selected) return 'border-red-400/60 bg-red-950/40 text-red-400'
+    return 'border-white/5 opacity-40'
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <AnimatePresence mode="wait">
         <motion.div
           key={exercise.vocab.id}
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -16 }}
+          exit={{ opacity: 0, y: -14 }}
           transition={{ duration: 0.2 }}
-          className="bg-card rounded-2xl border px-8 py-10 text-center shadow-sm"
+          className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-indigo-500/5 px-6 py-5"
         >
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-4xl font-bold tracking-tight">
+          <div className="absolute inset-x-0 top-0 h-px bg-indigo-400/40" />
+          <div className="flex items-baseline gap-2.5">
+            <p className="text-3xl font-semibold tracking-tight">
               {exercise.vocab.word}
-            </span>
-            <SpeakButton text={exercise.vocab.word} className="mt-1" />
+            </p>
+            {exercise.vocab.phonetic && (
+              <span className="text-muted-foreground font-mono text-sm">
+                {exercise.vocab.phonetic}
+              </span>
+            )}
           </div>
           {exercise.vocab.word_type && (
-            <p className="text-muted-foreground mt-1 text-xs italic">
+            <span className="mt-1 inline-block rounded bg-indigo-500/15 px-1.5 py-0.5 text-xs text-indigo-300">
               {exercise.vocab.word_type}
+            </span>
+          )}
+          {exercise.vocab.example && (
+            <p className="text-muted-foreground/70 mt-2 text-xs italic">
+              &ldquo;{exercise.vocab.example}&rdquo;
             </p>
           )}
-          <p className="text-muted-foreground mt-2 text-sm">
+          <p className="text-muted-foreground mt-3 text-xs">
             {t('chooseMeaning')}
           </p>
         </motion.div>
       </AnimatePresence>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         {exercise.options.map((opt, idx) => (
           <motion.button
             key={idx}
@@ -90,7 +99,7 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
             onClick={() => handleSelect(idx)}
             disabled={selected !== null}
             className={cn(
-              'rounded-xl border-2 px-4 py-4 text-left text-sm font-medium transition-all',
+              'rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all',
               getOptionStyle(idx),
             )}
           >

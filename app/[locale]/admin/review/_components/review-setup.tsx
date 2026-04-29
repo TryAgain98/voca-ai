@@ -20,6 +20,7 @@ const ALL_EXERCISE_TYPES: ExerciseType[] = [
   'word-to-meaning',
   'meaning-to-word',
   'listen-to-word',
+  'speak-word',
 ]
 
 interface ReviewSetupProps {
@@ -40,8 +41,9 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
     word: v.word,
     meaning: v.meaning,
     word_type: v.word_type,
+    phonetic: v.phonetic,
+    example: v.example,
   }))
-  console.log({ vocab })
 
   const toggleLesson = (id: string) => {
     setSelectedLessons((prev) =>

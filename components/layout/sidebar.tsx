@@ -7,6 +7,7 @@ import {
   GraduationCap,
   ImagePlus,
   Settings,
+  X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
@@ -14,7 +15,11 @@ import { useTranslations } from 'next-intl'
 
 import { cn } from '~/lib/cn'
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const t = useTranslations('Nav')
   const pathname = usePathname()
   const params = useParams()
@@ -35,6 +40,15 @@ export function Sidebar() {
     <aside className="border-sidebar-border bg-sidebar flex h-full w-56 shrink-0 flex-col border-r">
       <div className="flex h-14 items-center px-5">
         <span className="text-base font-bold tracking-tight">Voca AI</span>
+        {onClose && (
+          <button
+            className="hover:bg-sidebar-accent ml-auto rounded-md p-1.5 lg:hidden"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-2">

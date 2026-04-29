@@ -2,12 +2,15 @@ export type ExerciseType =
   | 'word-to-meaning'
   | 'meaning-to-word'
   | 'listen-to-word'
+  | 'speak-word'
 
 export interface ReviewVocab {
   id: string
   word: string
   meaning: string
   word_type: string | null
+  phonetic?: string | null
+  example?: string | null
 }
 
 export interface MCQExercise {
@@ -24,7 +27,13 @@ export interface TypingExercise {
   isReinforcement: boolean
 }
 
-export type Exercise = MCQExercise | TypingExercise
+export interface SpeakExercise {
+  type: 'speak-word'
+  vocab: ReviewVocab
+  isReinforcement: boolean
+}
+
+export type Exercise = MCQExercise | TypingExercise | SpeakExercise
 
 export interface ExerciseResult {
   exercise: Exercise
