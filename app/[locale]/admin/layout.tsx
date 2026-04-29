@@ -1,10 +1,10 @@
-import { UserButton } from '@clerk/nextjs'
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 
 import { LocaleSwitcher } from '~/components/layout/locale-switcher'
 import { Sidebar } from '~/components/layout/sidebar'
 import { ThemeToggle } from '~/components/layout/theme-toggle'
+import { UserButtonClient } from '~/components/layout/user-button-client'
 
 export default async function AdminLayout({
   children,
@@ -24,7 +24,7 @@ export default async function AdminLayout({
         <header className="border-border bg-background flex h-14 shrink-0 items-center justify-end gap-2 border-b px-5">
           <LocaleSwitcher />
           <ThemeToggle />
-          <UserButton />
+          <UserButtonClient />
         </header>
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>

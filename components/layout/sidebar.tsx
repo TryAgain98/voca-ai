@@ -4,6 +4,7 @@ import {
   BookMarked,
   BookOpen,
   BrainCircuit,
+  GraduationCap,
   ImagePlus,
   Settings,
 } from 'lucide-react'
@@ -25,6 +26,7 @@ export function Sidebar() {
     { href: '/admin/lessons', label: t('lessons'), icon: BookOpen },
     { href: '/admin/vocabularies', label: t('vocabularies'), icon: BookMarked },
     { href: '/admin/import', label: t('import'), icon: ImagePlus },
+    { href: '/admin/review', label: t('review'), icon: GraduationCap },
     { href: '/admin/quiz', label: t('quiz'), icon: BrainCircuit },
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ]
