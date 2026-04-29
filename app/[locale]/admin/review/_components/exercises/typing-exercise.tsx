@@ -128,11 +128,11 @@ export function TypingExerciseCard({
               </p>
             </>
           )}
-          {exercise.vocab.phonetic && (
+          {/* {exercise.vocab.phonetic && (
             <p className="text-muted-foreground/50 mt-1 font-mono text-xs">
               {exercise.vocab.phonetic}
             </p>
-          )}
+          )} */}
           <p className="text-muted-foreground/60 mt-2 font-mono text-sm tracking-widest">
             {hint}
           </p>

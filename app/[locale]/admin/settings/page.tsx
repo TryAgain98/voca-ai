@@ -12,6 +12,7 @@ export default async function SettingsPage() {
   if (!user) return null
 
   const t = await getTranslations('Settings')
+  const tc = await getTranslations('Common')
 
   const initials = [user.firstName?.[0], user.lastName?.[0]]
     .filter(Boolean)
@@ -58,8 +59,8 @@ export default async function SettingsPage() {
             </Row>
             <Row label={t('emailVerified')}>
               {user.primaryEmailAddress?.verification?.status === 'verified'
-                ? t('yes')
-                : t('no')}
+                ? tc('yes')
+                : tc('no')}
             </Row>
             <Row label={t('memberSince')}>
               {new Date(user.createdAt ?? 0).toLocaleDateString('en-US', {

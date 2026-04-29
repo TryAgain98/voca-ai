@@ -46,11 +46,11 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
 
   const getOptionStyle = (idx: number): string => {
     if (selected === null)
-      return 'border-white/10 hover:border-indigo-400/40 hover:bg-indigo-500/5'
+      return 'border-gray-400/40 hover:border-indigo-400/60 hover:bg-indigo-500/5'
     if (idx === exercise.correctIndex)
       return 'border-green-500/60 bg-green-950/40 text-green-300'
     if (idx === selected) return 'border-red-400/60 bg-red-950/40 text-red-400'
-    return 'border-white/5 opacity-40'
+    return 'border-gray-400/20 opacity-40'
   }
 
   return (

@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useLessons } from '~/hooks/use-lessons'
 import { useVocabulariesByLessons } from '~/hooks/use-vocabularies'
 
@@ -32,9 +33,10 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
   const { data: lessons = [] } = useLessons()
   const [selectedLessons, setSelectedLessons] = useState<string[]>([])
 
-  const { data: rawVocab = [] } = useVocabulariesByLessons(
-    selectedLessons.length > 0 ? selectedLessons : undefined,
-  )
+  const { data: rawVocab = [], isLoading: isVocabLoading } =
+    useVocabulariesByLessons(
+      selectedLessons.length > 0 ? selectedLessons : undefined,
+    )
 
   const vocab: ReviewVocab[] = rawVocab.map((v) => ({
     id: v.id,
@@ -51,7 +53,7 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
     )
   }
 
-  const canStart = vocab.length >= 4
+  const canStart = !isVocabLoading && vocab.length >= 4
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8 pt-4">
@@ -87,12 +89,20 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
               </label>
             ))}
           </div>
-          <p className="text-muted-foreground text-xs">
-            {t('vocabAvailable', { count: vocab.length })}
-            {!canStart && (
-              <span className="text-destructive ml-2">— {t('minWarning')}</span>
+          <div className="text-muted-foreground text-xs">
+            {isVocabLoading ? (
+              <Skeleton className="h-3 w-24" />
+            ) : (
+              <>
+                {t('vocabAvailable', { count: vocab.length })}
+                {!canStart && (
+                  <span className="text-destructive ml-2">
+                    — {t('minWarning')}
+                  </span>
+                )}
+              </>
             )}
-          </p>
+          </div>
         </div>
 
         <Button
@@ -104,7 +114,7 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
               vocab,
             })
           }
-          disabled={!canStart}
+          disabled={isVocabLoading || !canStart}
           className="w-full gap-2"
         >
           <Shuffle size={16} />

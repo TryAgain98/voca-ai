@@ -81,7 +81,10 @@
     "speechPerfect": "Hoàn hảo!",
     "speechClose": "Gần đúng rồi",
     "speechWrong": "Hãy luyện tập thêm",
-    "speakError": "Không nghe thấy — thử lại"
+    "speakError": "Không nghe thấy — thử lại",
+    "listenBtn": "Nghe",
+    "skipBtn": "Bỏ qua từ này",
+    "maxAttemptsHint": "Đã thử 3 lần — bạn có thể bỏ qua từ này"
   },
   "Quiz": {
     "setupTitle": "Kiểm tra từ vựng",

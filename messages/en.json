@@ -81,7 +81,10 @@
     "speechPerfect": "Perfect!",
     "speechClose": "Almost there",
     "speechWrong": "Keep practicing",
-    "speakError": "Couldn't hear you — try again"
+    "speakError": "Couldn't hear you — try again",
+    "listenBtn": "Listen",
+    "skipBtn": "Skip this word",
+    "maxAttemptsHint": "3 attempts used — you can skip this one"
   },
   "Quiz": {
     "setupTitle": "Vocabulary Quiz",
