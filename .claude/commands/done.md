@@ -1,44 +1,35 @@
-# Done — Commit & Push
+# # Done — Commit & Push
 
 Run this after completing any task.
 
 ## Steps
 
-1. **Format**
-
+1. **Format & Lint**
    ```bash
-   npm run format
-   ```
-
-2. **Lint**
-
-   ```bash
-   npm run lint:fix
-   ```
-
+   npm run format -- --loglevel warn && npm run lint:fix -- --quiet
    Fix all remaining errors manually if needed. Do not proceed with lint errors.
-
-3. **Type check**
-
-   ```bash
-   npx tsc --noEmit
    ```
 
-   Stop and report errors if this fails.
+Type check
 
-4. **Stage & commit**
+Bash
+npx tsc --noEmit --pretty false
+Stop and report errors if this fails.
 
-   ```bash
-   git add -A
-   git commit -m "<type>(<scope>): <description>"
-   ```
+Stage & commit
 
-   Write the commit message based on what actually changed. Follow Conventional Commits format.
+Bash
+git add .
+git commit -m "<type>(<scope>): <description>"
+Write the commit message based on what actually changed. Follow Conventional Commits format. Skip if no changes.
 
-5. **Push**
+Push
 
-   ```bash
-   git push origin main
-   ```
+Bash
+git push origin main --quiet && echo "Hash: $(git rev-parse --short HEAD)"
+Output Rules (Token Saving)
+Silent Success: Do not output terminal logs for successful steps. Just say "OK".
 
-6. Report the commit hash and push result to the user.
+Concise Errors: If a step fails, only show the relevant error lines.
+
+Final Report: Only provide the short commit hash and push status.

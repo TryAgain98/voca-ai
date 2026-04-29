@@ -151,7 +151,11 @@
     "updateSuccess": "Đã cập nhật từ vựng",
     "updateError": "Không thể cập nhật từ vựng",
     "deleteSuccess": "Đã xóa từ vựng",
-    "deleteError": "Không thể xóa từ vựng"
+    "deleteError": "Không thể xóa từ vựng",
+    "colNo": "#",
+    "filteringBy": "Đang lọc theo:",
+    "clearFilters": "Xóa bộ lọc",
+    "pageOf": "Trang {current} / {total}"
   },
   "Import": {
     "title": "Nhập từ vựng từ ảnh",

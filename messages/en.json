@@ -151,7 +151,11 @@
     "updateSuccess": "Vocabulary updated",
     "updateError": "Failed to update vocabulary",
     "deleteSuccess": "Vocabulary deleted",
-    "deleteError": "Failed to delete vocabulary"
+    "deleteError": "Failed to delete vocabulary",
+    "colNo": "#",
+    "filteringBy": "Filtering by:",
+    "clearFilters": "Clear filters",
+    "pageOf": "Page {current} of {total}"
   },
   "Import": {
     "title": "Import vocabulary from image",

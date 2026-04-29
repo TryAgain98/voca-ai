@@ -1,18 +1,10 @@
 'use client'
 
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '~/components/ui/select'
 import { useLessons } from '~/hooks/use-lessons'
 import {
   useCreateVocabulary,
@@ -23,6 +15,7 @@ import {
 
 import { VocabularyDeleteDialog } from './_components/vocabulary-delete-dialog'
 import { VocabularyDetailSheet } from './_components/vocabulary-detail-sheet'
+import { VocabularyFilter } from './_components/vocabulary-filter'
 import { VocabularyFormDialog } from './_components/vocabulary-form-dialog'
 import { VocabularyTable } from './_components/vocabulary-table'
 
@@ -35,6 +28,7 @@ export default function VocabulariesPage() {
   const { data: lessons = [] } = useLessons()
   const [lessonFilter, setLessonFilter] = useState(ALL)
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Vocabulary | null>(null)
   const [deletingVoca, setDeletingVoca] = useState<Vocabulary | null>(null)
@@ -47,7 +41,6 @@ export default function VocabulariesPage() {
   const updateVocabulary = useUpdateVocabulary()
   const deleteVocabulary = useDeleteVocabulary()
 
-  // Search across both word AND meaning
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
     if (!q) return vocabularies
@@ -56,6 +49,24 @@ export default function VocabulariesPage() {
         v.word.toLowerCase().includes(q) || v.meaning.toLowerCase().includes(q),
     )
   }, [vocabularies, searchQuery])
+
+  const isFiltering = lessonFilter !== ALL || searchQuery.trim() !== ''
+
+  const handleLessonChange = (value: string) => {
+    setLessonFilter(value)
+    setPage(1)
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    setPage(1)
+  }
+
+  const handleClearFilters = () => {
+    setLessonFilter(ALL)
+    setSearchQuery('')
+    setPage(1)
+  }
 
   const handleSubmit = async (data: {
     lesson_id: string
@@ -111,56 +122,34 @@ export default function VocabulariesPage() {
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3">
-        <Select
-          value={lessonFilter}
-          onValueChange={(v) => v && setLessonFilter(v)}
-        >
-          <SelectTrigger className="w-52">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t('filterLesson')}</SelectItem>
-            {lessons.map((l) => (
-              <SelectItem key={l.id} value={l.id}>
-                {l.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <VocabularyFilter
+        lessons={lessons}
+        lessonFilter={lessonFilter}
+        searchQuery={searchQuery}
+        onLessonChange={handleLessonChange}
+        onSearchChange={handleSearchChange}
+        onClearFilters={handleClearFilters}
+      />
 
-        <div className="relative max-w-sm flex-1">
-          <Search
-            size={14}
-            className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
-          />
-          <Input
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      {/* Table */}
       <div className="rounded-xl border">
         <VocabularyTable
           vocabularies={filtered}
           lessons={lessons}
           searchQuery={searchQuery}
           isLoading={isLoading}
-          onView={setViewingVoca}
+          isFiltering={isFiltering}
+          page={page}
+          onPageChange={setPage}
+          onRowClick={setViewingVoca}
           onEdit={(v) => {
             setEditing(v)
             setFormOpen(true)
           }}
           onDelete={setDeletingVoca}
+          onClearFilters={handleClearFilters}
         />
       </div>
 
-      {/* Detail sheet */}
       <VocabularyDetailSheet
         voca={viewingVoca}
         lessons={lessons}
