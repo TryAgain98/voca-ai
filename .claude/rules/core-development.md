@@ -11,7 +11,8 @@
 - `hooks/`: Query hooks (1 file/resource). `services/`: Data access (extend `BaseService`).
 - `lib/`: Stateless utils. `types/`: Shared interfaces (Barrel exports).
 - `supabase/migrations/`: **Read-only.** Never edit pushed migrations.
-- **Imports**: Always use `~/`. **Ban**: `../` or `@/`.
+- **Imports**: Always use `~/` (project root) or `~admin/` (admin routes). **Ban**: `../`, `../../`, or `@/`.
+  - `~admin/` → `app/[locale]/admin/` — use for any import within the admin section (e.g., `~admin/review/_types/review.types`).
 
 ## 💻 Coding Standards
 

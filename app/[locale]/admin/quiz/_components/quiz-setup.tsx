@@ -11,7 +11,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '~/components/ui/select'
 import { useLessons } from '~/hooks/use-lessons'
 import { useVocabularies } from '~/hooks/use-vocabularies'
@@ -68,7 +67,17 @@ export function QuizSetupScreen({ onStart }: QuizSetupProps) {
           <Label>{t('selectLesson')}</Label>
           <Select value={lessonId} onValueChange={(v) => setLessonId(v ?? '')}>
             <SelectTrigger>
-              <SelectValue placeholder={t('lessonPlaceholder')} />
+              <span
+                className={cn(
+                  'flex flex-1 truncate text-left text-sm',
+                  !lessonId && 'text-muted-foreground',
+                )}
+              >
+                {lessonId
+                  ? (lessons.find((l) => l.id === lessonId)?.name ??
+                    t('lessonPlaceholder'))
+                  : t('lessonPlaceholder')}
+              </span>
             </SelectTrigger>
             <SelectContent>
               {lessons.map((l) => (

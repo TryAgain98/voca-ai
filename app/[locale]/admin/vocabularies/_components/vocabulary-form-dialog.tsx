@@ -19,7 +19,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
 
@@ -115,7 +114,14 @@ export function VocabularyFormDialog({
               disabled={!!editing}
             >
               <SelectTrigger aria-invalid={!!errors.lesson_id}>
-                <SelectValue placeholder={t('lessonPlaceholder')} />
+                <span
+                  className={`flex flex-1 truncate text-left text-sm${!form.lesson_id ? 'text-muted-foreground' : ''}`}
+                >
+                  {form.lesson_id
+                    ? (lessons.find((l) => l.id === form.lesson_id)?.name ??
+                      t('lessonPlaceholder'))
+                    : t('lessonPlaceholder')}
+                </span>
               </SelectTrigger>
               <SelectContent>
                 {lessons.map((l) => (
