@@ -40,7 +40,7 @@ function buildFirstLetterHint(word: string): string {
 
 interface TypingExerciseCardProps {
   exercise: TypingExercise
-  onAnswer: (isCorrect: boolean) => void
+  onAnswer: (isCorrect: boolean, userAnswer?: string) => void
 }
 
 export function TypingExerciseCard({
@@ -118,11 +118,6 @@ export function TypingExerciseCard({
           ) : (
             <>
               <p className="text-xl font-medium">{exercise.vocab.meaning}</p>
-              {exercise.vocab.example && (
-                <p className="text-muted-foreground/70 mt-1.5 text-xs italic">
-                  &ldquo;{exercise.vocab.example}&rdquo;
-                </p>
-              )}
               <p className="text-muted-foreground mt-3 text-xs">
                 {t('typeTheWord')}
               </p>
@@ -166,7 +161,7 @@ export function TypingExerciseCard({
         <ExerciseFeedback
           show={submitted}
           isCorrect={isCorrect}
-          onContinue={() => onAnswer(false)}
+          onContinue={() => onAnswer(false, value.trim())}
           correctAnswer={exercise.vocab.word}
         />
 

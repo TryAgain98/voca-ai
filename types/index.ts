@@ -42,3 +42,26 @@ export interface ReviewWord extends Vocabulary {
   progress: WordReviewProgress | null
   score: number
 }
+
+export interface QuizIncorrectWord {
+  word_id: string
+  word: string
+  meaning: string
+  user_answer: string
+  correct_answer: string
+}
+
+export interface QuizSession {
+  id: string
+  user_id: string
+  lesson_ids: string[]
+  start_time: string
+  end_time: string
+  total_questions: number
+  correct_count: number
+  score: number
+  incorrect_words: QuizIncorrectWord[]
+  created_at: string
+}
+
+export type QuizSessionInsert = Omit<QuizSession, 'id' | 'created_at'>

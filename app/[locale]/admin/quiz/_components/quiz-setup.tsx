@@ -1,133 +1,133 @@
 'use client'
 
-import { BrainCircuit, Shuffle } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import { BrainCircuit, ClipboardList, Shuffle } from 'lucide-react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '~/components/ui/select'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useLessons } from '~/hooks/use-lessons'
-import { useVocabularies } from '~/hooks/use-vocabularies'
-import { cn } from '~/lib/cn'
+import { useVocabulariesByLessons } from '~/hooks/use-vocabularies'
 
-import type {
-  QuizMode,
-  QuizSetup,
-  QuizVocab,
-} from '~/app/[locale]/admin/quiz/_types/quiz.types'
+import type { ExerciseType, QuizSetup } from '../_types/quiz.types'
+import type { ReviewVocab } from '~admin/review/_types/review.types'
 
-const MIN_MC = 4
-const MIN_MATCHING = 3
+const ALL_EXERCISE_TYPES: ExerciseType[] = [
+  'word-to-meaning',
+  'meaning-to-word',
+  'listen-to-word',
+  'speak-word',
+]
+
+const MIN_VOCAB = 4
 
 interface QuizSetupProps {
   onStart: (setup: QuizSetup) => void
 }
 
-export function QuizSetupScreen({ onStart }: QuizSetupProps) {
+export function QuizSetup({ onStart }: QuizSetupProps) {
   const t = useTranslations('Quiz')
+  const { user } = useUser()
   const { data: lessons = [] } = useLessons()
-  const [lessonId, setLessonId] = useState('')
-  const [mode, setMode] = useState<QuizMode>('multiple-choice')
+  const [selectedLessons, setSelectedLessons] = useState<string[]>([])
 
-  const { data: vocabData = [] } = useVocabularies(lessonId || undefined)
+  const effectiveLessonIds =
+    selectedLessons.length > 0 ? selectedLessons : lessons.map((l) => l.id)
 
-  const vocab: QuizVocab[] = vocabData.map((v) => ({
+  const { data: vocabData = [], isLoading: isVocabLoading } =
+    useVocabulariesByLessons(
+      effectiveLessonIds.length > 0 ? effectiveLessonIds : undefined,
+    )
+
+  const vocab: ReviewVocab[] = vocabData.map((v) => ({
     id: v.id,
     word: v.word,
     meaning: v.meaning,
+    word_type: v.word_type,
+    phonetic: v.phonetic,
+    example: v.example,
   }))
 
-  const minRequired = mode === 'multiple-choice' ? MIN_MC : MIN_MATCHING
-  const canStart = lessonId !== '' && vocab.length >= minRequired
+  const toggleLesson = (id: string) => {
+    setSelectedLessons((prev) =>
+      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id],
+    )
+  }
+
+  const canStart = !isVocabLoading && vocab.length >= MIN_VOCAB
 
   const handleStart = () => {
-    if (!canStart) return
-    onStart({ lessonId, mode, vocab })
+    if (!canStart || !user?.id) return
+    onStart({
+      userId: user.id,
+      lessonIds: effectiveLessonIds,
+      exerciseTypes: ALL_EXERCISE_TYPES,
+      vocab,
+    })
   }
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8 pt-4">
-      <div className="flex items-center gap-3">
-        <BrainCircuit size={28} className="text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold">{t('setupTitle')}</h1>
-          <p className="text-muted-foreground text-sm">{t('setupSubtitle')}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <BrainCircuit size={28} className="text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold">{t('setupTitle')}</h1>
+            <p className="text-muted-foreground text-sm">
+              {t('setupSubtitle')}
+            </p>
+          </div>
         </div>
+        <Link
+          href="./quiz/history"
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
+        >
+          <ClipboardList size={15} />
+          {t('historyButton')}
+        </Link>
       </div>
 
-      <div className="flex flex-col gap-5">
-        {/* Lesson selector */}
-        <div className="space-y-2">
-          <Label>{t('selectLesson')}</Label>
-          <Select value={lessonId} onValueChange={(v) => setLessonId(v ?? '')}>
-            <SelectTrigger>
-              <span
-                className={cn(
-                  'flex flex-1 truncate text-left text-sm',
-                  !lessonId && 'text-muted-foreground',
-                )}
+      <div className="flex flex-col gap-6">
+        <div className="space-y-3">
+          <Label>{t('selectLessons')}</Label>
+          <div className="space-y-2">
+            <label className="hover:bg-accent/50 flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 transition-colors">
+              <Checkbox
+                checked={selectedLessons.length === 0}
+                onCheckedChange={() => setSelectedLessons([])}
+              />
+              <span className="text-sm font-medium">{t('allLessons')}</span>
+            </label>
+            {lessons.map((l) => (
+              <label
+                key={l.id}
+                className="hover:bg-accent/50 flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-2.5 transition-colors"
               >
-                {lessonId
-                  ? (lessons.find((l) => l.id === lessonId)?.name ??
-                    t('lessonPlaceholder'))
-                  : t('lessonPlaceholder')}
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {lessons.map((l) => (
-                <SelectItem key={l.id} value={l.id}>
-                  {l.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {lessonId && (
-            <p className="text-muted-foreground text-xs">
-              {t('wordsAvailable', { count: vocab.length })}
-              {vocab.length < minRequired && (
-                <span className="text-destructive ml-2">
-                  —{' '}
-                  {mode === 'multiple-choice'
-                    ? t('minWarningMC')
-                    : t('minWarningMatching')}
-                </span>
-              )}
-            </p>
-          )}
-        </div>
-
-        {/* Mode selector */}
-        <div className="space-y-2">
-          <Label>{t('modeLabel')}</Label>
-          <div className="grid grid-cols-2 gap-3">
-            {(['multiple-choice', 'matching'] as QuizMode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                className={cn(
-                  'rounded-xl border-2 p-4 text-left transition-all',
-                  mode === m
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/40',
-                )}
-              >
-                <div className="mb-1 text-sm font-semibold">
-                  {m === 'multiple-choice' ? t('modeMC') : t('modeMatching')}
-                </div>
-                <div className="text-muted-foreground text-xs">
-                  {m === 'multiple-choice'
-                    ? t('modeMCDesc')
-                    : t('modeMatchingDesc')}
-                </div>
-              </button>
+                <Checkbox
+                  checked={selectedLessons.includes(l.id)}
+                  onCheckedChange={() => toggleLesson(l.id)}
+                />
+                <span className="text-sm">{l.name}</span>
+              </label>
             ))}
+          </div>
+          <div className="text-muted-foreground text-xs">
+            {isVocabLoading ? (
+              <Skeleton className="h-3 w-24" />
+            ) : (
+              <>
+                {t('vocabAvailable', { count: vocab.length })}
+                {!canStart && vocab.length > 0 && (
+                  <span className="text-destructive ml-2">
+                    — {t('minWarning')}
+                  </span>
+                )}
+              </>
+            )}
           </div>
         </div>
 

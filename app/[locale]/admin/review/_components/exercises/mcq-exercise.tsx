@@ -16,7 +16,7 @@ const CORRECT_ADVANCE_DELAY_MS = 1200
 
 interface MCQExerciseCardProps {
   exercise: MCQExercise
-  onAnswer: (isCorrect: boolean) => void
+  onAnswer: (isCorrect: boolean, userAnswer?: string) => void
 }
 
 export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
@@ -111,7 +111,12 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
       <ExerciseFeedback
         show={selected !== null}
         isCorrect={isCorrect}
-        onContinue={() => onAnswer(false)}
+        onContinue={() =>
+          onAnswer(
+            false,
+            selected !== null ? exercise.options[selected] : undefined,
+          )
+        }
       />
     </div>
   )
