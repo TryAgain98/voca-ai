@@ -4,6 +4,17 @@ import { Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
 import { Button } from '~/components/ui/button'
 import { useLessons } from '~/hooks/use-lessons'
 import {
@@ -64,7 +75,7 @@ export function QuizHistoryTable({ userId }: QuizHistoryTableProps) {
 
           const scoreColor =
             scorePercent >= 80
-              ? 'text-green-400'
+              ? 'text-emerald-400'
               : scorePercent >= 50
                 ? 'text-amber-400'
                 : 'text-red-400'
@@ -85,8 +96,13 @@ export function QuizHistoryTable({ userId }: QuizHistoryTableProps) {
                   {lessonNames || t('allLessons')}
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-xs">
-                  {new Date(session.created_at).toLocaleString()} —{' '}
-                  {t('resultsTime', { seconds: duration })}
+                  {new Date(session.created_at).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}{' '}
+                  — {t('resultsTime', { seconds: duration })}
                 </p>
               </div>
               <div className="shrink-0 text-right">
@@ -97,18 +113,49 @@ export function QuizHistoryTable({ userId }: QuizHistoryTableProps) {
                   {session.correct_count}/{session.total_questions}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-destructive shrink-0"
-                disabled={isDeleting}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  deleteSession({ id: session.id, userId })
-                }}
+              <div
+                role="presentation"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
               >
-                <Trash2 size={14} />
-              </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-destructive shrink-0"
+                        disabled={isDeleting}
+                      />
+                    }
+                  >
+                    <Trash2 size={14} />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        {t('deleteConfirmTitle')}
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('deleteConfirmDesc')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
+                        {t('deleteConfirmCancel')}
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() =>
+                          deleteSession({ id: session.id, userId })
+                        }
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        {t('deleteConfirmOk')}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           )
         })}

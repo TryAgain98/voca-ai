@@ -109,7 +109,11 @@
     "loadingHistory": "Loading...",
     "noHistory": "No quiz sessions yet — start a quiz!",
     "detailTitle": "Session Detail",
-    "perfectScore": "Perfect score!"
+    "perfectScore": "Perfect score!",
+    "deleteConfirmTitle": "Delete this session?",
+    "deleteConfirmDesc": "This action cannot be undone.",
+    "deleteConfirmOk": "Delete",
+    "deleteConfirmCancel": "Cancel"
   },
   "Settings": {
     "title": "Settings",

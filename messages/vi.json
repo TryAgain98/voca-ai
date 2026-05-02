@@ -109,7 +109,11 @@
     "loadingHistory": "Đang tải...",
     "noHistory": "Chưa có lần kiểm tra nào — hãy bắt đầu!",
     "detailTitle": "Chi tiết lần kiểm tra",
-    "perfectScore": "Điểm tuyệt đối!"
+    "perfectScore": "Điểm tuyệt đối!",
+    "deleteConfirmTitle": "Xóa lần kiểm tra này?",
+    "deleteConfirmDesc": "Hành động này không thể hoàn tác.",
+    "deleteConfirmOk": "Xóa",
+    "deleteConfirmCancel": "Hủy"
   },
   "Settings": {
     "title": "Cài đặt",

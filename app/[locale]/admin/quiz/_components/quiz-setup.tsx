@@ -1,8 +1,7 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { BrainCircuit, ClipboardList, Shuffle } from 'lucide-react'
-import Link from 'next/link'
+import { BrainCircuit, Shuffle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -72,23 +71,12 @@ export function QuizSetup({ onStart }: QuizSetupProps) {
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8 pt-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BrainCircuit size={28} className="text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold">{t('setupTitle')}</h1>
-            <p className="text-muted-foreground text-sm">
-              {t('setupSubtitle')}
-            </p>
-          </div>
+      <div className="flex items-center gap-3">
+        <BrainCircuit size={28} className="text-primary" />
+        <div>
+          <h1 className="text-2xl font-bold">{t('setupTitle')}</h1>
+          <p className="text-muted-foreground text-sm">{t('setupSubtitle')}</p>
         </div>
-        <Link
-          href="./quiz/history"
-          className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
-        >
-          <ClipboardList size={15} />
-          {t('historyButton')}
-        </Link>
       </div>
 
       <div className="flex flex-col gap-6">

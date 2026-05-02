@@ -47,7 +47,10 @@ export function QuizResults({
       word: r.exercise.vocab.word,
       meaning: r.exercise.vocab.meaning,
       user_answer: r.userAnswer ?? '',
-      correct_answer: r.exercise.vocab.word,
+      correct_answer:
+        r.exercise.type === 'word-to-meaning'
+          ? r.exercise.vocab.meaning
+          : r.exercise.vocab.word,
     }))
 
     saveSession(

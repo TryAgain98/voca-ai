@@ -36,6 +36,13 @@ export function QuizSessionDetailSheet({
   const scorePercent = Math.round(session.score * 100)
   const lessonNames = session.lesson_ids.map((id) => lessonNameMap[id] ?? id)
 
+  const scoreColor =
+    scorePercent >= 80
+      ? 'text-emerald-400'
+      : scorePercent >= 50
+        ? 'text-amber-400'
+        : 'text-red-400'
+
   return (
     <Sheet open={!!session} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-md">
@@ -43,16 +50,24 @@ export function QuizSessionDetailSheet({
           <SheetTitle>{t('detailTitle')}</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-6 flex flex-col gap-5">
-          <div className="bg-card rounded-xl border px-5 py-4 text-center">
-            <p className="text-primary text-4xl font-bold">{scorePercent}%</p>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {session.correct_count} / {session.total_questions} —{' '}
+        <div className="flex flex-col gap-5 px-4 pb-6">
+          <div className="rounded-xl border bg-white/3 py-5 text-center">
+            <p className={`text-5xl font-bold ${scoreColor}`}>
+              {scorePercent}%
+            </p>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {session.correct_count} / {session.total_questions} &mdash;{' '}
               {t('resultsTime', { seconds: duration })}
             </p>
+            <div className="mx-6 mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full transition-all ${scorePercent >= 80 ? 'bg-emerald-400' : scorePercent >= 50 ? 'bg-amber-400' : 'bg-red-400'}`}
+                style={{ width: `${scorePercent}%` }}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               {t('selectLessons')}
             </p>
@@ -66,26 +81,34 @@ export function QuizSessionDetailSheet({
           </div>
 
           {session.incorrect_words.length === 0 ? (
-            <div className="flex items-center gap-2 text-green-400">
-              <CheckCircle size={16} />
+            <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-emerald-400">
+              <CheckCircle size={16} className="shrink-0" />
               <p className="text-sm font-medium">{t('perfectScore')}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <p className="text-sm font-semibold">{t('mistakesTitle')}</p>
               {session.incorrect_words.map((w, i) => (
-                <div key={i} className="rounded-xl border px-4 py-3 text-sm">
+                <div
+                  key={i}
+                  className="rounded-xl border border-red-500/15 bg-red-500/5 px-4 py-3"
+                >
                   <div className="flex items-center gap-2">
                     <XCircle size={14} className="shrink-0 text-red-500" />
-                    <span className="font-semibold">{w.word}</span>
+                    <span className="text-sm font-semibold">{w.word}</span>
+                    <span className="text-muted-foreground text-xs">
+                      &mdash; {w.meaning}
+                    </span>
                   </div>
-                  <p className="text-muted-foreground mt-1 pl-5 text-xs">
-                    {t('correctAnswer')}: {w.meaning}
-                  </p>
                   {w.user_answer && (
-                    <p className="mt-0.5 pl-5 text-xs text-red-400">
-                      {t('yourAnswer')}: {w.user_answer}
-                    </p>
+                    <div className="mt-2 pl-5">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-muted-foreground shrink-0">
+                          {t('yourAnswer')}:
+                        </span>
+                        <span className="text-red-400">{w.user_answer}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
