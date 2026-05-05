@@ -21,8 +21,8 @@ import type {
 const ALL_EXERCISE_TYPES: ExerciseType[] = [
   'word-to-meaning',
   'meaning-to-word',
-  'listen-to-word',
-  'speak-word',
+  // 'listen-to-word',
+  // 'speak-word',
 ]
 
 interface ReviewSetupProps {

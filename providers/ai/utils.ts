@@ -1,0 +1,44 @@
+import type { ExtractedVocabulary, TranslationDirection } from './types'
+
+export const EXTRACT_VOCABULARY_PROMPT = `You are an English dictionary. Extract all vocabulary words from this image.
+
+For each word, return:
+- word: the English word exactly as shown
+- word_type: part of speech (n, v, adj, adv, prep, conj, pron, etc.)
+- phonetic: IPA transcription (e.g. /riːd/) — use your dictionary knowledge if not shown in the image
+- meaning: Vietnamese meaning — use your dictionary knowledge if not shown in the image
+- example: a natural English example sentence — use your dictionary knowledge if not shown in the image
+- description: a short Vietnamese explanation of the word's nuance or usage, especially useful for words that are easily confused with similar words (e.g. see vs look vs watch, make vs do). Keep it under 2 sentences.
+
+Fill every field using your knowledge as an English dictionary. Never leave a field empty.
+
+Return a JSON array in this exact format, no markdown, no explanation:
+[
+  {
+    "word": "read",
+    "word_type": "v",
+    "phonetic": "/riːd/",
+    "meaning": "đọc",
+    "example": "She reads a book every night.",
+    "description": "Chỉ hành động đọc chữ hoặc thông tin từ văn bản, tài liệu."
+  }
+]`
+
+export function buildTranslationPrompt(
+  text: string,
+  direction: TranslationDirection,
+): string {
+  if (direction === 'word-to-meaning') {
+    return `You are a bilingual English-Vietnamese dictionary. Given the English word or phrase "${text}", provide the Vietnamese meaning in 1-6 words. Return ONLY the Vietnamese meaning, no explanation, no punctuation at the end.`
+  }
+  return `You are a bilingual English-Vietnamese dictionary. Given the Vietnamese meaning "${text}", suggest the most fitting English word or short phrase. Return ONLY the English word or phrase, nothing else.`
+}
+
+export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
+  const cleaned = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim()
+  return JSON.parse(cleaned) as ExtractedVocabulary[]
+}
