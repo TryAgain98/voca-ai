@@ -42,6 +42,7 @@
     "import": "Nhập",
     "review": "Ôn tập",
     "quiz": "Kiểm tra",
+    "users": "Học viên",
     "settings": "Cài đặt"
   },
   "Dashboard": {
@@ -231,6 +232,31 @@
     "filteringBy": "Đang lọc theo:",
     "clearFilters": "Xóa bộ lọc",
     "pageOf": "Trang {current} / {total}"
+  },
+  "Users": {
+    "title": "Học viên",
+    "subtitle": "Theo dõi và tôn vinh thành tích học tập của mọi người",
+    "searchPlaceholder": "Tìm theo tên, email hoặc số điện thoại...",
+    "colRank": "Hạng",
+    "colUser": "Học viên",
+    "colScore": "Điểm",
+    "colProgress": "Tiến độ",
+    "colDueToday": "Cần ôn hôm nay",
+    "colAction": "Hành động",
+    "viewDashboard": "Xem",
+    "noResults": "Không tìm thấy học viên",
+    "scoreTierElite": "Xuất sắc",
+    "scoreTierAdvanced": "Tiên tiến",
+    "scoreTierRising": "Đang lên",
+    "scoreTierBeginner": "Mới bắt đầu",
+    "scoreTierNew": "Chưa học",
+    "words": "{learned} / {total} từ",
+    "notStarted": "Chưa bắt đầu",
+    "backToUsers": "Quay lại danh sách",
+    "joinedAt": "Tham gia {date}",
+    "lastActive": "Hoạt động {date}",
+    "rankLabel": "Hạng #{rank}",
+    "quizSessions": "{count} lần kiểm tra"
   },
   "Import": {
     "title": "Nhập từ vựng từ ảnh",

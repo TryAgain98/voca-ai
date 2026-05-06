@@ -42,6 +42,7 @@
     "import": "Import",
     "review": "Review",
     "quiz": "Quiz",
+    "users": "Learners",
     "settings": "Settings"
   },
   "Dashboard": {
@@ -231,6 +232,31 @@
     "filteringBy": "Filtering by:",
     "clearFilters": "Clear filters",
     "pageOf": "Page {current} of {total}"
+  },
+  "Users": {
+    "title": "Learners",
+    "subtitle": "Track and celebrate everyone's progress",
+    "searchPlaceholder": "Search by name, email or phone...",
+    "colRank": "Rank",
+    "colUser": "Learner",
+    "colScore": "Score",
+    "colProgress": "Progress",
+    "colDueToday": "Due Today",
+    "colAction": "Action",
+    "viewDashboard": "View",
+    "noResults": "No learners found",
+    "scoreTierElite": "Elite",
+    "scoreTierAdvanced": "Advanced",
+    "scoreTierRising": "Rising",
+    "scoreTierBeginner": "Beginner",
+    "scoreTierNew": "New",
+    "words": "{learned} / {total} words",
+    "notStarted": "Not started yet",
+    "backToUsers": "Back to Learners",
+    "joinedAt": "Joined {date}",
+    "lastActive": "Last active {date}",
+    "rankLabel": "Rank #{rank}",
+    "quizSessions": "{count} quizzes taken"
   },
   "Import": {
     "title": "Import vocabulary from image",

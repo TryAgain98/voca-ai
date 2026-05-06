@@ -10,6 +10,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  Trophy,
   X,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -45,6 +46,7 @@ export function Sidebar({
     { href: '/admin/import', label: t('import'), icon: ImagePlus },
     { href: '/admin/review', label: t('review'), icon: GraduationCap },
     { href: '/admin/quiz', label: t('quiz'), icon: BrainCircuit },
+    { href: '/admin/users', label: t('users'), icon: Trophy },
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ]
 
