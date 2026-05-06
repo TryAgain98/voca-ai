@@ -16,7 +16,7 @@ import type { ReviewWord, Vocabulary } from '~/types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'
 
 const ALL = 'all'
-const MIN_REVIEW_WORDS = 4
+const MIN_REVIEW_WORDS = 1
 
 export type WordsViewType = 'unlearned' | 'due'
 

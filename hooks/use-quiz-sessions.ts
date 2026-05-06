@@ -17,6 +17,14 @@ export function useQuizSessions(userId: string) {
   })
 }
 
+export function useQuizPerformance(userId: string) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'performance', userId],
+    queryFn: () => quizSessionService.getPerformanceStats(userId),
+    enabled: !!userId,
+  })
+}
+
 export function useSaveQuizSession() {
   const qc = useQueryClient()
   return useMutation({

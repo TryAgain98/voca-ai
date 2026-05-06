@@ -13,16 +13,25 @@ import { ExerciseFeedback } from './exercise-feedback'
 import type { MCQExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
+const QUIZ_ADVANCE_DELAY_MS = 280
+
+export type ExerciseMode = 'review' | 'quiz'
 
 interface MCQExerciseCardProps {
   exercise: MCQExercise
   onAnswer: (isCorrect: boolean, userAnswer?: string) => void
+  mode?: ExerciseMode
 }
 
-export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
+export function MCQExerciseCard({
+  exercise,
+  onAnswer,
+  mode = 'review',
+}: MCQExerciseCardProps) {
   const t = useTranslations('Review')
   const [selected, setSelected] = useState<number | null>(null)
   const { speak } = useTTS(exercise.vocab.word)
+  const isQuiz = mode === 'quiz'
 
   useEffect(() => {
     const timer = setTimeout(() => speak(), 400)
@@ -36,7 +45,15 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
   const handleSelect = (idx: number) => {
     if (selected !== null) return
     setSelected(idx)
-    if (idx === exercise.correctIndex) {
+    const correct = idx === exercise.correctIndex
+    if (isQuiz) {
+      setTimeout(
+        () => onAnswer(correct, exercise.options[idx]),
+        QUIZ_ADVANCE_DELAY_MS,
+      )
+      return
+    }
+    if (correct) {
       playCorrectSound()
       setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
     } else {
@@ -47,6 +64,11 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
   const getOptionStyle = (idx: number): string => {
     if (selected === null)
       return 'border-gray-400/40 hover:border-indigo-400/60 hover:bg-indigo-500/5'
+    if (isQuiz) {
+      if (idx === selected)
+        return 'border-indigo-400/70 bg-indigo-500/10 text-indigo-200'
+      return 'border-gray-400/20 opacity-50'
+    }
     if (idx === exercise.correctIndex)
       return 'border-green-500/60 bg-green-950/40 text-green-300'
     if (idx === selected) return 'border-red-400/60 bg-red-950/40 text-red-400'
@@ -108,16 +130,18 @@ export function MCQExerciseCard({ exercise, onAnswer }: MCQExerciseCardProps) {
         ))}
       </div>
 
-      <ExerciseFeedback
-        show={selected !== null}
-        isCorrect={isCorrect}
-        onContinue={() =>
-          onAnswer(
-            false,
-            selected !== null ? exercise.options[selected] : undefined,
-          )
-        }
-      />
+      {!isQuiz && (
+        <ExerciseFeedback
+          show={selected !== null}
+          isCorrect={isCorrect}
+          onContinue={() =>
+            onAnswer(
+              false,
+              selected !== null ? exercise.options[selected] : undefined,
+            )
+          }
+        />
+      )}
     </div>
   )
 }

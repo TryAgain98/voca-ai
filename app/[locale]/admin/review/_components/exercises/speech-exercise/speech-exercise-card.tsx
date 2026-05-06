@@ -18,18 +18,23 @@ import { VocabCard } from './_components/vocab-card'
 import { useSpeechAttempts } from './_hooks/use-speech-attempts'
 
 import type { SpeakExercise } from '../../../_types/review.types'
+import type { ExerciseMode } from '../mcq-exercise'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
+const QUIZ_ADVANCE_DELAY_MS = 350
 
 interface SpeechExerciseCardProps {
   exercise: SpeakExercise
   onAnswer: (isCorrect: boolean) => void
+  mode?: ExerciseMode
 }
 
 export function SpeechExerciseCard({
   exercise,
   onAnswer,
+  mode = 'review',
 }: SpeechExerciseCardProps) {
+  const isQuiz = mode === 'quiz'
   const t = useTranslations('Review')
   const { speak, isSpeaking, isLoading } = useTTS(exercise.vocab.word)
   const { status, transcript, start, reset, isSupported } =
@@ -62,19 +67,23 @@ export function SpeechExerciseCard({
     status === 'done' ? buildSpeechDiff(exercise.vocab.word, transcript) : null
 
   useEffect(() => {
-    if (!diff?.isExact) return
-    playCorrectSound()
-    const timer = setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
-    return () => clearTimeout(timer)
-  }, [diff?.isExact, onAnswer])
-
-  useEffect(() => {
-    if (status === 'done' && diff && !diff.isExact) {
-      playWrongSound()
-      incrementAttempts()
+    if (status !== 'done' || !diff) return
+    if (isQuiz) {
+      const timer = setTimeout(
+        () => onAnswer(diff.isExact),
+        QUIZ_ADVANCE_DELAY_MS,
+      )
+      return () => clearTimeout(timer)
     }
+    if (diff.isExact) {
+      playCorrectSound()
+      const timer = setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
+      return () => clearTimeout(timer)
+    }
+    playWrongSound()
+    incrementAttempts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status])
+  }, [status, diff?.isExact, isQuiz])
 
   const handleListen = () => {
     reset()
@@ -112,7 +121,7 @@ export function SpeechExerciseCard({
         onListen={handleListen}
       />
 
-      {status === 'done' && diff?.isExact && (
+      {!isQuiz && status === 'done' && diff?.isExact && (
         <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,7 +131,7 @@ export function SpeechExerciseCard({
         </motion.p>
       )}
 
-      {status === 'done' && diff && !diff.isExact && (
+      {!isQuiz && status === 'done' && diff && !diff.isExact && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -135,6 +144,16 @@ export function SpeechExerciseCard({
             onSkip={() => onAnswer(false)}
           />
         </motion.div>
+      )}
+
+      {isQuiz && status === 'done' && (
+        <motion.p
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center text-sm text-indigo-300"
+        >
+          {t('answerRecorded')}
+        </motion.p>
       )}
 
       {(status === 'idle' || status === 'error') && (

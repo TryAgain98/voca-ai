@@ -3,9 +3,10 @@
 import { useUser } from '@clerk/nextjs'
 import { ClipboardList } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 
 import { QuizSessionView } from './_components/quiz-session'
 import { QuizSetup } from './_components/quiz-setup'
@@ -13,19 +14,45 @@ import { QuizHistoryTable } from './history/_components/quiz-history-table'
 
 import type { QuizSetup as QuizSetupType } from './_types/quiz.types'
 
+// speak-word disabled in quiz: speech recognition isn't reliable enough
+// to score mastery fairly. Re-enable once accuracy improves.
+const QUICK_START_EXERCISE_TYPES = [
+  'meaning-to-word',
+  'listen-to-word',
+  // 'speak-word',
+] as const
+const MIN_QUICK_START_VOCAB = 1
+
 export default function QuizPage() {
   const t = useTranslations('Quiz')
   const { user } = useUser()
   const [setup, setSetup] = useState<QuizSetupType | null>(null)
   const [sessionKey, setSessionKey] = useState(0)
+  const pendingVocab = useQuizQuickStartStore((s) => s.pendingVocab)
+  const clearPendingVocab = useQuizQuickStartStore((s) => s.clearPendingVocab)
+  const userId = user?.id ?? null
 
-  if (setup) {
+  const quickStartSetup = useMemo<QuizSetupType | null>(() => {
+    if (!userId || !pendingVocab) return null
+    if (pendingVocab.length < MIN_QUICK_START_VOCAB) return null
+    return {
+      userId,
+      lessonIds: [],
+      exerciseTypes: [...QUICK_START_EXERCISE_TYPES],
+      vocab: pendingVocab,
+    }
+  }, [userId, pendingVocab])
+
+  const activeSetup = setup ?? quickStartSetup
+
+  if (activeSetup) {
     return (
       <QuizSessionView
         key={sessionKey}
-        setup={setup}
+        setup={activeSetup}
         onExit={() => {
           setSetup(null)
+          clearPendingVocab()
           setSessionKey((k) => k + 1)
         }}
       />

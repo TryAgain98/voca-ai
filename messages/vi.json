@@ -73,7 +73,62 @@
     "urgent": "Đến hạn",
     "andMore": "+{count} từ khác",
     "notEnoughWords": "Cần ít nhất 4 từ để bắt đầu phiên học",
-    "viewAll": "Xem tất cả"
+    "viewAll": "Xem tất cả",
+    "testPerformanceTitle": "Kết Quả Kiểm Tra",
+    "testPerformanceSubtitle": "{count} bài kiểm tra tuần này",
+    "testPerformanceEmpty": "Làm bài kiểm tra đầu tiên để xem kết quả",
+    "trendUp": "Tiến bộ qua {count} bài gần nhất",
+    "trendDown": "Giảm qua {count} bài gần nhất",
+    "startQuiz": "Làm Kiểm Tra",
+    "takeAnotherQuiz": "Làm Tiếp Một Bài",
+    "viewHistory": "Lịch sử",
+    "trickyWordsTitle": "Từ Hay Sai",
+    "trickyWordsHint": "Những từ bạn sai nhiều nhất trong các bài kiểm tra gần đây",
+    "trickyWordsHintAllCorrect": "Không sai từ nào trong các bài gần đây — tuyệt!",
+    "trickyWordsHintNoSessions": "Làm một bài kiểm tra để xác định điểm yếu",
+    "reviewTrickyNow": "Ôn Ngay Các Từ Này",
+    "notEnoughTricky": "Cần ít nhất {min} từ hay sai để bắt đầu phiên ôn tập trung",
+    "masteryTitle": "Mức Độ Thuộc",
+    "masterySubtitle": "{percent}% đã được kiểm tra xác nhận",
+    "legendMastered": "Đã thuộc",
+    "legendPracticing": "Đang ôn",
+    "legendUntouched": "Chưa chạm",
+    "needsTestingTitle": "Cần Kiểm Tra",
+    "needsTestingHero": "Đến lúc xác minh xem bạn thực sự nhớ những gì",
+    "needsTestingSubtitle": "Theo đường cong quên, các từ này đã đến lúc cần kiểm tra lại",
+    "needsTestingDone": "Đã xong ✨",
+    "needsTestingDoneSubtitle": "Hiện chưa có từ nào đến hạn kiểm tra",
+    "startTestNow": "Kiểm Tra Ngay",
+    "notEnoughTestable": "Cần ít nhất {min} từ đến hạn kiểm tra",
+    "hero": {
+      "badge": {
+        "test": "Cần hành động",
+        "review": "Đến hạn ôn",
+        "learn": "Khám phá",
+        "celebrate": "Đang đúng tiến độ"
+      },
+      "title": {
+        "test": "Kiểm tra {count} từ hôm nay",
+        "review": "Ôn {count} từ hôm nay",
+        "learn": "Học {count} từ mới hôm nay",
+        "celebrate": "Đã ôn xong tất cả"
+      },
+      "queueTail": "+{count} từ chờ lượt sau",
+      "dailyPlanTitle": "Kế hoạch hôm nay",
+      "dailyPlanHint": "Ôn để khơi lại trí nhớ — rồi kiểm tra xem nhớ thật hay không.",
+      "subtitle": {
+        "test": "Ôn không đồng nghĩa với nhớ. Một bài kiểm tra ngắn xác nhận thật sự bạn còn nhớ gì — và chỉ ra những gì đang dần quên.",
+        "review": "Ôn nhanh để giữ trí nhớ trước khi đường cong quên đuổi kịp.",
+        "learn": "Bắt đầu với vài từ mới hôm nay. Đều đặn quan trọng hơn nhồi nhét.",
+        "celebrate": "Hiện không có gì gấp. Thử một bài kiểm tra ngẫu nhiên để giữ phong độ."
+      },
+      "cta": {
+        "test": "Kiểm tra ngay {count} từ",
+        "review": "Ôn ngay {count} từ",
+        "learn": "Bắt đầu với {count} từ",
+        "celebrate": "Test ngẫu nhiên"
+      }
+    }
   },
   "DashboardWords": {
     "back": "Quay lại",
@@ -127,16 +182,23 @@
     "speakError": "Không nghe thấy — thử lại",
     "listenBtn": "Nghe",
     "skipBtn": "Bỏ qua từ này",
-    "maxAttemptsHint": "Đã thử 3 lần — bạn có thể bỏ qua từ này"
+    "maxAttemptsHint": "Đã thử 3 lần — bạn có thể bỏ qua từ này",
+    "answerRecorded": "Đã ghi nhận"
   },
   "Quiz": {
-    "setupTitle": "Kiểm tra từ vựng",
-    "setupSubtitle": "Kiểm tra vốn từ của bạn",
+    "setupTitle": "Chế độ Kiểm tra",
+    "setupSubtitle": "Không gợi ý. Có giờ. Một lần duy nhất.",
     "selectLessons": "Bài học",
     "allLessons": "Tất cả bài học",
     "vocabAvailable": "{count} từ",
+    "batchPrioritized": "Sẽ test {batch} / {total} từ ưu tiên cao nhất — chưa kiểm tra hoặc có khả năng đã quên",
     "minWarning": "Cần ít nhất 4 từ",
-    "startButton": "Bắt đầu kiểm tra",
+    "startButton": "Bắt đầu Kiểm tra",
+    "challenge": {
+      "noHints": "Không gợi ý",
+      "timed": "20s / câu",
+      "oneShot": "Một lần"
+    },
     "progress": "{current} / {total}",
     "resultsTitle": "Hoàn thành!",
     "resultsTime": "{seconds}s",

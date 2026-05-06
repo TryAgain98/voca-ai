@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { Button } from '~/components/ui/button'
 import { useSaveQuizSession } from '~/hooks/use-quiz-sessions'
+import { useApplyQuizMastery } from '~/hooks/use-word-review-progress'
 
 import type { QuizExerciseResult, QuizSetup } from '../_types/quiz.types'
 import type { QuizIncorrectWord } from '~/types'
@@ -31,6 +32,7 @@ export function QuizResults({
 }: QuizResultsProps) {
   const t = useTranslations('Quiz')
   const { mutate: saveSession } = useSaveQuizSession()
+  const { mutate: applyMastery } = useApplyQuizMastery()
   const savedRef = useRef(false)
 
   const correctCount = results.filter((r) => r.isCorrect).length
@@ -68,6 +70,14 @@ export function QuizResults({
         onSuccess: () => toast.success(t('sessionSaved')),
       },
     )
+
+    applyMastery({
+      userId: setup.userId,
+      results: results.map((r) => ({
+        wordId: r.exercise.vocab.id,
+        isCorrect: r.isCorrect,
+      })),
+    })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

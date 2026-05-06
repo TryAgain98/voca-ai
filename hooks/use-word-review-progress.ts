@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { wordReviewProgressService } from '~/services/word-review-progress.service'
 
+import type { QuizWordResult } from '~/services/word-review-progress.service'
+
 export { type DashboardStats } from '~/services/word-review-progress.service'
 
 const QUERY_KEY = 'word-review-progress'
@@ -35,6 +37,27 @@ export function useDashboardStats(userId: string) {
   })
 }
 
+interface UseQuizCandidatesParams {
+  userId: string
+  lessonIds: string[]
+  limit?: number
+  enabled?: boolean
+}
+
+export function useQuizCandidates({
+  userId,
+  lessonIds,
+  limit = 20,
+  enabled = true,
+}: UseQuizCandidatesParams) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'quiz-candidates', userId, lessonIds, limit],
+    queryFn: () =>
+      wordReviewProgressService.getQuizCandidates(userId, lessonIds, limit),
+    enabled: enabled && !!userId,
+  })
+}
+
 interface SubmitAnswerParams {
   userId: string
   wordId: string
@@ -47,6 +70,23 @@ export function useSubmitAnswer() {
   return useMutation({
     mutationFn: ({ userId, wordId, isCorrect }: SubmitAnswerParams) =>
       wordReviewProgressService.upsertAfterAnswer(userId, wordId, isCorrect),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+    },
+  })
+}
+
+interface ApplyMasteryParams {
+  userId: string
+  results: QuizWordResult[]
+}
+
+export function useApplyQuizMastery() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userId, results }: ApplyMasteryParams) =>
+      wordReviewProgressService.applyQuizMastery(userId, results),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },

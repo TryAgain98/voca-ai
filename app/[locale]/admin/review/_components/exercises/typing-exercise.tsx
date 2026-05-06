@@ -14,9 +14,11 @@ import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 
 import { ExerciseFeedback } from './exercise-feedback'
 
+import type { ExerciseMode } from './mcq-exercise'
 import type { TypingExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
+const QUIZ_ADVANCE_DELAY_MS = 280
 const HINT_MAX_REVEAL_RATIO = 0.4
 const HINT_MAX_LEVELS = 3
 
@@ -49,11 +51,13 @@ function buildHintFromRevealedSet(word: string, revealed: Set<number>): string {
 interface TypingExerciseCardProps {
   exercise: TypingExercise
   onAnswer: (isCorrect: boolean, userAnswer?: string) => void
+  mode?: ExerciseMode
 }
 
 export function TypingExerciseCard({
   exercise,
   onAnswer,
+  mode = 'review',
 }: TypingExerciseCardProps) {
   const t = useTranslations('Review')
   const [value, setValue] = useState('')
@@ -64,6 +68,7 @@ export function TypingExerciseCard({
   const { speak } = useTTS(exercise.vocab.word)
   const isListenMode = exercise.type === 'listen-to-word'
   const accentColor = isListenMode ? 'amber' : 'sky'
+  const isQuiz = mode === 'quiz'
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -83,6 +88,10 @@ export function TypingExerciseCard({
       value.trim().toLowerCase() === exercise.vocab.word.toLowerCase()
     setIsCorrect(correct)
     setSubmitted(true)
+    if (isQuiz) {
+      setTimeout(() => onAnswer(correct, value.trim()), QUIZ_ADVANCE_DELAY_MS)
+      return
+    }
     if (correct) {
       playCorrectSound()
       setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
@@ -149,9 +158,11 @@ export function TypingExerciseCard({
               {exercise.vocab.phonetic}
             </p>
           )} */}
-          <p className="text-muted-foreground/60 mt-2 font-mono text-sm tracking-widest">
-            {hint}
-          </p>
+          {!isQuiz && (
+            <p className="text-muted-foreground/60 mt-2 font-mono text-sm tracking-widest">
+              {hint}
+            </p>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -166,12 +177,17 @@ export function TypingExerciseCard({
             disabled={submitted}
             className={cn(
               'text-base',
-              submitted &&
+              !isQuiz &&
+                submitted &&
                 isCorrect &&
                 'border-green-500/60 bg-green-950/20 text-green-300',
-              submitted &&
+              !isQuiz &&
+                submitted &&
                 !isCorrect &&
                 'border-red-400/60 bg-red-950/20 text-red-400',
+              isQuiz &&
+                submitted &&
+                'border-indigo-400/60 bg-indigo-500/10 text-indigo-200',
             )}
           />
           <Button onClick={handleSubmit} disabled={!value.trim() || submitted}>
@@ -179,14 +195,16 @@ export function TypingExerciseCard({
           </Button>
         </div>
 
-        <ExerciseFeedback
-          show={submitted}
-          isCorrect={isCorrect}
-          onContinue={() => onAnswer(false, value.trim())}
-          correctAnswer={exercise.vocab.word}
-        />
+        {!isQuiz && (
+          <ExerciseFeedback
+            show={submitted}
+            isCorrect={isCorrect}
+            onContinue={() => onAnswer(false, value.trim())}
+            correctAnswer={exercise.vocab.word}
+          />
+        )}
 
-        {!submitted && canShowMoreHint && (
+        {!isQuiz && !submitted && canShowMoreHint && (
           <Button
             variant="ghost"
             size="sm"

@@ -11,10 +11,13 @@ import { ExitConfirmDialog } from '~admin/review/_components/exit-confirm-dialog
 
 import { useQuizSession } from '../_hooks/use-quiz-session'
 
+import { QuestionTimer } from './question-timer'
 import { QuizResults } from './quiz-results'
 
 import type { QuizSetup } from '../_types/quiz.types'
 import type { Exercise } from '~admin/review/_types/review.types'
+
+const QUIZ_PER_QUESTION_MS = 20000
 
 function renderExercise(
   exercise: Exercise,
@@ -24,7 +27,12 @@ function renderExercise(
   switch (exercise.type) {
     case 'word-to-meaning':
       return (
-        <MCQExerciseCard key={index} exercise={exercise} onAnswer={onAnswer} />
+        <MCQExerciseCard
+          key={index}
+          exercise={exercise}
+          onAnswer={onAnswer}
+          mode="quiz"
+        />
       )
     case 'speak-word':
       return (
@@ -32,6 +40,7 @@ function renderExercise(
           key={index}
           exercise={exercise}
           onAnswer={onAnswer}
+          mode="quiz"
         />
       )
     default:
@@ -40,6 +49,7 @@ function renderExercise(
           key={index}
           exercise={exercise}
           onAnswer={onAnswer}
+          mode="quiz"
         />
       )
   }
@@ -71,6 +81,10 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
     [submitAnswer],
   )
 
+  const handleTimeout = useCallback(() => {
+    submitAnswer(false)
+  }, [submitAnswer])
+
   if (isComplete && endTime) {
     const elapsedSeconds = Math.round(
       (endTime.getTime() - startTime.getTime()) / 1000,
@@ -91,12 +105,19 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
-      <div className="space-y-1.5">
-        <div className="flex justify-between text-xs">
-          <span className="text-muted-foreground">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-muted-foreground text-xs font-[510]">
             {t('progress', { current: currentIndex + 1, total })}
           </span>
-          <ExitConfirmDialog onConfirm={onExit} />
+          <div className="flex items-center gap-3">
+            <QuestionTimer
+              key={`${currentIndex}-${currentExercise.vocab.id}`}
+              durationMs={QUIZ_PER_QUESTION_MS}
+              onExpire={handleTimeout}
+            />
+            <ExitConfirmDialog onConfirm={onExit} />
+          </div>
         </div>
         <div className="bg-muted h-1.5 w-full rounded-full">
           <motion.div
