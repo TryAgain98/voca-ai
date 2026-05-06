@@ -47,6 +47,10 @@ export function UnlearnedCard({
     router.push(`/${locale}/admin/review`)
   }
 
+  const handleViewAll = () => {
+    router.push(`/${locale}/admin/dashboard/words?type=unlearned`)
+  }
+
   const isDone = !isLoading && unlearnedCount === 0
   const preview = unlearnedWords.slice(0, PREVIEW_COUNT)
   const remaining = unlearnedCount - PREVIEW_COUNT
@@ -138,7 +142,7 @@ export function UnlearnedCard({
 
       {!isLoading && !isDone && unlearnedCount >= 4 && (
         <motion.div
-          className="mt-4"
+          className="mt-4 flex items-center gap-2"
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
@@ -146,18 +150,34 @@ export function UnlearnedCard({
           <Button
             size="sm"
             onClick={handleStartReview}
-            className="w-full gap-2"
+            className="flex-1 gap-2"
           >
             {t('startUnlearned')}
             <ArrowRight size={14} />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleViewAll}
+            className="shrink-0"
+          >
+            {t('viewAll')}
           </Button>
         </motion.div>
       )}
 
       {!isLoading && !isDone && unlearnedCount < 4 && unlearnedCount > 0 && (
-        <p className="text-muted-foreground mt-3 text-xs">
-          {t('notEnoughWords')}
-        </p>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <p className="text-muted-foreground text-xs">{t('notEnoughWords')}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleViewAll}
+            className="shrink-0"
+          >
+            {t('viewAll')}
+          </Button>
+        </div>
       )}
     </motion.div>
   )

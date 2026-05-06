@@ -35,8 +35,8 @@ interface VocabularyTableProps {
   page: number
   onPageChange: (page: number) => void
   onRowClick: (voca: Vocabulary) => void
-  onEdit: (voca: Vocabulary) => void
-  onDelete: (voca: Vocabulary) => void
+  onEdit?: (voca: Vocabulary) => void
+  onDelete?: (voca: Vocabulary) => void
   onClearFilters: () => void
 }
 
@@ -95,6 +95,7 @@ export function VocabularyTable({
   const totalPages = Math.max(1, Math.ceil(vocabularies.length / PAGE_SIZE))
   const pageStart = (page - 1) * PAGE_SIZE
   const paginated = vocabularies.slice(pageStart, pageStart + PAGE_SIZE)
+  const showActions = !!onEdit || !!onDelete
 
   const lessonName = (id: string): string =>
     lessons.find((l) => l.id === id)?.name ?? id
@@ -135,7 +136,7 @@ export function VocabularyTable({
             <TableHead className="px-4">{t('colMeaning')}</TableHead>
             <TableHead className="px-4">{t('colLesson')}</TableHead>
             <TableHead className="w-28 px-4">{t('colUpdated')}</TableHead>
-            <TableHead className="w-24 px-4" />
+            {showActions && <TableHead className="w-24 px-4" />}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -194,29 +195,40 @@ export function VocabularyTable({
                 {formatDate(voca.updated_at, voca.created_at)}
               </TableCell>
 
-              <TableCell className="px-4" onClick={(e) => e.stopPropagation()}>
-                <div className="inline-flex cursor-pointer items-center rounded-md border border-white/8 bg-white/2">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    title={tCommon('edit')}
-                    className="rounded-r-none"
-                    onClick={() => onEdit(voca)}
-                  >
-                    <Pencil size={13} />
-                  </Button>
-                  <div className="h-4 w-px bg-white/8" />
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-destructive hover:text-destructive rounded-l-none"
-                    title={tCommon('delete')}
-                    onClick={() => onDelete(voca)}
-                  >
-                    <Trash2 size={13} />
-                  </Button>
-                </div>
-              </TableCell>
+              {showActions && (
+                <TableCell
+                  className="px-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="inline-flex cursor-pointer items-center rounded-md border border-white/8 bg-white/2">
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        title={tCommon('edit')}
+                        className="rounded-r-none"
+                        onClick={() => onEdit(voca)}
+                      >
+                        <Pencil size={13} />
+                      </Button>
+                    )}
+                    {onEdit && onDelete && (
+                      <div className="h-4 w-px bg-white/8" />
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-destructive hover:text-destructive rounded-l-none"
+                        title={tCommon('delete')}
+                        onClick={() => onDelete(voca)}
+                      >
+                        <Trash2 size={13} />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

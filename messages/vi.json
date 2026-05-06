@@ -72,7 +72,18 @@
     "reviewNow": "Ôn Ngay",
     "urgent": "Đến hạn",
     "andMore": "+{count} từ khác",
-    "notEnoughWords": "Cần ít nhất 4 từ để bắt đầu phiên học"
+    "notEnoughWords": "Cần ít nhất 4 từ để bắt đầu phiên học",
+    "viewAll": "Xem tất cả"
+  },
+  "DashboardWords": {
+    "back": "Quay lại",
+    "unlearnedTitle": "Từ mới",
+    "unlearnedSubtitle": "{count, plural, =0 {Chưa có từ nào cần học} =1 {1 từ cần học} other {# từ cần học}}",
+    "dueTitle": "Đến hạn hôm nay",
+    "dueSubtitle": "{count, plural, =0 {Không có từ nào đến hạn} =1 {1 từ đến hạn ôn tập} other {# từ đến hạn ôn tập}}",
+    "startLearning": "Bắt đầu học",
+    "reviewNow": "Ôn ngay",
+    "notEnoughWords": "Cần ít nhất {min} từ để bắt đầu phiên học"
   },
   "Review": {
     "setupTitle": "Ôn tập",

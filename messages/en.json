@@ -72,7 +72,18 @@
     "reviewNow": "Review Now",
     "urgent": "Due",
     "andMore": "+{count} more",
-    "notEnoughWords": "Need at least 4 words to start a session"
+    "notEnoughWords": "Need at least 4 words to start a session",
+    "viewAll": "View all"
+  },
+  "DashboardWords": {
+    "back": "Back",
+    "unlearnedTitle": "New Words",
+    "unlearnedSubtitle": "{count, plural, =0 {No words to learn} =1 {1 word to learn} other {# words to learn}}",
+    "dueTitle": "Due Today",
+    "dueSubtitle": "{count, plural, =0 {No words due} =1 {1 word due for review} other {# words due for review}}",
+    "startLearning": "Start Learning",
+    "reviewNow": "Review Now",
+    "notEnoughWords": "Need at least {min} words to start a session"
   },
   "Review": {
     "setupTitle": "Review",

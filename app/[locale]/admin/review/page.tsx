@@ -1,14 +1,17 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useReviewQuickStartStore } from '~/stores/review-quick-start'
 
 import { ReviewSessionView } from './_components/review-session'
 import { ReviewSetup } from './_components/review-setup'
 
-import type { ReviewSetup as ReviewSetupType } from './_types/review.types'
+import type {
+  ReviewSetup as ReviewSetupType,
+  ReviewVocab,
+} from './_types/review.types'
 
 const ALL_EXERCISE_TYPES = ['word-to-meaning', 'meaning-to-word'] as const
 
@@ -16,15 +19,25 @@ export default function ReviewPage() {
   const { user } = useUser()
   const [manualSetup, setManualSetup] = useState<ReviewSetupType | null>(null)
   const [sessionKey, setSessionKey] = useState(0)
-  const { pendingVocab, clearPendingVocab } = useReviewQuickStartStore()
+  const clearPendingVocab = useReviewQuickStartStore((s) => s.clearPendingVocab)
+
+  const [quickStartVocab, setQuickStartVocab] = useState<ReviewVocab[] | null>(
+    () => useReviewQuickStartStore.getState().pendingVocab,
+  )
+
+  useEffect(() => {
+    if (quickStartVocab) {
+      clearPendingVocab()
+    }
+  }, [quickStartVocab, clearPendingVocab])
 
   const quickStartSetup: ReviewSetupType | null =
-    pendingVocab && pendingVocab.length >= 4 && user?.id
+    quickStartVocab && quickStartVocab.length >= 4 && user?.id
       ? {
           userId: user.id,
           lessonIds: [],
           exerciseTypes: [...ALL_EXERCISE_TYPES],
-          vocab: pendingVocab,
+          vocab: quickStartVocab,
         }
       : null
 
@@ -32,7 +45,7 @@ export default function ReviewPage() {
 
   const handleExit = () => {
     setManualSetup(null)
-    clearPendingVocab()
+    setQuickStartVocab(null)
     setSessionKey((k) => k + 1)
   }
 
