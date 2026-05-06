@@ -2,6 +2,15 @@ import { supabase } from '~/lib/supabase'
 
 import type { ReviewWord, WordReviewProgress } from '~/types'
 
+export interface DashboardStats {
+  totalWords: number
+  learnedCount: number
+  unlearnedCount: number
+  dueTodayCount: number
+  dueTodayWords: ReviewWord[]
+  unlearnedWords: ReviewWord[]
+}
+
 const REVIEW_INTERVALS_DAYS = [1, 3, 7, 14, 30] as const
 
 function addDays(date: Date, days: number): Date {
@@ -103,6 +112,64 @@ class WordReviewProgressService {
     scored.sort((a, b) => b.score - a.score)
 
     return scored.slice(0, limit)
+  }
+
+  async getDashboardStats(userId: string): Promise<DashboardStats> {
+    const { data: vocabs, error: vocabError } = await supabase
+      .from('vocabularies')
+      .select('*')
+
+    if (vocabError) throw vocabError
+    if (!vocabs || vocabs.length === 0) {
+      return {
+        totalWords: 0,
+        learnedCount: 0,
+        unlearnedCount: 0,
+        dueTodayCount: 0,
+        dueTodayWords: [],
+        unlearnedWords: [],
+      }
+    }
+
+    const wordIds = vocabs.map((v) => v.id)
+
+    const { data: progressRows, error: progressError } = await supabase
+      .from('word_review_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .in('word_id', wordIds)
+
+    if (progressError) throw progressError
+
+    const progressMap = new Map<string, WordReviewProgress>(
+      (progressRows ?? []).map((p: WordReviewProgress) => [p.word_id, p]),
+    )
+
+    const now = new Date()
+    const learnedCount = progressRows?.length ?? 0
+
+    const unlearnedWords: ReviewWord[] = vocabs
+      .filter((v) => !progressMap.has(v.id))
+      .map((v) => ({ ...v, progress: null, score: computeScore(null) }))
+
+    const dueTodayWords: ReviewWord[] = vocabs
+      .filter((v) => {
+        const progress = progressMap.get(v.id)
+        return progress && new Date(progress.next_review_at) <= now
+      })
+      .map((v) => {
+        const progress = progressMap.get(v.id) ?? null
+        return { ...v, progress, score: computeScore(progress) }
+      })
+
+    return {
+      totalWords: vocabs.length,
+      learnedCount,
+      unlearnedCount: vocabs.length - learnedCount,
+      dueTodayCount: dueTodayWords.length,
+      dueTodayWords,
+      unlearnedWords,
+    }
   }
 }
 

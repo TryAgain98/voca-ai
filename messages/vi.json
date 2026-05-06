@@ -36,12 +36,42 @@
     "no": "Không"
   },
   "Nav": {
+    "dashboard": "Tổng quan",
     "lessons": "Bài học",
     "vocabularies": "Từ vựng",
     "import": "Nhập",
     "review": "Ôn tập",
     "quiz": "Kiểm tra",
     "settings": "Cài đặt"
+  },
+  "Dashboard": {
+    "greeting": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối"
+    },
+    "greetingSubtitle": "Đây là tổng quan tiến độ học của bạn.",
+    "learnedTitle": "Đã Học",
+    "progress": "Tiến độ",
+    "almostDone": "Chỉ còn {left} từ nữa thôi!",
+    "achievement": {
+      "perfect": "Bạn đã thuộc hết tất cả từ! 🎉",
+      "great": "Tiến bộ tuyệt vời! Gần xong rồi.",
+      "halfway": "Xuất sắc! Đã qua hơn nửa chặng đường.",
+      "started": "Khởi đầu tốt — tiếp tục nào!",
+      "fresh": "Sẵn sàng bắt đầu hành trình chưa?"
+    },
+    "unlearnedTitle": "Từ Mới",
+    "unlearnedSubtitle": "Những từ bạn chưa học lần nào",
+    "unlearnedDone": "Đã ôn qua tất cả các từ ít nhất một lần!",
+    "startUnlearned": "Bắt Đầu Học",
+    "dueTodayTitle": "Cần Ôn Hôm Nay",
+    "dueTodaySubtitle": "Các từ đến hạn ôn tập",
+    "dueTodayDone": "Hôm nay đã ôn hết rồi! ✨",
+    "reviewNow": "Ôn Ngay",
+    "urgent": "Đến hạn",
+    "andMore": "+{count} từ khác",
+    "notEnoughWords": "Cần ít nhất 4 từ để bắt đầu phiên học"
   },
   "Review": {
     "setupTitle": "Ôn tập",

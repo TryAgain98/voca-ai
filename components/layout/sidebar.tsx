@@ -6,6 +6,7 @@ import {
   BrainCircuit,
   GraduationCap,
   ImagePlus,
+  LayoutDashboard,
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
@@ -38,6 +39,7 @@ export function Sidebar({
   const isActive = (href: string) => pathname.startsWith(`/${locale}${href}`)
 
   const navItems = [
+    { href: '/admin/dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { href: '/admin/lessons', label: t('lessons'), icon: BookOpen },
     { href: '/admin/vocabularies', label: t('vocabularies'), icon: BookMarked },
     { href: '/admin/import', label: t('import'), icon: ImagePlus },

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { wordReviewProgressService } from '~/services/word-review-progress.service'
 
+export { type DashboardStats } from '~/services/word-review-progress.service'
+
 const QUERY_KEY = 'word-review-progress'
 
 interface UseReviewWordsParams {
@@ -22,6 +24,14 @@ export function useReviewWords({
     queryFn: () =>
       wordReviewProgressService.getReviewWords(userId, lessonIds, limit),
     enabled: enabled && !!userId && lessonIds.length > 0,
+  })
+}
+
+export function useDashboardStats(userId: string) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'dashboard', userId],
+    queryFn: () => wordReviewProgressService.getDashboardStats(userId),
+    enabled: !!userId,
   })
 }
 

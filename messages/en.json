@@ -36,12 +36,42 @@
     "no": "No"
   },
   "Nav": {
+    "dashboard": "Dashboard",
     "lessons": "Lessons",
     "vocabularies": "Vocabularies",
     "import": "Import",
     "review": "Review",
     "quiz": "Quiz",
     "settings": "Settings"
+  },
+  "Dashboard": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "greetingSubtitle": "Here's your learning progress at a glance.",
+    "learnedTitle": "Words Learned",
+    "progress": "Progress",
+    "almostDone": "Only {left} more to go!",
+    "achievement": {
+      "perfect": "You've mastered all words! 🎉",
+      "great": "Amazing progress! Almost there.",
+      "halfway": "Great work! Over halfway through.",
+      "started": "Good start — keep it up!",
+      "fresh": "Ready to start your journey?"
+    },
+    "unlearnedTitle": "New Words",
+    "unlearnedSubtitle": "Words you haven't studied yet",
+    "unlearnedDone": "All words reviewed at least once!",
+    "startUnlearned": "Start Learning",
+    "dueTodayTitle": "Due Today",
+    "dueTodaySubtitle": "Words ready for review",
+    "dueTodayDone": "All caught up for today! ✨",
+    "reviewNow": "Review Now",
+    "urgent": "Due",
+    "andMore": "+{count} more",
+    "notEnoughWords": "Need at least 4 words to start a session"
   },
   "Review": {
     "setupTitle": "Review",
