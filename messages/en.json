@@ -90,6 +90,7 @@
     "typeHere": "Type here...",
     "check": "Check",
     "showHint": "Show hint",
+    "showMoreHint": "More hint",
     "correctAnswer": "Correct answer",
     "resultsTitle": "Session complete!",
     "resultsTime": "{seconds}s",

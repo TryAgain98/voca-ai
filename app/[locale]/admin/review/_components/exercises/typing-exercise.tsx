@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Lightbulb } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { SpeakButton } from '~/components/layout/speak-button'
 import { Button } from '~/components/ui/button'
@@ -17,25 +17,33 @@ import { ExerciseFeedback } from './exercise-feedback'
 import type { TypingExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
+const HINT_MAX_REVEAL_RATIO = 0.4
+const HINT_MAX_LEVELS = 3
 
-function buildBlankHint(word: string): string {
-  return word
-    .split('')
-    .map(() => '_')
-    .join(' ')
+function seedFromWord(word: string): number {
+  let seed = 0
+  for (let i = 0; i < word.length; i++) {
+    seed = (seed * 31 + word.charCodeAt(i)) >>> 0
+  }
+  return seed || 1
 }
 
-function buildFirstLetterHint(word: string): string {
-  if (word.length <= 1) return word
-  return (
-    word[0] +
-    ' ' +
-    word
-      .slice(1)
-      .split('')
-      .map(() => '_')
-      .join(' ')
-  )
+function buildShuffledRevealOrder(word: string): number[] {
+  const indices = Array.from({ length: word.length }, (_, i) => i)
+  let seed = seedFromWord(word)
+  for (let i = indices.length - 1; i > 0; i--) {
+    seed = (seed * 1103515245 + 12345) >>> 0
+    const j = seed % (i + 1)
+    ;[indices[i], indices[j]] = [indices[j], indices[i]]
+  }
+  return indices
+}
+
+function buildHintFromRevealedSet(word: string, revealed: Set<number>): string {
+  return word
+    .split('')
+    .map((ch, i) => (revealed.has(i) ? ch : '_'))
+    .join(' ')
 }
 
 interface TypingExerciseCardProps {
@@ -51,7 +59,7 @@ export function TypingExerciseCard({
   const [value, setValue] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
-  const [showFirstLetter, setShowFirstLetter] = useState(false)
+  const [hintLevel, setHintLevel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const { speak } = useTTS(exercise.vocab.word)
   const isListenMode = exercise.type === 'listen-to-word'
@@ -83,9 +91,22 @@ export function TypingExerciseCard({
     }
   }
 
-  const hint = showFirstLetter
-    ? buildFirstLetterHint(exercise.vocab.word)
-    : buildBlankHint(exercise.vocab.word)
+  const word = exercise.vocab.word
+  const revealOrder = useMemo(() => buildShuffledRevealOrder(word), [word])
+  const maxRevealCount =
+    word.length <= 1
+      ? 0
+      : Math.max(1, Math.floor(word.length * HINT_MAX_REVEAL_RATIO))
+  const maxLevels = Math.min(HINT_MAX_LEVELS, maxRevealCount)
+  const revealPerLevel =
+    maxLevels > 0 ? Math.ceil(maxRevealCount / maxLevels) : 0
+  const revealCount = Math.min(hintLevel * revealPerLevel, maxRevealCount)
+  const revealedSet = useMemo(
+    () => new Set(revealOrder.slice(0, revealCount)),
+    [revealOrder, revealCount],
+  )
+  const canShowMoreHint = revealCount < maxRevealCount
+  const hint = buildHintFromRevealedSet(word, revealedSet)
 
   return (
     <div className="flex flex-col gap-4">
@@ -165,15 +186,15 @@ export function TypingExerciseCard({
           correctAnswer={exercise.vocab.word}
         />
 
-        {!submitted && !showFirstLetter && (
+        {!submitted && canShowMoreHint && (
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground w-fit"
-            onClick={() => setShowFirstLetter(true)}
+            onClick={() => setHintLevel((level) => level + 1)}
           >
             <Lightbulb size={14} className="mr-1.5" />
-            {t('showHint')}
+            {hintLevel === 0 ? t('showHint') : t('showMoreHint')}
           </Button>
         )}
       </div>
