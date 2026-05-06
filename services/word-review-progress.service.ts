@@ -16,8 +16,11 @@ function computeScore(progress: WordReviewProgress | null): number {
   const isNew = !progress
   const isDue = progress ? new Date(progress.next_review_at) <= now : true
   const wrongCount = progress?.wrong_count ?? 0
+  const correctCount = progress?.correct_count ?? 0
+  const totalAttempts = wrongCount + correctCount
+  const errorRate = totalAttempts > 0 ? wrongCount / totalAttempts : 0
 
-  return (5 - level) * 2 + (isNew ? 3 : 0) + (isDue ? 5 : 0) + wrongCount * 1.5
+  return (5 - level) * 2 + (isNew ? 3 : 0) + (isDue ? 5 : 0) + errorRate * 3
 }
 
 class WordReviewProgressService {
