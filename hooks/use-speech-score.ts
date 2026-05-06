@@ -22,7 +22,7 @@ const RECORDING_DURATION_MS = 4000
 
 function isMediaRecorderSupported(): boolean {
   if (typeof window === 'undefined') return false
-  return !!(navigator.mediaDevices?.getUserMedia && window.MediaRecorder)
+  return !!(navigator.mediaDevices && window.MediaRecorder)
 }
 
 export function useSpeechScore(expected: string): UseSpeechScoreReturn {
