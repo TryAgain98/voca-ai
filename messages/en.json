@@ -218,7 +218,25 @@
     "deleteConfirmTitle": "Delete this session?",
     "deleteConfirmDesc": "This action cannot be undone.",
     "deleteConfirmOk": "Delete",
-    "deleteConfirmCancel": "Cancel"
+    "deleteConfirmCancel": "Cancel",
+    "results": {
+      "tier": {
+        "perfect": "Perfect score!",
+        "excellent": "Excellent!",
+        "great": "Great job!",
+        "good": "Good work!",
+        "keep": "Keep going",
+        "practice": "Practice more"
+      },
+      "accuracy": "Accuracy",
+      "time": "Time",
+      "breakdownTitle": "All answers",
+      "filterAll": "All ({count})",
+      "filterMistakes": "Mistakes ({count})",
+      "noMistakes": "Clean run — no mistakes ✨",
+      "expected": "Expected",
+      "yourAnswer": "You typed"
+    }
   },
   "Settings": {
     "title": "Settings",

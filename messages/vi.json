@@ -218,7 +218,25 @@
     "deleteConfirmTitle": "Xóa lần kiểm tra này?",
     "deleteConfirmDesc": "Hành động này không thể hoàn tác.",
     "deleteConfirmOk": "Xóa",
-    "deleteConfirmCancel": "Hủy"
+    "deleteConfirmCancel": "Hủy",
+    "results": {
+      "tier": {
+        "perfect": "Điểm tuyệt đối!",
+        "excellent": "Xuất sắc!",
+        "great": "Tuyệt vời!",
+        "good": "Tốt lắm!",
+        "keep": "Cố lên nào",
+        "practice": "Cần luyện thêm"
+      },
+      "accuracy": "Chính xác",
+      "time": "Thời gian",
+      "breakdownTitle": "Tất cả câu trả lời",
+      "filterAll": "Tất cả ({count})",
+      "filterMistakes": "Sai ({count})",
+      "noMistakes": "Hoàn hảo — không sai câu nào ✨",
+      "expected": "Đáp án",
+      "yourAnswer": "Bạn gõ"
+    }
   },
   "Settings": {
     "title": "Cài đặt",
