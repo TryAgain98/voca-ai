@@ -61,7 +61,7 @@ function computePracticeScore(progress: WordMastery | null): number {
 }
 
 function computeQuizPriority(progress: WordMastery | null, now: Date): number {
-  if (!progress) return -1
+  if (!progress) return 30
   if (progress.is_relearning && progress.due_at) {
     const due = new Date(progress.due_at)
     if (due > now) return -1
