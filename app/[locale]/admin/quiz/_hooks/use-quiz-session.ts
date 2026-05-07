@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 
 import type { QuizExerciseResult, QuizSetup } from '../_types/quiz.types'
 import type {
+  AnswerMeta,
   Exercise,
   ExerciseType,
   ReviewVocab,
@@ -56,7 +57,7 @@ interface UseQuizSessionReturn {
   isComplete: boolean
   startTime: Date
   endTime: Date | null
-  submitAnswer: (isCorrect: boolean, userAnswer?: string) => void
+  submitAnswer: (isCorrect: boolean, meta?: AnswerMeta) => void
 }
 
 export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
@@ -72,11 +73,16 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
   const currentExercise = queue[currentIndex] ?? null
 
   const submitAnswer = useCallback(
-    (isCorrect: boolean, userAnswer?: string) => {
+    (isCorrect: boolean, meta?: AnswerMeta) => {
       if (!currentExercise) return
       setResults((prev) => [
         ...prev,
-        { exercise: currentExercise, isCorrect, userAnswer },
+        {
+          exercise: currentExercise,
+          isCorrect,
+          userAnswer: meta?.userAnswer,
+          responseMs: meta?.responseMs,
+        },
       ])
       const nextIndex = currentIndex + 1
       setCurrentIndex(nextIndex)

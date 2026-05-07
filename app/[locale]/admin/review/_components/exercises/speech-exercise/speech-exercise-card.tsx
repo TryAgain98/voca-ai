@@ -17,7 +17,7 @@ import { SpeakButton } from './_components/speak-button'
 import { VocabCard } from './_components/vocab-card'
 import { useSpeechAttempts } from './_hooks/use-speech-attempts'
 
-import type { SpeakExercise } from '../../../_types/review.types'
+import type { AnswerHandler, SpeakExercise } from '../../../_types/review.types'
 import type { ExerciseMode } from '../mcq-exercise'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
@@ -25,7 +25,7 @@ const QUIZ_ADVANCE_DELAY_MS = 350
 
 interface SpeechExerciseCardProps {
   exercise: SpeakExercise
-  onAnswer: (isCorrect: boolean) => void
+  onAnswer: AnswerHandler
   mode?: ExerciseMode
 }
 
@@ -44,6 +44,7 @@ export function SpeechExerciseCard({
   const isTTSActive = isSpeaking || isLoading
   const autoRecordRef = useRef(true)
   const ttsWasActiveRef = useRef(false)
+  const startedAtRef = useRef<number>(0)
 
   useEffect(() => {
     if (isTTSActive) {
@@ -58,6 +59,7 @@ export function SpeechExerciseCard({
   }, [isTTSActive, start])
 
   useEffect(() => {
+    startedAtRef.current = Date.now()
     const timer = setTimeout(speak, 400)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,16 +70,20 @@ export function SpeechExerciseCard({
 
   useEffect(() => {
     if (status !== 'done' || !diff) return
+    const responseMs = Date.now() - startedAtRef.current
     if (isQuiz) {
       const timer = setTimeout(
-        () => onAnswer(diff.isExact),
+        () => onAnswer(diff.isExact, { responseMs }),
         QUIZ_ADVANCE_DELAY_MS,
       )
       return () => clearTimeout(timer)
     }
     if (diff.isExact) {
       playCorrectSound()
-      const timer = setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
+      const timer = setTimeout(
+        () => onAnswer(true, { responseMs }),
+        CORRECT_ADVANCE_DELAY_MS,
+      )
       return () => clearTimeout(timer)
     }
     playWrongSound()

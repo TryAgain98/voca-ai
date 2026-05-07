@@ -39,6 +39,14 @@ export interface WordReviewProgress {
   test_wrong_count: number
   last_test_at: string | null
   next_test_due_at: string | null
+  ease_factor: number
+  stability: number
+  difficulty: number
+  lapse_count: number
+  is_relearning: boolean
+  relearning_step: number
+  last_grade: number | null
+  last_response_ms: number | null
   created_at: string
   updated_at: string
 }

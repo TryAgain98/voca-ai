@@ -8,6 +8,7 @@ import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
 import { useDashboardStats } from '~/hooks/use-word-review-progress'
 
 import { MasteryCard } from './_components/mastery-card'
+import { MemoryStrengthCard } from './_components/memory-strength-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
 import { TestPerformanceCard } from './_components/test-performance-card'
 import { TrickyWordsCard } from './_components/tricky-words-card'
@@ -54,17 +55,27 @@ export default function DashboardPage() {
         dueTodayWords={stats?.dueTodayWords ?? []}
         unlearnedCount={stats?.unlearnedCount ?? 0}
         unlearnedWords={stats?.unlearnedWords ?? []}
+        relearningCount={stats?.relearningCount ?? 0}
+        relearningWords={stats?.relearningWords ?? []}
         masteredCount={stats?.masteredCount ?? 0}
         totalWords={stats?.totalWords ?? 0}
         isLoading={isLoading}
       />
 
-      <MasteryCard
-        totalWords={stats?.totalWords ?? 0}
-        masteredCount={stats?.masteredCount ?? 0}
-        practicingCount={stats?.practicingCount ?? 0}
-        isLoading={isLoading}
-      />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <MasteryCard
+          totalWords={stats?.totalWords ?? 0}
+          masteredCount={stats?.masteredCount ?? 0}
+          practicingCount={stats?.practicingCount ?? 0}
+          isLoading={isLoading}
+        />
+        <MemoryStrengthCard
+          averageRetention={stats?.averageRetention ?? 1}
+          fadingCount={stats?.fadingCount ?? 0}
+          relearningCount={stats?.relearningCount ?? 0}
+          isLoading={isLoading}
+        />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TestPerformanceCard

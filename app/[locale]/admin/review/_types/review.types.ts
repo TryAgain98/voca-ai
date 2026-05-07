@@ -35,9 +35,17 @@ export interface SpeakExercise {
 
 export type Exercise = MCQExercise | TypingExercise | SpeakExercise
 
+export interface AnswerMeta {
+  userAnswer?: string
+  responseMs?: number
+}
+
+export type AnswerHandler = (isCorrect: boolean, meta?: AnswerMeta) => void
+
 export interface ExerciseResult {
   exercise: Exercise
   isCorrect: boolean
+  responseMs?: number
 }
 
 export interface ReviewSetup {

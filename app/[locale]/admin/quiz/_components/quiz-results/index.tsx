@@ -87,6 +87,7 @@ export function QuizResults({
       results: results.map((r) => ({
         wordId: r.exercise.vocab.id,
         isCorrect: r.isCorrect,
+        responseMs: r.responseMs,
       })),
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps

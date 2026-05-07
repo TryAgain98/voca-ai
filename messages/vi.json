@@ -102,12 +102,14 @@
     "notEnoughTestable": "Cần ít nhất {min} từ đến hạn kiểm tra",
     "hero": {
       "badge": {
+        "relearn": "Đang trượt nhanh",
         "test": "Cần hành động",
         "review": "Đến hạn ôn",
         "learn": "Khám phá",
         "celebrate": "Đang đúng tiến độ"
       },
       "title": {
+        "relearn": "Cứu {count} từ vừa quên",
         "test": "Kiểm tra {count} từ hôm nay",
         "review": "Ôn {count} từ hôm nay",
         "learn": "Học {count} từ mới hôm nay",
@@ -117,17 +119,34 @@
       "dailyPlanTitle": "Kế hoạch hôm nay",
       "dailyPlanHint": "Ôn để khơi lại trí nhớ — rồi kiểm tra xem nhớ thật hay không.",
       "subtitle": {
+        "relearn": "Những từ này vừa trượt khỏi mức thuộc — kiểm tra lại ngay để chặn đứng việc quên.",
         "test": "Ôn không đồng nghĩa với nhớ. Một bài kiểm tra ngắn xác nhận thật sự bạn còn nhớ gì — và chỉ ra những gì đang dần quên.",
         "review": "Ôn nhanh để giữ trí nhớ trước khi đường cong quên đuổi kịp.",
         "learn": "Bắt đầu với vài từ mới hôm nay. Đều đặn quan trọng hơn nhồi nhét.",
         "celebrate": "Hiện không có gì gấp. Thử một bài kiểm tra ngẫu nhiên để giữ phong độ."
       },
       "cta": {
+        "relearn": "Kiểm tra lại {count} từ",
         "test": "Kiểm tra ngay {count} từ",
         "review": "Ôn ngay {count} từ",
         "learn": "Bắt đầu với {count} từ",
         "celebrate": "Test ngẫu nhiên"
       }
+    },
+    "memoryStrength": {
+      "title": "Độ bền trí nhớ",
+      "tier": {
+        "strong": "Nhớ chắc",
+        "fading": "Đang phai dần",
+        "risk": "Sắp quên"
+      },
+      "hint": {
+        "strong": "Khả năng nhớ được dự đoán cao — giữ nhịp như hiện tại.",
+        "fading": "Vài từ đang trôi đi — nên kiểm tra sớm để khoá lại.",
+        "risk": "Đường cong quên đang thắng — sắp xếp một buổi tập trung."
+      },
+      "relearningBadge": "{count, plural, =1 {1 từ vừa trượt} other {# từ vừa trượt}}",
+      "fadingBadge": "{count, plural, =1 {1 từ đang phai} other {# từ đang phai}}"
     }
   },
   "DashboardWords": {

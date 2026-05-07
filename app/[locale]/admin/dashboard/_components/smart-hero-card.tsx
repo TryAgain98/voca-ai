@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import {
+  AlertCircle,
   ArrowRight,
   BookOpen,
   Sparkles,
@@ -22,7 +23,7 @@ import type { ReviewVocab } from '~admin/review/_types/review.types'
 const HERO_BATCH_LIMIT = 20
 const MIN_BATCH = 1
 
-type Track = 'test' | 'review' | 'learn' | 'celebrate'
+type Track = 'relearn' | 'test' | 'review' | 'learn' | 'celebrate'
 
 interface SmartHeroCardProps {
   needsTestingCount: number
@@ -31,6 +32,8 @@ interface SmartHeroCardProps {
   dueTodayWords: ReviewWord[]
   unlearnedCount: number
   unlearnedWords: ReviewWord[]
+  relearningCount: number
+  relearningWords: ReviewWord[]
   masteredCount: number
   totalWords: number
   isLoading: boolean
@@ -46,6 +49,14 @@ interface PhaseConfig {
 }
 
 const PHASE_CONFIG: Record<Track, PhaseConfig> = {
+  relearn: {
+    track: 'relearn',
+    icon: AlertCircle,
+    accent: 'text-rose-500',
+    glow: 'bg-rose-500/15',
+    iconAnim: 'pulse',
+    ctaClass: 'bg-rose-500 hover:bg-rose-600 text-white',
+  },
   review: {
     track: 'review',
     icon: BookOpen,
@@ -235,10 +246,17 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     )
   }
 
+  const hasRelearn = props.relearningCount >= MIN_BATCH
   const hasReview = props.dueTodayCount >= MIN_BATCH
   const hasTest = props.needsTestingCount >= MIN_BATCH
   const hasLearn = props.unlearnedCount >= MIN_BATCH
 
+  const handleRelearn = () => {
+    setPendingQuiz(
+      props.relearningWords.slice(0, HERO_BATCH_LIMIT).map(toReviewVocab),
+    )
+    router.push(`/${locale}/admin/quiz`)
+  }
   const handleReview = () => {
     setPendingReview(
       props.dueTodayWords.slice(0, HERO_BATCH_LIMIT).map(toReviewVocab),
@@ -258,6 +276,33 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     router.push(`/${locale}/admin/review`)
   }
   const handleCelebrate = () => router.push(`/${locale}/admin/quiz`)
+
+  // Relearn always wins — these words just slipped, don't let them rot
+  if (hasRelearn) {
+    const batch = Math.min(props.relearningCount, HERO_BATCH_LIMIT)
+    const cfg = PHASE_CONFIG.relearn
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-rose-500/5 p-7"
+      >
+        <motion.div
+          className={`pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full blur-3xl ${cfg.glow}`}
+          animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0.95, 0.6] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
+        <Phase
+          track="relearn"
+          total={props.relearningCount}
+          batch={batch}
+          onCta={handleRelearn}
+          size="large"
+        />
+      </motion.div>
+    )
+  }
 
   // Dual track: surface BOTH review and test so user can prep then verify
   if (hasReview && hasTest) {

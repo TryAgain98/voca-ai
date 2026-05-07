@@ -14,12 +14,16 @@ import { TypingExerciseCard } from './exercises/typing-exercise'
 import { ExitConfirmDialog } from './exit-confirm-dialog'
 import { ReviewResults } from './review-results'
 
-import type { Exercise, ReviewSetup } from '../_types/review.types'
+import type {
+  AnswerHandler,
+  Exercise,
+  ReviewSetup,
+} from '../_types/review.types'
 
 function renderExercise(
   exercise: Exercise,
   index: number,
-  onAnswer: (ok: boolean) => void,
+  onAnswer: AnswerHandler,
 ) {
   switch (exercise.type) {
     case 'word-to-meaning':
@@ -70,8 +74,8 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
 
   const { mutate: persistAnswer } = useSubmitAnswer()
 
-  const handleAnswer = useCallback(
-    (isCorrect: boolean) => {
+  const handleAnswer = useCallback<AnswerHandler>(
+    (isCorrect) => {
       if (!currentExercise) return
       if (!currentExercise.isReinforcement) {
         persistAnswer({

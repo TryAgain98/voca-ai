@@ -15,12 +15,16 @@ import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 import { ExerciseFeedback } from './exercise-feedback'
 
 import type { ExerciseMode } from './mcq-exercise'
-import type { TypingExercise } from '../../_types/review.types'
+import type { AnswerHandler, TypingExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
 const QUIZ_ADVANCE_DELAY_MS = 280
 const HINT_MAX_REVEAL_RATIO = 0.4
 const HINT_MAX_LEVELS = 3
+
+function elapsedSince(start: number): number {
+  return Date.now() - start
+}
 
 function seedFromWord(word: string): number {
   let seed = 0
@@ -50,7 +54,7 @@ function buildHintFromRevealedSet(word: string, revealed: Set<number>): string {
 
 interface TypingExerciseCardProps {
   exercise: TypingExercise
-  onAnswer: (isCorrect: boolean, userAnswer?: string) => void
+  onAnswer: AnswerHandler
   mode?: ExerciseMode
 }
 
@@ -65,12 +69,14 @@ export function TypingExerciseCard({
   const [isCorrect, setIsCorrect] = useState(false)
   const [hintLevel, setHintLevel] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const startedAtRef = useRef<number>(0)
   const { speak } = useTTS(exercise.vocab.word)
   const isListenMode = exercise.type === 'listen-to-word'
   const accentColor = isListenMode ? 'amber' : 'sky'
   const isQuiz = mode === 'quiz'
 
   useEffect(() => {
+    startedAtRef.current = Date.now()
     inputRef.current?.focus()
   }, [])
 
@@ -88,13 +94,21 @@ export function TypingExerciseCard({
       value.trim().toLowerCase() === exercise.vocab.word.toLowerCase()
     setIsCorrect(correct)
     setSubmitted(true)
+    const responseMs = elapsedSince(startedAtRef.current)
     if (isQuiz) {
-      setTimeout(() => onAnswer(correct, value.trim()), QUIZ_ADVANCE_DELAY_MS)
+      setTimeout(
+        () =>
+          onAnswer(correct, {
+            userAnswer: value.trim(),
+            responseMs,
+          }),
+        QUIZ_ADVANCE_DELAY_MS,
+      )
       return
     }
     if (correct) {
       playCorrectSound()
-      setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
+      setTimeout(() => onAnswer(true, { responseMs }), CORRECT_ADVANCE_DELAY_MS)
     } else {
       playWrongSound()
     }
@@ -199,7 +213,12 @@ export function TypingExerciseCard({
           <ExerciseFeedback
             show={submitted}
             isCorrect={isCorrect}
-            onContinue={() => onAnswer(false, value.trim())}
+            onContinue={() =>
+              onAnswer(false, {
+                userAnswer: value.trim(),
+                responseMs: elapsedSince(startedAtRef.current),
+              })
+            }
             correctAnswer={exercise.vocab.word}
           />
         )}

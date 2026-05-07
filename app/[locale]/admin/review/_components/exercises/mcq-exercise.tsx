@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
@@ -10,16 +10,20 @@ import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 
 import { ExerciseFeedback } from './exercise-feedback'
 
-import type { MCQExercise } from '../../_types/review.types'
+import type { AnswerHandler, MCQExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
 const QUIZ_ADVANCE_DELAY_MS = 280
 
 export type ExerciseMode = 'review' | 'quiz'
 
+function elapsedSince(start: number): number {
+  return Date.now() - start
+}
+
 interface MCQExerciseCardProps {
   exercise: MCQExercise
-  onAnswer: (isCorrect: boolean, userAnswer?: string) => void
+  onAnswer: AnswerHandler
   mode?: ExerciseMode
 }
 
@@ -32,8 +36,10 @@ export function MCQExerciseCard({
   const [selected, setSelected] = useState<number | null>(null)
   const { speak } = useTTS(exercise.vocab.word)
   const isQuiz = mode === 'quiz'
+  const startedAtRef = useRef<number>(0)
 
   useEffect(() => {
+    startedAtRef.current = Date.now()
     const timer = setTimeout(() => speak(), 400)
     return () => clearTimeout(timer)
     // speak is stable within TTS module lifecycle
@@ -46,16 +52,21 @@ export function MCQExerciseCard({
     if (selected !== null) return
     setSelected(idx)
     const correct = idx === exercise.correctIndex
+    const responseMs = elapsedSince(startedAtRef.current)
     if (isQuiz) {
       setTimeout(
-        () => onAnswer(correct, exercise.options[idx]),
+        () =>
+          onAnswer(correct, {
+            userAnswer: exercise.options[idx],
+            responseMs,
+          }),
         QUIZ_ADVANCE_DELAY_MS,
       )
       return
     }
     if (correct) {
       playCorrectSound()
-      setTimeout(() => onAnswer(true), CORRECT_ADVANCE_DELAY_MS)
+      setTimeout(() => onAnswer(true, { responseMs }), CORRECT_ADVANCE_DELAY_MS)
     } else {
       playWrongSound()
     }
@@ -135,10 +146,11 @@ export function MCQExerciseCard({
           show={selected !== null}
           isCorrect={isCorrect}
           onContinue={() =>
-            onAnswer(
-              false,
-              selected !== null ? exercise.options[selected] : undefined,
-            )
+            onAnswer(false, {
+              userAnswer:
+                selected !== null ? exercise.options[selected] : undefined,
+              responseMs: elapsedSince(startedAtRef.current),
+            })
           }
         />
       )}

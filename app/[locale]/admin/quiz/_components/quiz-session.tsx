@@ -15,14 +15,14 @@ import { QuestionTimer } from './question-timer'
 import { QuizResults } from './quiz-results'
 
 import type { QuizSetup } from '../_types/quiz.types'
-import type { Exercise } from '~admin/review/_types/review.types'
+import type { AnswerHandler, Exercise } from '~admin/review/_types/review.types'
 
 const QUIZ_PER_QUESTION_MS = 20000
 
 function renderExercise(
   exercise: Exercise,
   index: number,
-  onAnswer: (isCorrect: boolean, userAnswer?: string) => void,
+  onAnswer: AnswerHandler,
 ) {
   switch (exercise.type) {
     case 'word-to-meaning':
@@ -74,15 +74,15 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
     submitAnswer,
   } = useQuizSession(setup)
 
-  const handleAnswer = useCallback(
-    (isCorrect: boolean, userAnswer?: string) => {
-      submitAnswer(isCorrect, userAnswer)
+  const handleAnswer = useCallback<AnswerHandler>(
+    (isCorrect, meta) => {
+      submitAnswer(isCorrect, meta)
     },
     [submitAnswer],
   )
 
   const handleTimeout = useCallback(() => {
-    submitAnswer(false)
+    submitAnswer(false, { responseMs: QUIZ_PER_QUESTION_MS })
   }, [submitAnswer])
 
   if (isComplete && endTime) {

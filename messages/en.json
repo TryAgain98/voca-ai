@@ -102,12 +102,14 @@
     "notEnoughTestable": "Need at least {min} words due for testing",
     "hero": {
       "badge": {
+        "relearn": "Slipping fast",
         "test": "Action needed",
         "review": "Due today",
         "learn": "Discover",
         "celebrate": "On track"
       },
       "title": {
+        "relearn": "Lock in {count} fading words",
         "test": "Test {count} words today",
         "review": "Review {count} words today",
         "learn": "Learn {count} new words today",
@@ -117,17 +119,34 @@
       "dailyPlanTitle": "Today's plan",
       "dailyPlanHint": "Review primes recall — then test confirms what stuck.",
       "subtitle": {
+        "relearn": "These mastered words just slipped — a quick re-test now stops the leak before they're lost.",
         "test": "Reviewing isn't the same as remembering. A quick test confirms what's truly stored — and reveals what's slipping.",
         "review": "Quick review keeps these words sharp before the forgetting curve catches up.",
         "learn": "Start with a few new words today. Small, consistent steps beat cramming.",
         "celebrate": "No urgent reviews or tests right now. Take a random retest to keep mastery fresh."
       },
       "cta": {
+        "relearn": "Re-test {count} now",
         "test": "Test {count} now",
         "review": "Review {count} now",
         "learn": "Start with {count}",
         "celebrate": "Take a random test"
       }
+    },
+    "memoryStrength": {
+      "title": "Memory Strength",
+      "tier": {
+        "strong": "Strong recall",
+        "fading": "Slowly fading",
+        "risk": "At risk"
+      },
+      "hint": {
+        "strong": "Predicted recall is high — keep the cadence steady.",
+        "fading": "A few words are drifting — re-test soon to lock them in.",
+        "risk": "Forgetting curve is winning — schedule a focused session."
+      },
+      "relearningBadge": "{count, plural, =1 {1 lapsed} other {# lapsed}}",
+      "fadingBadge": "{count, plural, =1 {1 fading} other {# fading}}"
     }
   },
   "DashboardWords": {

@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
+import { SpeakButton } from '~/components/layout/speak-button'
 import { cn } from '~/lib/cn'
 
 import type { QuizExerciseResult } from '../../_types/quiz.types'
@@ -150,10 +151,14 @@ function AnswerRow({ result, index }: AnswerRowProps) {
         />
       )}
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           <span className="text-foreground text-sm font-[590]">
             {result.exercise.vocab.word}
           </span>
+          <SpeakButton
+            text={result.exercise.vocab.word}
+            className="-my-1 size-6"
+          />
           <span className="text-muted-foreground text-xs">
             — {result.exercise.vocab.meaning}
           </span>
