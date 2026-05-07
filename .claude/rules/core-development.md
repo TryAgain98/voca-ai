@@ -46,4 +46,5 @@
 - **Rules**: 1 schema change = 1 new migration. **Never edit pushed migrations.**
 - **Naming**: Descriptive snake_case (e.g., `create_lessons_table`).
 - **Commands**: `db:new`, `db:push`, `db:pull`, `db:status`.
-- **SQL**: Always enable **RLS** on new tables
+- **SQL**: Always enable **RLS** on new tables.
+- **Apply Immediately**: After creating ANY migration file under `supabase/migrations/`, **always** run `npm run db:push` in the same task before reporting work as done. Never leave a migration file uncommitted to the remote DB — it leaves the schema and code out of sync. Verify with `npm run db:status` after push.
