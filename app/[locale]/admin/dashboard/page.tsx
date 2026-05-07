@@ -5,11 +5,13 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
+import { useStreak } from '~/hooks/use-streak'
 import { useDashboardStats } from '~/hooks/use-word-mastery'
 
 import { MasteryCard } from './_components/mastery-card'
 import { MemoryStrengthCard } from './_components/memory-strength-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
+import { StreakCard } from './_components/streak-card'
 import { TestPerformanceCard } from './_components/test-performance-card'
 import { TrickyWordsCard } from './_components/tricky-words-card'
 
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   const userId = user?.id ?? ''
   const { data: stats, isLoading } = useDashboardStats(userId)
   const { data: perf, isLoading: isPerfLoading } = useQuizPerformance(userId)
+  const { data: streak, isLoading: isStreakLoading } = useStreak(userId)
 
   const greeting = getGreeting()
   const firstName = user?.firstName ?? user?.username ?? ''
@@ -47,6 +50,8 @@ export default function DashboardPage() {
           {t('greetingSubtitle')}
         </p>
       </motion.div>
+
+      <StreakCard streak={streak} isLoading={isStreakLoading} />
 
       <SmartHeroCard
         needsTestingCount={stats?.needsTestingCount ?? 0}

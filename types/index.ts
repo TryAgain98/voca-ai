@@ -73,3 +73,26 @@ export interface QuizSession {
 }
 
 export type QuizSessionInsert = Omit<QuizSession, 'id' | 'created_at'>
+
+export interface UserStreak {
+  user_id: string
+  current_streak: number
+  longest_streak: number
+  last_active_date: string | null
+  freezes_remaining: number
+  freezes_replenished_at: string
+  email: string | null
+  timezone: string
+  reminder_hour: number
+  email_reminders_enabled: boolean
+  last_reminder_sent_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface StreakReminderPrefs {
+  email_reminders_enabled: boolean
+  email: string
+  timezone: string
+  reminder_hour: number
+}

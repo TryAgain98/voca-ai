@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { Button } from '~/components/ui/button'
 import { useSaveQuizSession } from '~/hooks/use-quiz-sessions'
+import { useRecordStreakActivity } from '~/hooks/use-streak'
 import { useApplyQuizMastery } from '~/hooks/use-word-mastery'
 
 import { AnswersBreakdown } from './answers-breakdown'
@@ -45,6 +46,7 @@ export function QuizResults({
   const t = useTranslations('Quiz')
   const { mutate: saveSession } = useSaveQuizSession()
   const { mutate: applyMastery } = useApplyQuizMastery()
+  const { mutate: recordStreak } = useRecordStreakActivity()
   const savedRef = useRef(false)
 
   const correctCount = results.filter((r) => r.isCorrect).length
@@ -90,6 +92,8 @@ export function QuizResults({
         responseMs: r.responseMs,
       })),
     })
+
+    recordStreak(setup.userId)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
