@@ -10,7 +10,7 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useLessons } from '~/hooks/use-lessons'
-import { useReviewWords } from '~/hooks/use-word-review-progress'
+import { useReviewWords } from '~/hooks/use-word-mastery'
 
 import type {
   ExerciseType,

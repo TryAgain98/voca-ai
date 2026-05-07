@@ -25,20 +25,15 @@ export interface Vocabulary {
   deleted_at: string | null
 }
 
-export interface WordReviewProgress {
+export interface WordMastery {
   id: string
   user_id: string
   word_id: string
   level: number
   correct_count: number
   wrong_count: number
-  last_review_at: string | null
-  next_review_at: string
-  mastery_level: number
-  test_correct_count: number
-  test_wrong_count: number
-  last_test_at: string | null
-  next_test_due_at: string | null
+  tested_at: string | null
+  due_at: string | null
   ease_factor: number
   stability: number
   difficulty: number
@@ -52,7 +47,7 @@ export interface WordReviewProgress {
 }
 
 export interface ReviewWord extends Vocabulary {
-  progress: WordReviewProgress | null
+  progress: WordMastery | null
   score: number
 }
 

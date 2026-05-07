@@ -11,7 +11,7 @@ import { Checkbox } from '~/components/ui/checkbox'
 import { Label } from '~/components/ui/label'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useLessons } from '~/hooks/use-lessons'
-import { useQuizCandidates } from '~/hooks/use-word-review-progress'
+import { useQuizCandidates } from '~/hooks/use-word-mastery'
 
 import type { ExerciseType, QuizSetup } from '../_types/quiz.types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'

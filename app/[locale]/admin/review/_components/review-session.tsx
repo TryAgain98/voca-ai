@@ -4,8 +4,6 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useSubmitAnswer } from '~/hooks/use-word-review-progress'
-
 import { useReviewSession } from '../_hooks/use-review-session'
 
 import { MCQExerciseCard } from './exercises/mcq-exercise'
@@ -72,21 +70,12 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
     submitAnswer,
   } = useReviewSession(setup)
 
-  const { mutate: persistAnswer } = useSubmitAnswer()
-
   const handleAnswer = useCallback<AnswerHandler>(
     (isCorrect) => {
       if (!currentExercise) return
-      if (!currentExercise.isReinforcement) {
-        persistAnswer({
-          userId: setup.userId,
-          wordId: currentExercise.vocab.id,
-          isCorrect,
-        })
-      }
       submitAnswer(isCorrect)
     },
-    [currentExercise, persistAnswer, setup.userId, submitAnswer],
+    [currentExercise, submitAnswer],
   )
 
   useEffect(() => {

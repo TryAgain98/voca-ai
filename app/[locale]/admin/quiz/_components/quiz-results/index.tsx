@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 
 import { Button } from '~/components/ui/button'
 import { useSaveQuizSession } from '~/hooks/use-quiz-sessions'
-import { useApplyQuizMastery } from '~/hooks/use-word-review-progress'
+import { useApplyQuizMastery } from '~/hooks/use-word-mastery'
 
 import { AnswersBreakdown } from './answers-breakdown'
 import { ConfettiBurst } from './confetti-burst'

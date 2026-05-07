@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
-import { useDashboardStats } from '~/hooks/use-word-review-progress'
+import { useDashboardStats } from '~/hooks/use-word-mastery'
 
 import { MasteryCard } from './_components/mastery-card'
 import { MemoryStrengthCard } from './_components/memory-strength-card'
@@ -51,8 +51,6 @@ export default function DashboardPage() {
       <SmartHeroCard
         needsTestingCount={stats?.needsTestingCount ?? 0}
         needsTestingWords={stats?.needsTestingWords ?? []}
-        dueTodayCount={stats?.dueTodayCount ?? 0}
-        dueTodayWords={stats?.dueTodayWords ?? []}
         unlearnedCount={stats?.unlearnedCount ?? 0}
         unlearnedWords={stats?.unlearnedWords ?? []}
         relearningCount={stats?.relearningCount ?? 0}

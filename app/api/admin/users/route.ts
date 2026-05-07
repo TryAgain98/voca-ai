@@ -12,7 +12,7 @@ export interface AdminUser {
   imageUrl: string
   username: string | null
   learnedCount: number
-  dueTodayCount: number
+  dueCount: number
   quizCount: number
   totalWords: number
   score: number
@@ -23,13 +23,13 @@ export interface AdminUser {
 
 function calculateScore(
   learnedCount: number,
-  dueTodayCount: number,
+  dueCount: number,
   totalWords: number,
 ): number {
   if (totalWords === 0) return 0
   const completionScore = (learnedCount / totalWords) * 60
   const disciplineScore =
-    Math.max(0, 1 - dueTodayCount / Math.max(learnedCount, 1)) * 40
+    Math.max(0, 1 - dueCount / Math.max(learnedCount, 1)) * 40
   return Math.round(completionScore + disciplineScore)
 }
 
@@ -39,7 +39,7 @@ export async function GET(): Promise<NextResponse> {
     const { data: clerkUsers } = await clerk.users.getUserList({ limit: 500 })
 
     const [progressResult, vocabResult, quizResult] = await Promise.all([
-      supabase.from('word_review_progress').select('user_id, next_review_at'),
+      supabase.from('word_mastery').select('user_id, due_at'),
       supabase
         .from('vocabularies')
         .select('id', { count: 'exact', head: true }),
@@ -51,15 +51,15 @@ export async function GET(): Promise<NextResponse> {
 
     const progressMap = new Map<
       string,
-      { learnedCount: number; dueTodayCount: number }
+      { learnedCount: number; dueCount: number }
     >()
     for (const row of progressResult.data ?? []) {
       const existing = progressMap.get(row.user_id) ?? {
         learnedCount: 0,
-        dueTodayCount: 0,
+        dueCount: 0,
       }
       existing.learnedCount++
-      if (new Date(row.next_review_at) <= now) existing.dueTodayCount++
+      if (row.due_at && new Date(row.due_at) <= now) existing.dueCount++
       progressMap.set(row.user_id, existing)
     }
 
@@ -71,7 +71,7 @@ export async function GET(): Promise<NextResponse> {
     const unsorted = clerkUsers.map((u) => {
       const stats = progressMap.get(u.id) ?? {
         learnedCount: 0,
-        dueTodayCount: 0,
+        dueCount: 0,
       }
       return {
         id: u.id,
@@ -82,14 +82,10 @@ export async function GET(): Promise<NextResponse> {
         imageUrl: u.imageUrl,
         username: u.username,
         learnedCount: stats.learnedCount,
-        dueTodayCount: stats.dueTodayCount,
+        dueCount: stats.dueCount,
         quizCount: quizMap.get(u.id) ?? 0,
         totalWords,
-        score: calculateScore(
-          stats.learnedCount,
-          stats.dueTodayCount,
-          totalWords,
-        ),
+        score: calculateScore(stats.learnedCount, stats.dueCount, totalWords),
         createdAt: u.createdAt,
         lastActiveAt: u.lastActiveAt,
       }

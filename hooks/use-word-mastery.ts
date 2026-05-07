@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { wordReviewProgressService } from '~/services/word-review-progress.service'
+import { wordMasteryService } from '~/services/word-mastery.service'
 
-import type { QuizWordResult } from '~/services/word-review-progress.service'
+import type { QuizWordResult } from '~/services/word-mastery.service'
 
-export { type DashboardStats } from '~/services/word-review-progress.service'
+export { type DashboardStats } from '~/services/word-mastery.service'
 
-const QUERY_KEY = 'word-review-progress'
+const QUERY_KEY = 'word-mastery'
 
 interface UseReviewWordsParams {
   userId: string
@@ -23,8 +23,7 @@ export function useReviewWords({
 }: UseReviewWordsParams) {
   return useQuery({
     queryKey: [QUERY_KEY, 'words', userId, lessonIds, limit],
-    queryFn: () =>
-      wordReviewProgressService.getReviewWords(userId, lessonIds, limit),
+    queryFn: () => wordMasteryService.getReviewWords(userId, lessonIds, limit),
     enabled: enabled && !!userId && lessonIds.length > 0,
   })
 }
@@ -32,7 +31,7 @@ export function useReviewWords({
 export function useDashboardStats(userId: string) {
   return useQuery({
     queryKey: [QUERY_KEY, 'dashboard', userId],
-    queryFn: () => wordReviewProgressService.getDashboardStats(userId),
+    queryFn: () => wordMasteryService.getDashboardStats(userId),
     enabled: !!userId,
   })
 }
@@ -53,26 +52,8 @@ export function useQuizCandidates({
   return useQuery({
     queryKey: [QUERY_KEY, 'quiz-candidates', userId, lessonIds, limit],
     queryFn: () =>
-      wordReviewProgressService.getQuizCandidates(userId, lessonIds, limit),
+      wordMasteryService.getQuizCandidates(userId, lessonIds, limit),
     enabled: enabled && !!userId,
-  })
-}
-
-interface SubmitAnswerParams {
-  userId: string
-  wordId: string
-  isCorrect: boolean
-}
-
-export function useSubmitAnswer() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ userId, wordId, isCorrect }: SubmitAnswerParams) =>
-      wordReviewProgressService.upsertAfterAnswer(userId, wordId, isCorrect),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
-    },
   })
 }
 
@@ -86,7 +67,7 @@ export function useApplyQuizMastery() {
 
   return useMutation({
     mutationFn: ({ userId, results }: ApplyMasteryParams) =>
-      wordReviewProgressService.applyQuizMastery(userId, results),
+      wordMasteryService.applyQuizMastery(userId, results),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },

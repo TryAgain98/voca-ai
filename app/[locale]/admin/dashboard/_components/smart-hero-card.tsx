@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import {
   AlertCircle,
   ArrowRight,
-  BookOpen,
   Sparkles,
   Stethoscope,
   Wand2,
@@ -23,13 +22,11 @@ import type { ReviewVocab } from '~admin/review/_types/review.types'
 const HERO_BATCH_LIMIT = 20
 const MIN_BATCH = 1
 
-type Track = 'relearn' | 'test' | 'review' | 'learn' | 'celebrate'
+type Track = 'relearn' | 'test' | 'learn' | 'celebrate'
 
 interface SmartHeroCardProps {
   needsTestingCount: number
   needsTestingWords: ReviewWord[]
-  dueTodayCount: number
-  dueTodayWords: ReviewWord[]
   unlearnedCount: number
   unlearnedWords: ReviewWord[]
   relearningCount: number
@@ -56,14 +53,6 @@ const PHASE_CONFIG: Record<Track, PhaseConfig> = {
     glow: 'bg-rose-500/15',
     iconAnim: 'pulse',
     ctaClass: 'bg-rose-500 hover:bg-rose-600 text-white',
-  },
-  review: {
-    track: 'review',
-    icon: BookOpen,
-    accent: 'text-primary',
-    glow: 'bg-primary/15',
-    iconAnim: 'wiggle',
-    ctaClass: '',
   },
   test: {
     track: 'test',
@@ -113,24 +102,16 @@ interface PhaseProps {
   total: number
   batch: number
   onCta: () => void
-  size: 'large' | 'compact'
 }
 
-function Phase({ track, total, batch, onCta, size }: PhaseProps) {
+function Phase({ track, total, batch, onCta }: PhaseProps) {
   const t = useTranslations('Dashboard.hero')
   const cfg = PHASE_CONFIG[track]
   const Icon = cfg.icon
   const queued = Math.max(0, total - batch)
-  const isCompact = size === 'compact'
 
   return (
-    <div
-      className={
-        isCompact
-          ? 'relative flex items-center justify-between gap-4 py-4'
-          : 'relative flex items-start justify-between gap-6'
-      }
-    >
+    <div className="relative flex items-start justify-between gap-6">
       <div className="min-w-0 flex-1">
         <motion.span
           initial={{ opacity: 0, x: -8 }}
@@ -160,13 +141,7 @@ function Phase({ track, total, batch, onCta, size }: PhaseProps) {
           transition={{ delay: 0.1 }}
           className="mt-2.5 flex flex-wrap items-baseline gap-x-3 gap-y-1"
         >
-          <h2
-            className={
-              isCompact
-                ? 'text-foreground text-xl leading-tight font-[590] tracking-[-0.5px]'
-                : 'text-foreground text-2xl leading-tight font-[590] tracking-[-0.5px] sm:text-3xl'
-            }
-          >
+          <h2 className="text-foreground text-2xl leading-tight font-[590] tracking-[-0.5px] sm:text-3xl">
             {t(`title.${track}`, { count: batch })}
           </h2>
           {queued > 0 && (
@@ -176,22 +151,20 @@ function Phase({ track, total, batch, onCta, size }: PhaseProps) {
           )}
         </motion.div>
 
-        {!isCompact && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.18 }}
-            className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed"
-          >
-            {t(`subtitle.${track}`)}
-          </motion.p>
-        )}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.18 }}
+          className="text-muted-foreground mt-2 max-w-md text-sm leading-relaxed"
+        >
+          {t(`subtitle.${track}`)}
+        </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.24 }}
-          className={isCompact ? 'mt-3' : 'mt-5'}
+          className="mt-5"
         >
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -199,12 +172,12 @@ function Phase({ track, total, batch, onCta, size }: PhaseProps) {
             className="inline-block"
           >
             <Button
-              size={isCompact ? 'sm' : 'lg'}
+              size="lg"
               onClick={onCta}
-              className={`gap-2 ${isCompact ? 'px-4' : 'px-5'} ${cfg.ctaClass}`}
+              className={`gap-2 px-5 ${cfg.ctaClass}`}
             >
               {t(`cta.${track}`, { count: batch })}
-              <ArrowRight size={isCompact ? 14 : 16} />
+              <ArrowRight size={16} />
             </Button>
           </motion.div>
         </motion.div>
@@ -217,18 +190,15 @@ function Phase({ track, total, batch, onCta, size }: PhaseProps) {
           repeat: Infinity,
           repeatDelay: cfg.iconAnim === 'pulse' ? 0 : 1.8,
         }}
-        className={`flex shrink-0 items-center justify-center rounded-2xl ${cfg.glow} ${cfg.accent} ${
-          isCompact ? 'h-11 w-11' : 'h-14 w-14'
-        }`}
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${cfg.glow} ${cfg.accent}`}
       >
-        <Icon size={isCompact ? 22 : 28} strokeWidth={1.7} />
+        <Icon size={28} strokeWidth={1.7} />
       </motion.div>
     </div>
   )
 }
 
 export function SmartHeroCard(props: SmartHeroCardProps) {
-  const t = useTranslations('Dashboard.hero')
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
@@ -247,7 +217,6 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
   }
 
   const hasRelearn = props.relearningCount >= MIN_BATCH
-  const hasReview = props.dueTodayCount >= MIN_BATCH
   const hasTest = props.needsTestingCount >= MIN_BATCH
   const hasLearn = props.unlearnedCount >= MIN_BATCH
 
@@ -256,12 +225,6 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
       props.relearningWords.slice(0, HERO_BATCH_LIMIT).map(toReviewVocab),
     )
     router.push(`/${locale}/admin/quiz`)
-  }
-  const handleReview = () => {
-    setPendingReview(
-      props.dueTodayWords.slice(0, HERO_BATCH_LIMIT).map(toReviewVocab),
-    )
-    router.push(`/${locale}/admin/review`)
   }
   const handleTest = () => {
     setPendingQuiz(
@@ -277,96 +240,19 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
   }
   const handleCelebrate = () => router.push(`/${locale}/admin/quiz`)
 
-  // Relearn always wins — these words just slipped, don't let them rot
-  if (hasRelearn) {
-    const batch = Math.min(props.relearningCount, HERO_BATCH_LIMIT)
-    const cfg = PHASE_CONFIG.relearn
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="relative overflow-hidden rounded-2xl border border-rose-500/30 bg-rose-500/5 p-7"
-      >
-        <motion.div
-          className={`pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full blur-3xl ${cfg.glow}`}
-          animate={{ scale: [1, 1.18, 1], opacity: [0.6, 0.95, 0.6] }}
-          transition={{ duration: 4, repeat: Infinity }}
-        />
-        <Phase
-          track="relearn"
-          total={props.relearningCount}
-          batch={batch}
-          onCta={handleRelearn}
-          size="large"
-        />
-      </motion.div>
-    )
-  }
-
-  // Dual track: surface BOTH review and test so user can prep then verify
-  if (hasReview && hasTest) {
-    const reviewBatch = Math.min(props.dueTodayCount, HERO_BATCH_LIMIT)
-    const testBatch = Math.min(props.needsTestingCount, HERO_BATCH_LIMIT)
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="border-border bg-card relative overflow-hidden rounded-2xl border px-7 py-5"
-      >
-        <motion.div
-          className="bg-primary/12 pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.85, 0.5] }}
-          transition={{ duration: 4, repeat: Infinity }}
-        />
-        <motion.div
-          className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-orange-500/12 blur-3xl"
-          animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.75, 0.4] }}
-          transition={{ duration: 5, repeat: Infinity, delay: 0.4 }}
-        />
-
-        <div className="relative">
-          <p className="text-muted-foreground text-[10px] font-[590] tracking-widest uppercase">
-            {t('dailyPlanTitle')}
-          </p>
-          <p className="text-muted-foreground/80 mt-0.5 text-xs">
-            {t('dailyPlanHint')}
-          </p>
-        </div>
-
-        <Phase
-          track="review"
-          total={props.dueTodayCount}
-          batch={reviewBatch}
-          onCta={handleReview}
-          size="compact"
-        />
-        <div className="border-border/40 border-t" />
-        <Phase
-          track="test"
-          total={props.needsTestingCount}
-          batch={testBatch}
-          onCta={handleTest}
-          size="compact"
-        />
-      </motion.div>
-    )
-  }
-
-  const track: Track = hasTest
-    ? 'test'
-    : hasReview
-      ? 'review'
+  const track: Track = hasRelearn
+    ? 'relearn'
+    : hasTest
+      ? 'test'
       : hasLearn
         ? 'learn'
         : 'celebrate'
 
   const total =
-    track === 'test'
-      ? props.needsTestingCount
-      : track === 'review'
-        ? props.dueTodayCount
+    track === 'relearn'
+      ? props.relearningCount
+      : track === 'test'
+        ? props.needsTestingCount
         : track === 'learn'
           ? props.unlearnedCount
           : props.masteredCount
@@ -374,22 +260,26 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
   const batch =
     track === 'celebrate' ? total : Math.min(total, HERO_BATCH_LIMIT)
   const onCta =
-    track === 'test'
-      ? handleTest
-      : track === 'review'
-        ? handleReview
+    track === 'relearn'
+      ? handleRelearn
+      : track === 'test'
+        ? handleTest
         : track === 'learn'
           ? handleLearn
           : handleCelebrate
 
   const cfg = PHASE_CONFIG[track]
+  const containerClass =
+    track === 'relearn'
+      ? 'relative overflow-hidden rounded-2xl border border-rose-500/30 bg-rose-500/5 p-7'
+      : 'border-border bg-card relative overflow-hidden rounded-2xl border p-7'
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
-      className="border-border bg-card relative overflow-hidden rounded-2xl border p-7"
+      className={containerClass}
     >
       <motion.div
         className={`pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full blur-3xl ${cfg.glow}`}
@@ -401,13 +291,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
         animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
       />
-      <Phase
-        track={track}
-        total={total}
-        batch={batch}
-        onCta={onCta}
-        size="large"
-      />
+      <Phase track={track} total={total} batch={batch} onCta={onCta} />
     </motion.div>
   )
 }

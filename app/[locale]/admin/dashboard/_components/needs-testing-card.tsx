@@ -34,7 +34,7 @@ function toReviewVocab(word: ReviewWord): ReviewVocab {
 }
 
 function getDaysOverdue(word: ReviewWord, now: Date): number {
-  const dueAt = word.progress?.next_test_due_at
+  const dueAt = word.progress?.due_at
   if (!dueAt) return 0
   const diffMs = now.getTime() - new Date(dueAt).getTime()
   return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)))

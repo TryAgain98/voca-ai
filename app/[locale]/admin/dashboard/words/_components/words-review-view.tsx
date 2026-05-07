@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ArrowRight, Clock, Layers } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Layers } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
@@ -18,10 +18,7 @@ import type { ReviewVocab } from '~admin/review/_types/review.types'
 const ALL = 'all'
 const MIN_REVIEW_WORDS = 1
 
-export type WordsViewType = 'unlearned' | 'due'
-
 interface WordsReviewViewProps {
-  type: WordsViewType
   words: ReviewWord[]
   isLoading: boolean
 }
@@ -37,11 +34,7 @@ function toReviewVocab(word: ReviewWord): ReviewVocab {
   }
 }
 
-export function WordsReviewView({
-  type,
-  words,
-  isLoading,
-}: WordsReviewViewProps) {
+export function WordsReviewView({ words, isLoading }: WordsReviewViewProps) {
   const t = useTranslations('DashboardWords')
   const router = useRouter()
   const params = useParams()
@@ -94,10 +87,10 @@ export function WordsReviewView({
     router.push(`/${locale}/admin/dashboard`)
   }
 
-  const Icon = type === 'unlearned' ? Layers : Clock
-  const titleKey = type === 'unlearned' ? 'unlearnedTitle' : 'dueTitle'
-  const subtitleKey = type === 'unlearned' ? 'unlearnedSubtitle' : 'dueSubtitle'
-  const startKey = type === 'unlearned' ? 'startLearning' : 'reviewNow'
+  const Icon = Layers
+  const titleKey = 'unlearnedTitle'
+  const subtitleKey = 'unlearnedSubtitle'
+  const startKey = 'startLearning'
 
   return (
     <div className="space-y-6">

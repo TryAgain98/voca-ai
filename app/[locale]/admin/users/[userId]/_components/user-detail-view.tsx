@@ -9,9 +9,9 @@ import { useTranslations } from 'next-intl'
 import { buttonVariants } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useAdminUsers } from '~/hooks/use-admin-users'
-import { useDashboardStats } from '~/hooks/use-word-review-progress'
-import { DueTodayCard } from '~admin/dashboard/_components/due-today-card'
+import { useDashboardStats } from '~/hooks/use-word-mastery'
 import { LearnedStatsCard } from '~admin/dashboard/_components/learned-stats-card'
+import { MemoryStrengthCard } from '~admin/dashboard/_components/memory-strength-card'
 import { UnlearnedCard } from '~admin/dashboard/_components/unlearned-card'
 
 import { UserScoreBadge } from '../../_components/user-score-badge'
@@ -131,9 +131,10 @@ export function UserDetailView({ userId }: UserDetailViewProps) {
           unlearnedWords={stats?.unlearnedWords ?? []}
           isLoading={isLoadingStats}
         />
-        <DueTodayCard
-          dueTodayCount={stats?.dueTodayCount ?? 0}
-          dueTodayWords={stats?.dueTodayWords ?? []}
+        <MemoryStrengthCard
+          averageRetention={stats?.averageRetention ?? 1}
+          fadingCount={stats?.fadingCount ?? 0}
+          relearningCount={stats?.relearningCount ?? 0}
           isLoading={isLoadingStats}
         />
       </div>

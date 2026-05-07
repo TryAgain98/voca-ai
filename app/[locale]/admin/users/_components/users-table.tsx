@@ -245,7 +245,7 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                     />
                   </td>
                   <td className="hidden px-4 py-4 text-center sm:table-cell">
-                    <DueTodayCell count={user.dueTodayCount} />
+                    <DueTodayCell count={user.dueCount} />
                   </td>
                   <td className="px-4 py-4 text-right">
                     <Link
