@@ -168,6 +168,7 @@
     "back": "Back",
     "title": "Word Library",
     "subtitle": "Browse and act on each group of words by mastery state",
+    "totalWords": "{count, plural, =0 {No words} =1 {1 word} other {# words}}",
     "unlearnedTitle": "New Words",
     "unlearnedSubtitle": "{count, plural, =0 {No words to learn} =1 {1 word to learn} other {# words to learn}}",
     "dueTitle": "Due Today",
