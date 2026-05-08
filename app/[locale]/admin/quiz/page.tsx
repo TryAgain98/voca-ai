@@ -5,7 +5,6 @@ import { ClipboardList } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 
 import { QuizSessionView } from './_components/quiz-session'
@@ -60,40 +59,20 @@ export default function QuizPage() {
   }
 
   return (
-    <>
-      {/* Mobile: 2 tabs */}
-      <div className="lg:hidden">
-        <Tabs defaultValue="setup">
-          <TabsList className="w-full">
-            <TabsTrigger value="setup" className="flex-1">
-              {t('setupTitle')}
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex-1">
-              {t('historyTitle')}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="setup" className="mt-4">
-            <QuizSetup onStart={setSetup} />
-          </TabsContent>
-          <TabsContent value="history" className="mt-4">
-            {user?.id && <QuizHistoryTable userId={user.id} />}
-          </TabsContent>
-        </Tabs>
+    <div className="flex h-full flex-col gap-6">
+      <div className="shrink-0">
+        <QuizSetup onStart={setSetup} />
       </div>
 
-      {/* Desktop: 2 columns */}
-      <div className="hidden h-full gap-8 lg:flex">
-        <div className="w-100 shrink-0">
-          <QuizSetup onStart={setSetup} />
+      <div className="flex min-h-0 flex-1 flex-col gap-3 border-t pt-5">
+        <div className="flex shrink-0 items-center gap-2">
+          <ClipboardList size={16} className="text-muted-foreground" />
+          <p className="text-sm font-[510]">{t('historyTitle')}</p>
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-4 border-l pt-4 pl-8">
-          <div className="flex items-center gap-2">
-            <ClipboardList size={16} className="text-muted-foreground" />
-            <p className="text-sm font-medium">{t('historyTitle')}</p>
-          </div>
+        <div className="min-h-[280px] flex-1 overflow-y-auto">
           {user?.id && <QuizHistoryTable userId={user.id} />}
         </div>
       </div>
-    </>
+    </div>
   )
 }

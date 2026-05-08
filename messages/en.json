@@ -217,6 +217,15 @@
     "batchPrioritized": "Top {batch} of {total} prioritized — words you've never tested or have likely forgotten",
     "minWarning": "Need at least 4 words",
     "startButton": "Begin Test",
+    "emptyTitle": "All caught up for now ✨",
+    "emptySubtitle": "No words are due for testing. Practice your weaker words instead — practice doesn't affect your schedule.",
+    "goToReview": "Go to Practice",
+    "table": {
+      "date": "Date",
+      "score": "Score",
+      "correct": "Correct",
+      "duration": "Duration"
+    },
     "challenge": {
       "noHints": "No hints",
       "timed": "20s / question",

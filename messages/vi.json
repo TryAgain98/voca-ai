@@ -217,6 +217,15 @@
     "batchPrioritized": "Sẽ test {batch} / {total} từ ưu tiên cao nhất — chưa kiểm tra hoặc có khả năng đã quên",
     "minWarning": "Cần ít nhất 4 từ",
     "startButton": "Bắt đầu Kiểm tra",
+    "emptyTitle": "Đã xong bài hôm nay ✨",
+    "emptySubtitle": "Không còn từ nào đến hạn kiểm tra. Hãy ôn tập các từ còn yếu — luyện tập không ảnh hưởng đến lịch ôn.",
+    "goToReview": "Đi ôn tập",
+    "table": {
+      "date": "Ngày",
+      "score": "Điểm",
+      "correct": "Đúng",
+      "duration": "Thời gian"
+    },
     "challenge": {
       "noHints": "Không gợi ý",
       "timed": "20s / câu",

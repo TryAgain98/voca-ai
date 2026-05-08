@@ -87,6 +87,13 @@ function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   return 40 - progress.level * 4 + (1 - retention) * 30
 }
 
+function isDueForDashboard(progress: WordMastery, now: Date): boolean {
+  if (progress.due_at) {
+    return new Date(progress.due_at) <= now
+  }
+  return !progress.tested_at
+}
+
 class WordMasteryService {
   async getReviewWords(
     userId: string,
@@ -215,8 +222,8 @@ class WordMasteryService {
         fadingPriorityList.push({ word: reviewWord, retention })
       }
 
+      if (!isDueForDashboard(progress, now)) continue
       const priority = computeQuizPriority(progress, now)
-      if (priority < 0) continue
       needsTestingCount += 1
       needsTestingPriorityList.push({ word: reviewWord, priority })
     }
@@ -276,6 +283,7 @@ class WordMasteryService {
     const candidates: { word: ReviewWord; priority: number }[] = []
     for (const vocab of vocabs) {
       const progress = progressMap.get(vocab.id) ?? null
+      if (progress && !isDueForDashboard(progress, now)) continue
       const priority = computeQuizPriority(progress, now)
       if (priority < 0) continue
       candidates.push({
