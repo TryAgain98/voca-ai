@@ -34,6 +34,7 @@ const RETRIEVABILITY_DECAY = -Math.log(TARGET_RETENTION)
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 const MS_PER_MIN = 1000 * 60
+const LAPSE_GRACE_MS = 5 * 60 * 60 * 1000
 
 const RELEARNING_STEPS_MIN = [10, 1440] as const
 const FAST_GOOD_THRESHOLD_MS = 5000
@@ -149,6 +150,18 @@ function relearningDueAt(step: number, now: Date): Date {
   return addMs(now, minutes * MS_PER_MIN)
 }
 
+function startOfNextDay(now: Date): Date {
+  const next = new Date(now)
+  next.setHours(24, 0, 0, 0)
+  return next
+}
+
+function lapseDueAt(now: Date): Date {
+  const graceEnd = addMs(now, LAPSE_GRACE_MS)
+  const tomorrow = startOfNextDay(now)
+  return graceEnd < tomorrow ? tomorrow : graceEnd
+}
+
 export function nextSchedule(input: SchedulerInput): SchedulerOutput {
   const now = input.now ?? new Date()
   const grade = input.grade
@@ -229,7 +242,7 @@ export function nextSchedule(input: SchedulerInput): SchedulerOutput {
       difficulty: nextDifficulty,
       isRelearning: false,
       relearningStep: 0,
-      dueAt: addMs(now, MS_PER_DAY),
+      dueAt: lapseDueAt(now),
       isLapse: false,
     }
   }
