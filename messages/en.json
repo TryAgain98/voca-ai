@@ -103,6 +103,7 @@
     "legendMastered": "Mastered",
     "legendPracticing": "Practicing",
     "legendUntouched": "Untouched",
+    "viewLibrary": "View word library",
     "needsTestingTitle": "Needs Testing",
     "needsTestingHero": "Time to verify what you actually remember",
     "needsTestingSubtitle": "These words are due for a test based on the forgetting curve",
@@ -165,13 +166,48 @@
   },
   "DashboardWords": {
     "back": "Back",
+    "title": "Word Library",
+    "subtitle": "Browse and act on each group of words by mastery state",
     "unlearnedTitle": "New Words",
     "unlearnedSubtitle": "{count, plural, =0 {No words to learn} =1 {1 word to learn} other {# words to learn}}",
     "dueTitle": "Due Today",
     "dueSubtitle": "{count, plural, =0 {No words due} =1 {1 word due for review} other {# words due for review}}",
     "startLearning": "Start Learning",
     "reviewNow": "Review Now",
-    "notEnoughWords": "Need at least {min} words to start a session"
+    "notEnoughWords": "Need at least {min} words to start a session",
+    "tabs": {
+      "untouched": "Untested",
+      "practicing": "Practicing",
+      "mastered": "Mastered"
+    },
+    "panel": {
+      "untouched": {
+        "headline": "{count, plural, =0 {Every word has been tested} =1 {1 word still untested} other {# words still untested}}",
+        "description": "Quiz to see what you actually remember, or review first if you'd rather warm up."
+      },
+      "practicing": {
+        "headline": "{count, plural, =0 {Nothing in active review} =1 {1 word on its way to mastery} other {# words on their way to mastery}}",
+        "description": "You've tested these but not mastered them yet. Steady review locks them into long-term memory."
+      },
+      "mastered": {
+        "headline": "{count, plural, =0 {No mastered words yet} =1 {1 word conquered} other {# words conquered}}",
+        "description": "Mastered. Hit \"Unmaster\" on any word you're not actually confident with — it'll head back into review."
+      }
+    },
+    "actions": {
+      "testNow": "Test",
+      "reviewFirst": "Review first",
+      "reviewAgain": "Review",
+      "unmaster": "Unmaster"
+    },
+    "unmasterToast": "Moved \"{word}\" back to the review queue",
+    "empty": {
+      "untouched": "Nice — nothing left untested. Treat yourself to a coffee.",
+      "practicing": "Nothing in active review. Quiz a few new words to kick things off.",
+      "mastered": "No mastered words yet. Keep testing — the results will come."
+    },
+    "noMatch": "No words match your filters",
+    "clearFilters": "Clear filters"
   },
   "Review": {
     "setupTitle": "Review",

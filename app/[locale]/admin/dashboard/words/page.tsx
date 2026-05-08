@@ -13,7 +13,9 @@ export default function DashboardWordsPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <WordsReviewView
-        words={stats?.unlearnedWords ?? []}
+        untouchedWords={stats?.unlearnedWords ?? []}
+        practicingWords={stats?.practicingWords ?? []}
+        masteredWords={stats?.masteredWords ?? []}
         isLoading={isLoading}
       />
     </div>

@@ -97,7 +97,7 @@ export function HeroCelebrate({
         />
       )}
 
-      {!hasWrongToday && hasUnlearned && (
+      {hasUnlearned && (
         <CelebrateActionCard
           accent="sky"
           icon={<Wand2 size={16} strokeWidth={1.8} />}

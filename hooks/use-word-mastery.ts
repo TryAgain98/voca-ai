@@ -73,3 +73,20 @@ export function useApplyQuizMastery() {
     },
   })
 }
+
+interface SoftDemoteParams {
+  userId: string
+  wordId: string
+}
+
+export function useSoftDemoteMastery() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userId, wordId }: SoftDemoteParams) =>
+      wordMasteryService.softDemoteMastery(userId, wordId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+    },
+  })
+}

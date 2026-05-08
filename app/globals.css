@@ -134,4 +134,8 @@
     @apply font-sans;
     font-feature-settings: 'cv01', 'ss03';
   }
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
 }

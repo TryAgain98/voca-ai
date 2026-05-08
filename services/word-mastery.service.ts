@@ -3,6 +3,7 @@ import {
   deriveGrade,
   GRADE_AGAIN,
   isMastered,
+  MASTERED_THRESHOLD,
   nextSchedule,
   retrievability,
 } from '~/lib/mastery-scheduler'
@@ -17,7 +18,9 @@ export interface DashboardStats {
   unlearnedCount: number
   unlearnedWords: ReviewWord[]
   practicingCount: number
+  practicingWords: ReviewWord[]
   masteredCount: number
+  masteredWords: ReviewWord[]
   needsTestingCount: number
   needsTestingWords: ReviewWord[]
   relearningCount: number
@@ -163,7 +166,9 @@ class WordMasteryService {
         unlearnedCount: 0,
         unlearnedWords: [],
         practicingCount: 0,
+        practicingWords: [],
         masteredCount: 0,
+        masteredWords: [],
         needsTestingCount: 0,
         needsTestingWords: [],
         relearningCount: 0,
@@ -206,6 +211,8 @@ class WordMasteryService {
     let retentionN = 0
     const needsTestingPriorityList: { word: ReviewWord; priority: number }[] =
       []
+    const practicingList: ReviewWord[] = []
+    const masteredList: ReviewWord[] = []
     const relearningList: ReviewWord[] = []
     const fadingPriorityList: { word: ReviewWord; retention: number }[] = []
     let wrongTodayCount = 0
@@ -214,16 +221,19 @@ class WordMasteryService {
     for (const vocab of vocabs) {
       const progress = progressMap.get(vocab.id)
       if (!progress) continue
-      if (isMastered(progress.level)) {
-        masteredCount += 1
-      } else {
-        practicingCount += 1
-      }
 
       const reviewWord: ReviewWord = {
         ...vocab,
         progress,
         score: computePracticeScore(progress),
+      }
+
+      if (isMastered(progress.level)) {
+        masteredCount += 1
+        masteredList.push(reviewWord)
+      } else {
+        practicingCount += 1
+        practicingList.push(reviewWord)
       }
 
       if (progress.is_relearning) {
@@ -264,7 +274,9 @@ class WordMasteryService {
       unlearnedCount: vocabs.length - learnedCount,
       unlearnedWords,
       practicingCount,
+      practicingWords: practicingList,
       masteredCount,
+      masteredWords: masteredList,
       needsTestingCount,
       needsTestingWords: needsTestingPriorityList
         .slice(0, NEEDS_TESTING_PREVIEW_LIMIT)
@@ -392,6 +404,37 @@ class WordMasteryService {
       .upsert(payload, { onConflict: 'user_id,word_id' })
 
     if (upsertError) throw upsertError
+  }
+
+  async softDemoteMastery(userId: string, wordId: string): Promise<void> {
+    const now = new Date()
+    const { data: existing, error: fetchError } = await supabase
+      .from('word_mastery')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('word_id', wordId)
+      .maybeSingle()
+
+    if (fetchError) throw fetchError
+    if (!existing) return
+
+    const demotedLevel = Math.min(existing.level, MASTERED_THRESHOLD - 1)
+    const demotedStability = Math.max(0.5, (existing.stability ?? 0) * 0.2)
+
+    const { error: updateError } = await supabase
+      .from('word_mastery')
+      .update({
+        level: demotedLevel,
+        is_relearning: true,
+        relearning_step: 0,
+        stability: demotedStability,
+        due_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('word_id', wordId)
+
+    if (updateError) throw updateError
   }
 }
 

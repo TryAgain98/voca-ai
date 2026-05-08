@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Award, Brain, Lock, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Award, Brain, Lock, Sparkles } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
@@ -44,6 +45,9 @@ export function MasteryCard({
   isLoading,
 }: MasteryCardProps) {
   const t = useTranslations('Dashboard')
+  const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
 
   const animatedMastered = useAnimatedCount(masteredCount)
   const safeTotal = Math.max(totalWords, 1)
@@ -53,6 +57,10 @@ export function MasteryCard({
 
   const masteredPercent = Math.round(masteredRatio * 100)
   const isPerfect = masteredCount === totalWords && totalWords > 0
+
+  const goToTab = (tab: 'mastered' | 'practicing' | 'untouched') => {
+    router.push(`/${locale}/admin/dashboard/words?tab=${tab}`)
+  }
 
   return (
     <motion.div
@@ -162,75 +170,173 @@ export function MasteryCard({
             />
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-3 gap-2">
             <Legend
               icon={Award}
-              colorClass={isPerfect ? 'text-amber-500' : 'text-emerald-500'}
+              accent={isPerfect ? 'amber' : 'emerald'}
               label={t('legendMastered')}
               count={masteredCount}
               ratio={masteredRatio}
               delay={0.3}
+              onClick={() => goToTab('mastered')}
             />
             <Legend
               icon={Brain}
-              colorClass="text-primary"
+              accent="primary"
               label={t('legendPracticing')}
               count={practicingCount}
               ratio={practicingRatio}
               delay={0.36}
+              onClick={() => goToTab('practicing')}
             />
             <Legend
               icon={Lock}
-              colorClass="text-muted-foreground"
+              accent="muted"
               label={t('legendUntouched')}
               count={Math.round(untouchedRatio * totalWords)}
               ratio={untouchedRatio}
               delay={0.42}
+              onClick={() => goToTab('untouched')}
             />
           </div>
+
+          <motion.button
+            type="button"
+            onClick={() => goToTab('untouched')}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.985, y: 0 }}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="group border-primary/25 bg-primary/[0.06] text-primary hover:border-primary/50 hover:bg-primary/[0.14] hover:shadow-primary/30 focus-visible:ring-primary/40 active:bg-primary/[0.18] relative mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg border px-3 py-2.5 text-xs font-[510] tracking-wide shadow-[0_0_0_0_rgba(0,0,0,0)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <span
+              aria-hidden
+              className="bg-primary/20 pointer-events-none absolute -inset-px rounded-lg opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100"
+            />
+            <span className="relative inline-flex h-1.5 w-1.5">
+              <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+              <span className="bg-primary relative inline-flex h-1.5 w-1.5 rounded-full" />
+            </span>
+            <span>{t('viewLibrary')}</span>
+            <ArrowUpRight
+              size={13}
+              strokeWidth={2.4}
+              className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+            <motion.span
+              aria-hidden
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                repeatDelay: 1.6,
+                ease: 'easeInOut',
+              }}
+              className="via-primary/15 pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent to-transparent"
+            />
+          </motion.button>
         </motion.div>
       )}
     </motion.div>
   )
 }
 
+type LegendAccent = 'emerald' | 'primary' | 'muted' | 'amber'
+
+interface AccentClasses {
+  text: string
+  hoverBg: string
+  hoverBorder: string
+  shadow: string
+  glow: string
+}
+
+const LEGEND_ACCENT: Record<LegendAccent, AccentClasses> = {
+  emerald: {
+    text: 'text-emerald-500',
+    hoverBg: 'group-hover:bg-emerald-500/[0.05]',
+    hoverBorder: 'group-hover:border-emerald-500/30',
+    shadow: 'group-hover:shadow-emerald-500/25',
+    glow: 'bg-emerald-500/15',
+  },
+  primary: {
+    text: 'text-primary',
+    hoverBg: 'group-hover:bg-primary/[0.06]',
+    hoverBorder: 'group-hover:border-primary/30',
+    shadow: 'group-hover:shadow-primary/25',
+    glow: 'bg-primary/15',
+  },
+  muted: {
+    text: 'text-muted-foreground',
+    hoverBg: 'group-hover:bg-white/[0.05]',
+    hoverBorder: 'group-hover:border-white/[0.18]',
+    shadow: 'group-hover:shadow-black/30',
+    glow: 'bg-white/10',
+  },
+  amber: {
+    text: 'text-amber-500',
+    hoverBg: 'group-hover:bg-amber-500/[0.05]',
+    hoverBorder: 'group-hover:border-amber-500/30',
+    shadow: 'group-hover:shadow-amber-500/25',
+    glow: 'bg-amber-500/15',
+  },
+}
+
 interface LegendProps {
   icon: typeof Award
-  colorClass: string
+  accent: LegendAccent
   label: string
   count: number
   ratio: number
   delay: number
+  onClick: () => void
 }
 
 function Legend({
   icon: Icon,
-  colorClass,
+  accent,
   label,
   count,
   ratio,
   delay,
+  onClick,
 }: LegendProps) {
   const animated = useAnimatedCount(count)
+  const a = LEGEND_ACCENT[accent]
   return (
-    <motion.div
+    <motion.button
+      type="button"
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="flex flex-col gap-0.5"
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.97, y: 0 }}
+      onClick={onClick}
+      className={`group focus-visible:ring-ring relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 text-left shadow-[0_0_0_0_rgba(0,0,0,0)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:shadow-lg ${a.hoverBg} ${a.hoverBorder} ${a.shadow} focus-visible:ring-2 focus-visible:outline-none`}
     >
-      <div className="flex items-center gap-1.5">
-        <Icon size={11} className={colorClass} strokeWidth={2} />
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute -inset-px rounded-lg opacity-0 blur-md transition-opacity group-hover:opacity-100 ${a.glow}`}
+      />
+      <ArrowUpRight
+        size={11}
+        strokeWidth={2.4}
+        className={`absolute top-2 right-2 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100 ${a.text}`}
+      />
+      <div className="relative flex items-center gap-1.5">
+        <Icon size={11} className={a.text} strokeWidth={2.2} />
         <span className="text-muted-foreground text-[10px] font-[510] tracking-wide uppercase">
           {label}
         </span>
       </div>
-      <div className="flex items-baseline gap-1">
+      <div className="relative flex items-baseline gap-1">
         <span className="text-foreground text-base font-[590]">{animated}</span>
         <span className="text-muted-foreground text-xs">
           ({Math.round(ratio * 100)}%)
         </span>
       </div>
-    </motion.div>
+    </motion.button>
   )
 }
