@@ -60,6 +60,8 @@ export default function DashboardPage() {
         unlearnedWords={stats?.unlearnedWords ?? []}
         relearningCount={stats?.relearningCount ?? 0}
         relearningWords={stats?.relearningWords ?? []}
+        wrongTodayCount={stats?.wrongTodayCount ?? 0}
+        wrongTodayWords={stats?.wrongTodayWords ?? []}
         masteredCount={stats?.masteredCount ?? 0}
         totalWords={stats?.totalWords ?? 0}
         isLoading={isLoading}

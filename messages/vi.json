@@ -115,26 +115,36 @@
         "relearn": "Đang trượt nhanh",
         "test": "Cần hành động",
         "learn": "Khám phá",
-        "celebrate": "Đang đúng tiến độ"
+        "celebrate": "Hoàn thành nhiệm vụ"
       },
       "title": {
         "relearn": "Cứu {count} từ vừa quên",
         "test": "Kiểm tra {count} từ hôm nay",
         "learn": "Học {count} từ mới hôm nay",
-        "celebrate": "Đã ôn xong tất cả"
+        "celebrate": "Xuất sắc — hôm nay bạn đã hoàn thành"
       },
       "queueTail": "+{count} từ chờ lượt sau",
       "subtitle": {
         "relearn": "Những từ này vừa trượt khỏi mức thuộc — kiểm tra lại ngay để chặn đứng việc quên.",
         "test": "Một bài kiểm tra ngắn xác nhận thật sự bạn còn nhớ gì — và chỉ ra những gì đang dần quên.",
         "learn": "Bắt đầu với vài từ mới hôm nay. Đều đặn quan trọng hơn nhồi nhét.",
-        "celebrate": "Hiện không có gì gấp. Thử một bài kiểm tra ngẫu nhiên để giữ phong độ."
+        "celebrate": "Mọi từ đến hạn hôm nay đều đã được kiểm tra. Tận hưởng chiến thắng nhé — hẹn gặp lại ngày mai."
       },
       "cta": {
         "relearn": "Kiểm tra lại {count} từ",
         "test": "Kiểm tra ngay {count} từ",
         "learn": "Bắt đầu với {count} từ",
         "celebrate": "Test ngẫu nhiên"
+      },
+      "celebrateWrong": {
+        "headline": "{count, plural, =1 {Hôm nay bạn lỡ 1 từ} other {Hôm nay bạn lỡ # từ}}",
+        "encourage": "Không áp lực — chỉ cần lướt nhẹ một lần tối nay là mai bài kiểm tra sẽ dễ như chơi.",
+        "cta": "Luyện tập {count} từ ngay"
+      },
+      "celebrateLearn": {
+        "headline": "Vẫn còn năng lượng?",
+        "encourage": "{count, plural, =1 {1 từ mới} other {# từ mới}} đang chờ bất cứ khi nào bạn muốn khám phá.",
+        "cta": "Khám phá {count} từ mới"
       }
     },
     "memoryStrength": {

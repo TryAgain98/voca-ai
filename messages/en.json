@@ -115,26 +115,36 @@
         "relearn": "Slipping fast",
         "test": "Action needed",
         "learn": "Discover",
-        "celebrate": "On track"
+        "celebrate": "Mission complete"
       },
       "title": {
         "relearn": "Lock in {count} fading words",
         "test": "Test {count} words today",
         "learn": "Learn {count} new words today",
-        "celebrate": "You're all caught up"
+        "celebrate": "Brilliant — today's mission complete"
       },
       "queueTail": "+{count} more queued for later",
       "subtitle": {
         "relearn": "These mastered words just slipped — a quick re-test now stops the leak before they're lost.",
         "test": "A quick test confirms what's truly stored — and reveals what's slipping.",
         "learn": "Start with a few new words today. Small, consistent steps beat cramming.",
-        "celebrate": "No tests due right now. Take a random retest to keep mastery fresh."
+        "celebrate": "Every word due today has been tested. You've earned the win — see you tomorrow."
       },
       "cta": {
         "relearn": "Re-test {count} now",
         "test": "Test {count} now",
         "learn": "Start with {count}",
         "celebrate": "Take a random test"
+      },
+      "celebrateWrong": {
+        "headline": "{count, plural, =1 {1 word slipped today} other {# words slipped today}}",
+        "encourage": "No pressure — a single relaxed pass tonight makes tomorrow's check feel effortless.",
+        "cta": "Practice {count} now"
+      },
+      "celebrateLearn": {
+        "headline": "Got more energy?",
+        "encourage": "{count, plural, =1 {1 new word} other {# new words}} are waiting whenever you feel like exploring.",
+        "cta": "Discover {count} new"
       }
     },
     "memoryStrength": {

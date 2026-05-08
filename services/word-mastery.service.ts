@@ -1,6 +1,7 @@
 import {
   DEFAULTS,
   deriveGrade,
+  GRADE_AGAIN,
   isMastered,
   nextSchedule,
   retrievability,
@@ -23,11 +24,14 @@ export interface DashboardStats {
   relearningWords: ReviewWord[]
   fadingCount: number
   fadingWords: ReviewWord[]
+  wrongTodayCount: number
+  wrongTodayWords: ReviewWord[]
   averageRetention: number
 }
 
 const NEEDS_TESTING_PREVIEW_LIMIT = 50
 const FADING_PREVIEW_LIMIT = 20
+const WRONG_TODAY_PREVIEW_LIMIT = 20
 const FADING_RETENTION_THRESHOLD = 0.85
 const DAY_MS = 1000 * 60 * 60 * 24
 const RECENT_TEST_COOLDOWN_MS = 60 * 60 * 1000
@@ -94,6 +98,20 @@ function isDueForDashboard(progress: WordMastery, now: Date): boolean {
   return !progress.tested_at
 }
 
+function isSameLocalDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function wasWrongToday(progress: WordMastery, now: Date): boolean {
+  if (progress.last_grade !== GRADE_AGAIN) return false
+  if (!progress.tested_at) return false
+  return isSameLocalDay(new Date(progress.tested_at), now)
+}
+
 class WordMasteryService {
   async getReviewWords(
     userId: string,
@@ -152,6 +170,8 @@ class WordMasteryService {
         relearningWords: [],
         fadingCount: 0,
         fadingWords: [],
+        wrongTodayCount: 0,
+        wrongTodayWords: [],
         averageRetention: 1,
       }
     }
@@ -188,6 +208,8 @@ class WordMasteryService {
       []
     const relearningList: ReviewWord[] = []
     const fadingPriorityList: { word: ReviewWord; retention: number }[] = []
+    let wrongTodayCount = 0
+    const wrongTodayList: ReviewWord[] = []
 
     for (const vocab of vocabs) {
       const progress = progressMap.get(vocab.id)
@@ -222,6 +244,11 @@ class WordMasteryService {
         fadingPriorityList.push({ word: reviewWord, retention })
       }
 
+      if (wasWrongToday(progress, now)) {
+        wrongTodayCount += 1
+        wrongTodayList.push(reviewWord)
+      }
+
       if (!isDueForDashboard(progress, now)) continue
       const priority = computeQuizPriority(progress, now)
       needsTestingCount += 1
@@ -248,6 +275,8 @@ class WordMasteryService {
       fadingWords: fadingPriorityList
         .slice(0, FADING_PREVIEW_LIMIT)
         .map((c) => c.word),
+      wrongTodayCount,
+      wrongTodayWords: wrongTodayList.slice(0, WRONG_TODAY_PREVIEW_LIMIT),
       averageRetention: retentionN > 0 ? retentionSum / retentionN : 1,
     }
   }
