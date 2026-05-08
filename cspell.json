@@ -32,7 +32,8 @@
     "flashcard",
     "flashcards",
     "vocab",
-    "vocabs"
+    "vocabs",
+    "cooldown"
   ],
   "ignorePaths": [
     ".next/**",

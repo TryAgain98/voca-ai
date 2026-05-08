@@ -30,6 +30,8 @@ const NEEDS_TESTING_PREVIEW_LIMIT = 50
 const FADING_PREVIEW_LIMIT = 20
 const FADING_RETENTION_THRESHOLD = 0.85
 const DAY_MS = 1000 * 60 * 60 * 24
+const RECENT_TEST_COOLDOWN_MS = 60 * 60 * 1000
+const UNTESTED_PRIORITY = 50
 
 export interface QuizWordResult {
   wordId: string
@@ -61,7 +63,7 @@ function computePracticeScore(progress: WordMastery | null): number {
 }
 
 function computeQuizPriority(progress: WordMastery | null, now: Date): number {
-  if (!progress) return 30
+  if (!progress) return UNTESTED_PRIORITY
   if (progress.is_relearning && progress.due_at) {
     const due = new Date(progress.due_at)
     if (due > now) return -1
@@ -76,11 +78,13 @@ function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   if (dueDate <= now) {
     return 70 + Math.min(30, overdueDays * 4) - progress.level * 3
   }
-  if (!isMastered(progress.level)) {
-    const retention = progressRetention(progress, now)
-    return 40 - progress.level * 4 + (1 - retention) * 30
+  if (isMastered(progress.level)) return -1
+  const msSinceTest = now.getTime() - new Date(progress.tested_at).getTime()
+  if (msSinceTest < RECENT_TEST_COOLDOWN_MS) {
+    return msSinceTest / RECENT_TEST_COOLDOWN_MS
   }
-  return -1
+  const retention = progressRetention(progress, now)
+  return 40 - progress.level * 4 + (1 - retention) * 30
 }
 
 class WordMasteryService {
