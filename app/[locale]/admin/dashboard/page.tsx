@@ -9,7 +9,6 @@ import { useStreak } from '~/hooks/use-streak'
 import { useDashboardStats } from '~/hooks/use-word-mastery'
 
 import { MasteryCard } from './_components/mastery-card'
-import { MemoryStrengthCard } from './_components/memory-strength-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
 import { StreakCard } from './_components/streak-card'
 import { TestPerformanceCard } from './_components/test-performance-card'
@@ -51,7 +50,15 @@ export default function DashboardPage() {
         </p>
       </motion.div>
 
-      <StreakCard streak={streak} isLoading={isStreakLoading} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <StreakCard streak={streak} isLoading={isStreakLoading} />
+        <MasteryCard
+          totalWords={stats?.totalWords ?? 0}
+          masteredCount={stats?.masteredCount ?? 0}
+          practicingCount={stats?.practicingCount ?? 0}
+          isLoading={isLoading}
+        />
+      </div>
 
       <SmartHeroCard
         needsTestingCount={stats?.needsTestingCount ?? 0}
@@ -66,21 +73,6 @@ export default function DashboardPage() {
         totalWords={stats?.totalWords ?? 0}
         isLoading={isLoading}
       />
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <MasteryCard
-          totalWords={stats?.totalWords ?? 0}
-          masteredCount={stats?.masteredCount ?? 0}
-          practicingCount={stats?.practicingCount ?? 0}
-          isLoading={isLoading}
-        />
-        <MemoryStrengthCard
-          averageRetention={stats?.averageRetention ?? 1}
-          fadingCount={stats?.fadingCount ?? 0}
-          relearningCount={stats?.relearningCount ?? 0}
-          isLoading={isLoading}
-        />
-      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TestPerformanceCard

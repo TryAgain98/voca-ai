@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ArrowUpRight, Award, Brain, Lock, Sparkles } from 'lucide-react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
@@ -131,27 +132,40 @@ export function MasteryCard({
           )}
         </div>
 
-        <motion.div
-          className={
-            isPerfect
-              ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500'
-              : 'bg-muted text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg'
-          }
-          animate={isPerfect ? { rotate: [0, 10, -10, 0] } : {}}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
-        >
-          <Award size={18} strokeWidth={1.8} />
-        </motion.div>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <Link
+            href={`/${locale}/admin/dashboard/words`}
+            className="text-primary hover:text-primary/80 group inline-flex items-center gap-1 text-[11px] font-[510] tracking-widest uppercase transition-colors"
+          >
+            {t('viewLibrary')}
+            <ArrowUpRight
+              size={12}
+              strokeWidth={2.4}
+              className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </Link>
+          <motion.div
+            className={
+              isPerfect
+                ? 'flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500'
+                : 'bg-muted text-primary flex h-10 w-10 items-center justify-center rounded-lg'
+            }
+            animate={isPerfect ? { rotate: [0, 10, -10, 0] } : {}}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+          >
+            <Award size={18} strokeWidth={1.8} />
+          </motion.div>
+        </div>
       </div>
 
       {!isLoading && totalWords > 0 && (
         <motion.div
-          className="mt-5"
+          className="mt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
         >
-          <div className="bg-muted relative flex h-2 overflow-hidden rounded-full">
+          <div className="bg-muted relative flex h-1.5 overflow-hidden rounded-full">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${masteredRatio * 100}%` }}
@@ -170,7 +184,7 @@ export function MasteryCard({
             />
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-2">
             <Legend
               icon={Award}
               accent={isPerfect ? 'amber' : 'emerald'}
@@ -199,44 +213,6 @@ export function MasteryCard({
               onClick={() => goToTab('untouched')}
             />
           </div>
-
-          <motion.button
-            type="button"
-            onClick={() => goToTab('untouched')}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.985, y: 0 }}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="group border-primary/25 bg-primary/[0.06] text-primary hover:border-primary/50 hover:bg-primary/[0.14] hover:shadow-primary/30 focus-visible:ring-primary/40 active:bg-primary/[0.18] relative mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg border px-3 py-2.5 text-xs font-[510] tracking-wide shadow-[0_0_0_0_rgba(0,0,0,0)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <span
-              aria-hidden
-              className="bg-primary/20 pointer-events-none absolute -inset-px rounded-lg opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100"
-            />
-            <span className="relative inline-flex h-1.5 w-1.5">
-              <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-              <span className="bg-primary relative inline-flex h-1.5 w-1.5 rounded-full" />
-            </span>
-            <span>{t('viewLibrary')}</span>
-            <ArrowUpRight
-              size={13}
-              strokeWidth={2.4}
-              className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-            />
-            <motion.span
-              aria-hidden
-              initial={{ x: '-100%' }}
-              animate={{ x: '100%' }}
-              transition={{
-                duration: 2.4,
-                repeat: Infinity,
-                repeatDelay: 1.6,
-                ease: 'easeInOut',
-              }}
-              className="via-primary/15 pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent to-transparent"
-            />
-          </motion.button>
         </motion.div>
       )}
     </motion.div>

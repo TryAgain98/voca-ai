@@ -53,7 +53,10 @@ export function VocabularyFilter({
                 : (selectedLesson?.name ?? t('filterLesson'))}
             </span>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            alignItemWithTrigger={false}
+            className="w-fit max-w-[min(420px,calc(100vw-2rem))] min-w-(--anchor-width)"
+          >
             <SelectItem value={ALL}>{t('filterLesson')}</SelectItem>
             {lessons.map((l) => (
               <SelectItem key={l.id} value={l.id}>
