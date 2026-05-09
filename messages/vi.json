@@ -231,6 +231,11 @@
   "Review": {
     "setupTitle": "Ôn tập",
     "setupSubtitle": "Chọn bài học để ôn tập",
+    "selectMode": "Dạng ôn tập",
+    "modeWordToMeaning": "Từ → Nghĩa",
+    "modeMeaningToWord": "Nghĩa → Từ",
+    "modeListenToWord": "Nghe → Điền",
+    "modeMixed": "Hỗn hợp",
     "selectLessons": "Bài học",
     "allLessons": "Tất cả bài học",
     "vocabAvailable": "{count} từ",

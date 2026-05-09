@@ -231,6 +231,11 @@
   "Review": {
     "setupTitle": "Review",
     "setupSubtitle": "Choose lessons to study",
+    "selectMode": "Practice type",
+    "modeWordToMeaning": "Word → Meaning",
+    "modeMeaningToWord": "Meaning → Word",
+    "modeListenToWord": "Listen → Type",
+    "modeMixed": "Mixed",
     "selectLessons": "Lessons",
     "allLessons": "All Lessons",
     "vocabAvailable": "{count} words available",
