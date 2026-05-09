@@ -3,19 +3,12 @@
 import { Loader2, Sparkles } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { Button } from '~/components/ui/button'
-
 interface SuggestionHintProps {
   suggestion: string | null
   isLoading: boolean
-  onApply: (value: string) => void
 }
 
-export function SuggestionHint({
-  suggestion,
-  isLoading,
-  onApply,
-}: SuggestionHintProps) {
+export function SuggestionHint({ suggestion, isLoading }: SuggestionHintProps) {
   const t = useTranslations('Common')
 
   if (!isLoading && !suggestion) return null
@@ -38,15 +31,6 @@ export function SuggestionHint({
           <span className="text-muted-foreground min-w-0 flex-1 text-xs break-words">
             {suggestion}
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-6 shrink-0 px-2 text-xs"
-            onClick={() => onApply(suggestion!)}
-          >
-            {t('apply')}
-          </Button>
         </>
       )}
     </div>

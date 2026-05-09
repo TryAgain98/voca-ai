@@ -8,3 +8,10 @@ export interface ExtractedVocabulary {
 }
 
 export type TranslationDirection = 'word-to-meaning' | 'meaning-to-word'
+
+export interface VocabularyFill {
+  valid: boolean
+  meaning: string
+  phonetic: string
+  example: string
+}

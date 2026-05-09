@@ -72,6 +72,7 @@ export default function VocabulariesPage() {
     lesson_id: string
     word: string
     meaning: string
+    phonetic: string
     example?: string
   }) => {
     if (editing) {
@@ -81,6 +82,7 @@ export default function VocabulariesPage() {
         word: data.word,
         meaning: data.meaning,
         example: data.example,
+        phonetic: data.phonetic,
       })
     } else {
       await createVocabulary.mutateAsync(data)

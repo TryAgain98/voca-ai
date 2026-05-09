@@ -1,10 +1,12 @@
 'use client'
 
+import { Sparkles } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
+import { ExampleField } from '~/app/[locale]/admin/vocabularies/_components/example-field'
+import { IpaField } from '~/app/[locale]/admin/vocabularies/_components/ipa-field'
 import { WordMeaningFields } from '~/app/[locale]/admin/vocabularies/_components/word-meaning-fields'
-import { useVocabularySuggestions } from '~/app/[locale]/admin/vocabularies/_hooks/use-vocabulary-suggestions'
+import { useVocabForm } from '~/app/[locale]/admin/vocabularies/_hooks/use-vocab-form'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -20,7 +22,6 @@ import {
   SelectItem,
   SelectTrigger,
 } from '~/components/ui/select'
-import { Textarea } from '~/components/ui/textarea'
 
 import type { Lesson, Vocabulary } from '~/types'
 
@@ -34,18 +35,10 @@ interface VocabularyFormDialogProps {
     lesson_id: string
     word: string
     meaning: string
+    phonetic: string
     example?: string
   }) => void
 }
-
-interface FormState {
-  lesson_id: string
-  word: string
-  meaning: string
-  example: string
-}
-
-type FieldError = Partial<Record<keyof FormState, string>>
 
 export function VocabularyFormDialog({
   open,
@@ -57,33 +50,17 @@ export function VocabularyFormDialog({
 }: VocabularyFormDialogProps) {
   const t = useTranslations('Vocabularies')
   const tCommon = useTranslations('Common')
-
-  const [form, setForm] = useState<FormState>({
-    lesson_id: editing?.lesson_id ?? '',
-    word: editing?.word ?? '',
-    meaning: editing?.meaning ?? '',
-    example: editing?.example ?? '',
-  })
-  const [errors, setErrors] = useState<FieldError>({})
-
-  const { wordToMeaning, meaningToWord } = useVocabularySuggestions(
-    form.word,
-    form.meaning,
-  )
-
-  const set = (field: keyof FormState, value: string) => {
-    setForm((f) => ({ ...f, [field]: value }))
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }))
-  }
-
-  const validate = (): boolean => {
-    const next: FieldError = {}
-    if (!form.lesson_id) next.lesson_id = t('lessonRequired')
-    if (!form.word.trim()) next.word = t('wordRequired')
-    if (!form.meaning.trim()) next.meaning = t('meaningRequired')
-    setErrors(next)
-    return Object.keys(next).length === 0
-  }
+  const {
+    form,
+    errors,
+    canSubmit,
+    hasAnySuggestion,
+    suggestions,
+    selectedLessonName,
+    set,
+    validate,
+    applyAll,
+  } = useVocabForm(editing, lessons)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,6 +69,7 @@ export function VocabularyFormDialog({
       lesson_id: form.lesson_id,
       word: form.word.trim(),
       meaning: form.meaning.trim(),
+      phonetic: form.phonetic.trim(),
       example: form.example.trim() || undefined,
     })
   }
@@ -113,14 +91,14 @@ export function VocabularyFormDialog({
               onValueChange={(v) => v && set('lesson_id', v)}
               disabled={!!editing}
             >
-              <SelectTrigger aria-invalid={!!errors.lesson_id}>
+              <SelectTrigger
+                className="w-full"
+                aria-invalid={!!errors.lesson_id}
+              >
                 <span
-                  className={`flex flex-1 truncate text-left text-sm${!form.lesson_id ? 'text-muted-foreground' : ''}`}
+                  className={`min-w-0 flex-1 truncate text-left text-sm ${!form.lesson_id ? 'text-muted-foreground' : ''}`}
                 >
-                  {form.lesson_id
-                    ? (lessons.find((l) => l.id === form.lesson_id)?.name ??
-                      t('lessonPlaceholder'))
-                    : t('lessonPlaceholder')}
+                  {selectedLessonName ?? t('lessonPlaceholder')}
                 </span>
               </SelectTrigger>
               <SelectContent>
@@ -140,35 +118,41 @@ export function VocabularyFormDialog({
             wordConfig={{
               value: form.word,
               error: errors.word,
-              suggestion: meaningToWord,
+              suggestion: suggestions.word,
               onChange: (v) => set('word', v),
-              onApply: (v) => {
-                set('word', v)
-                meaningToWord.clear()
-              },
             }}
             meaningConfig={{
               value: form.meaning,
               error: errors.meaning,
-              suggestion: wordToMeaning,
+              suggestion: suggestions.meaning,
               onChange: (v) => set('meaning', v),
-              onApply: (v) => {
-                set('meaning', v)
-                wordToMeaning.clear()
-              },
             }}
           />
 
-          <div className="space-y-1.5">
-            <Label htmlFor="example">{t('exampleLabel')}</Label>
-            <Textarea
-              id="example"
-              value={form.example}
-              onChange={(e) => set('example', e.target.value)}
-              placeholder='e.g. "React renders UI to the DOM."'
-              rows={2}
-            />
-          </div>
+          <IpaField
+            value={form.phonetic}
+            error={errors.phonetic}
+            required
+            suggestion={suggestions.phonetic}
+            onChange={(v) => set('phonetic', v)}
+          />
+
+          <ExampleField
+            value={form.example}
+            suggestion={suggestions.example}
+            onChange={(v) => set('example', v)}
+          />
+
+          {hasAnySuggestion && (
+            <button
+              type="button"
+              onClick={applyAll}
+              className="border-border bg-muted/40 hover:bg-muted/70 flex w-full items-center justify-center gap-2 rounded-md border border-dashed px-3 py-2 transition-colors"
+            >
+              <Sparkles size={13} className="text-primary shrink-0" />
+              <span className="text-sm font-medium">{t('applyAll')}</span>
+            </button>
+          )}
 
           <DialogFooter>
             <Button
@@ -178,7 +162,7 @@ export function VocabularyFormDialog({
             >
               {tCommon('cancel')}
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || !canSubmit}>
               {isPending
                 ? tCommon('saving')
                 : editing

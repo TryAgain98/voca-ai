@@ -13,7 +13,6 @@ interface FieldConfig {
   error?: string
   suggestion: UseSuggestionReturn
   onChange: (v: string) => void
-  onApply: (v: string) => void
 }
 
 interface WordMeaningFieldsProps {
@@ -44,7 +43,6 @@ export function WordMeaningFields({
         <SuggestionHint
           suggestion={wordConfig.suggestion.suggestion}
           isLoading={wordConfig.suggestion.isLoading}
-          onApply={wordConfig.onApply}
         />
         {wordConfig.error && (
           <p className="text-destructive text-xs">{wordConfig.error}</p>
@@ -65,7 +63,6 @@ export function WordMeaningFields({
         <SuggestionHint
           suggestion={meaningConfig.suggestion.suggestion}
           isLoading={meaningConfig.suggestion.isLoading}
-          onApply={meaningConfig.onApply}
         />
         {meaningConfig.error && (
           <p className="text-destructive text-xs">{meaningConfig.error}</p>

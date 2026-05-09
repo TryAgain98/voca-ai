@@ -34,6 +34,14 @@ export function buildTranslationPrompt(
   return `You are a bilingual English-Vietnamese dictionary. Given the Vietnamese meaning "${text}", suggest the most fitting English word or short phrase. Return ONLY the English word or phrase, nothing else.`
 }
 
+export function buildVocabularyFillPrompt(word: string): string {
+  return `You are an English-Vietnamese dictionary. Given the input "${word}":
+- If it IS a real English word or phrase, return exactly: {"valid":true,"meaning":"<Vietnamese, 1-6 words>","phonetic":"</IPA/>","example":"<natural English sentence>"}
+- If it is NOT a real English word, return exactly: {"valid":false}
+
+Return ONLY valid JSON, no markdown, no explanation.`
+}
+
 export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
   const cleaned = raw
     .trim()

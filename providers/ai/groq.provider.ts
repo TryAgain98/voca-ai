@@ -4,10 +4,15 @@ import { BaseAIProvider } from './base.provider'
 import {
   EXTRACT_VOCABULARY_PROMPT,
   buildTranslationPrompt,
+  buildVocabularyFillPrompt,
   parseVocabularyJson,
 } from './utils'
 
-import type { ExtractedVocabulary, TranslationDirection } from './types'
+import type {
+  ExtractedVocabulary,
+  TranslationDirection,
+  VocabularyFill,
+} from './types'
 
 export class GroqProvider extends BaseAIProvider {
   readonly name = 'Groq'
@@ -54,6 +59,26 @@ export class GroqProvider extends BaseAIProvider {
       ],
     })
     return res.choices[0]?.message?.content?.trim() ?? ''
+  }
+
+  async suggestVocabularyFill(word: string): Promise<VocabularyFill> {
+    const res = await this.client.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      max_tokens: 128,
+      temperature: 0.2,
+      messages: [{ role: 'user', content: buildVocabularyFillPrompt(word) }],
+    })
+    const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
+    const fill = JSON.parse(raw) as Partial<VocabularyFill>
+    if (fill.valid === false) {
+      return { valid: false, meaning: '', phonetic: '', example: '' }
+    }
+    return {
+      valid: true,
+      meaning: String(fill.meaning ?? ''),
+      phonetic: String(fill.phonetic ?? ''),
+      example: String(fill.example ?? ''),
+    }
   }
 
   async transcribeAudio(file: File): Promise<string> {

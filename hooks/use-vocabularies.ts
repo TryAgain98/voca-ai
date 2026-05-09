@@ -33,6 +33,7 @@ export function useCreateVocabulary() {
       word: string
       meaning: string
       example?: string
+      phonetic?: string
     }) => vocabulariesService.create(payload),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lesson_id] })
@@ -53,11 +54,13 @@ export function useUpdateVocabulary() {
       word: string
       meaning: string
       example?: string
+      phonetic?: string
     }) =>
       vocabulariesService.update(vars.id, {
         word: vars.word,
         meaning: vars.meaning,
         example: vars.example,
+        phonetic: vars.phonetic,
       }),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lessonId] })
