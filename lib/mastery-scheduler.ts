@@ -87,13 +87,16 @@ export interface SchedulerOutput {
 interface DeriveGradeInput {
   isCorrect: boolean
   responseMs?: number | null
+  usedHint?: boolean | null
 }
 
 export function deriveGrade({
   isCorrect,
   responseMs,
+  usedHint,
 }: DeriveGradeInput): Grade {
   if (!isCorrect) return GRADE_AGAIN
+  if (usedHint) return GRADE_HARD
   if (responseMs == null) return GRADE_GOOD
   if (responseMs >= NO_PROGRESS_TIMEOUT_MS) return GRADE_HARD
   if (responseMs <= FAST_GOOD_THRESHOLD_MS) return GRADE_EASY

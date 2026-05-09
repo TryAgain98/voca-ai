@@ -24,6 +24,7 @@ export interface MCQExercise {
 export interface TypingExercise {
   type: 'meaning-to-word' | 'listen-to-word'
   vocab: ReviewVocab
+  siblings: ReviewVocab[]
   isReinforcement: boolean
 }
 
@@ -38,6 +39,8 @@ export type Exercise = MCQExercise | TypingExercise | SpeakExercise
 export interface AnswerMeta {
   userAnswer?: string
   responseMs?: number
+  usedHint?: boolean
+  acceptedSiblingId?: string
 }
 
 export type AnswerHandler = (isCorrect: boolean, meta?: AnswerMeta) => void
@@ -46,6 +49,7 @@ export interface ExerciseResult {
   exercise: Exercise
   isCorrect: boolean
   responseMs?: number
+  usedHint?: boolean
 }
 
 export interface ReviewSetup {

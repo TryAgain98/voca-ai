@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react'
 
+import { findSiblings } from '~/lib/answer-pattern'
+
 import type {
+  AnswerMeta,
   Exercise,
   ExerciseResult,
   ExerciseType,
@@ -40,7 +43,11 @@ function makeExercise(
       isReinforcement,
     }
   }
-  return { type, vocab, isReinforcement }
+  if (type === 'speak-word') {
+    return { type, vocab, isReinforcement }
+  }
+  const siblings = type === 'meaning-to-word' ? findSiblings(vocab, pool) : []
+  return { type, vocab, siblings, isReinforcement }
 }
 
 function buildInitialQueue(
@@ -60,7 +67,7 @@ interface UseReviewSessionReturn {
   totalQueued: number
   results: ExerciseResult[]
   isComplete: boolean
-  submitAnswer: (isCorrect: boolean) => void
+  submitAnswer: (isCorrect: boolean, meta?: AnswerMeta) => void
 }
 
 export function useReviewSession(setup: ReviewSetup): UseReviewSessionReturn {
@@ -74,9 +81,17 @@ export function useReviewSession(setup: ReviewSetup): UseReviewSessionReturn {
   const currentExercise = queue[currentIndex] ?? null
 
   const submitAnswer = useCallback(
-    (isCorrect: boolean) => {
+    (isCorrect: boolean, meta?: AnswerMeta) => {
       if (!currentExercise) return
-      setResults((prev) => [...prev, { exercise: currentExercise, isCorrect }])
+      setResults((prev) => [
+        ...prev,
+        {
+          exercise: currentExercise,
+          isCorrect,
+          responseMs: meta?.responseMs,
+          usedHint: meta?.usedHint,
+        },
+      ])
       if (!isCorrect) {
         const reinforcement = makeExercise(
           currentExercise.vocab,

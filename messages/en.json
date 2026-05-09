@@ -245,6 +245,7 @@
     "check": "Check",
     "showHint": "Show hint",
     "showMoreHint": "More hint",
+    "synonymAccepted": "Accepted as a synonym. Card answer: {expected}",
     "correctAnswer": "Correct answer",
     "resultsTitle": "Session complete!",
     "resultsTime": "{seconds}s",

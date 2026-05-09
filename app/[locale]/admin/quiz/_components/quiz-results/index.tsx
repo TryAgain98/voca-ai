@@ -90,6 +90,7 @@ export function QuizResults({
         wordId: r.exercise.vocab.id,
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
+        usedHint: r.usedHint,
       })),
     })
 

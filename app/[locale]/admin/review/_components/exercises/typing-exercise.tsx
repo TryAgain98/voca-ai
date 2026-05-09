@@ -9,47 +9,26 @@ import { SpeakButton } from '~/components/layout/speak-button'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useTTS } from '~/hooks/use-tts'
+import { checkAnswer } from '~/lib/answer-pattern'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 
+import {
+  buildFillSlots,
+  getMaxManualHints,
+  shuffledLetterPositions,
+} from './_utils/answer-fill'
 import { ExerciseFeedback } from './exercise-feedback'
+import { FillPatternDisplay } from './fill-pattern-display'
 
 import type { ExerciseMode } from './mcq-exercise'
 import type { AnswerHandler, TypingExercise } from '../../_types/review.types'
 
 const CORRECT_ADVANCE_DELAY_MS = 1200
 const QUIZ_ADVANCE_DELAY_MS = 280
-const HINT_MAX_REVEAL_RATIO = 0.4
-const HINT_MAX_LEVELS = 3
 
 function elapsedSince(start: number): number {
   return Date.now() - start
-}
-
-function seedFromWord(word: string): number {
-  let seed = 0
-  for (let i = 0; i < word.length; i++) {
-    seed = (seed * 31 + word.charCodeAt(i)) >>> 0
-  }
-  return seed || 1
-}
-
-function buildShuffledRevealOrder(word: string): number[] {
-  const indices = Array.from({ length: word.length }, (_, i) => i)
-  let seed = seedFromWord(word)
-  for (let i = indices.length - 1; i > 0; i--) {
-    seed = (seed * 1103515245 + 12345) >>> 0
-    const j = seed % (i + 1)
-    ;[indices[i], indices[j]] = [indices[j], indices[i]]
-  }
-  return indices
-}
-
-function buildHintFromRevealedSet(word: string, revealed: Set<number>): string {
-  return word
-    .split('')
-    .map((ch, i) => (revealed.has(i) ? ch : '_'))
-    .join(' ')
 }
 
 interface TypingExerciseCardProps {
@@ -67,13 +46,37 @@ export function TypingExerciseCard({
   const [value, setValue] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
-  const [hintLevel, setHintLevel] = useState(0)
+  const [manualHintCount, setManualHintCount] = useState(0)
+  const [collisionMatched, setCollisionMatched] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const startedAtRef = useRef<number>(0)
   const { speak } = useTTS(exercise.vocab.word)
   const isListenMode = exercise.type === 'listen-to-word'
   const accentColor = isListenMode ? 'amber' : 'sky'
   const isQuiz = mode === 'quiz'
+
+  const word = exercise.vocab.word
+  const revealOrder = useMemo(() => shuffledLetterPositions(word), [word])
+  const letterCount = revealOrder.length
+  const maxManualHints = isQuiz ? 0 : getMaxManualHints(letterCount)
+  const usedHint = manualHintCount > 0
+
+  const revealedSet = useMemo(() => {
+    const set = new Set<number>()
+    if (revealOrder.length > 0) set.add(revealOrder[0])
+    for (let i = 0; i < manualHintCount; i++) {
+      const pos = revealOrder[i + 1]
+      if (pos != null) set.add(pos)
+    }
+    return set
+  }, [revealOrder, manualHintCount])
+
+  const slots = useMemo(
+    () => buildFillSlots(word, value, revealedSet),
+    [word, value, revealedSet],
+  )
+
+  const canShowHint = !submitted && manualHintCount < maxManualHints
 
   useEffect(() => {
     startedAtRef.current = Date.now()
@@ -90,46 +93,31 @@ export function TypingExerciseCard({
 
   const handleSubmit = () => {
     if (submitted || !value.trim()) return
-    const correct =
-      value.trim().toLowerCase() === exercise.vocab.word.toLowerCase()
+    const verdict = checkAnswer(exercise.vocab, value, exercise.siblings)
+    const correct = verdict.kind !== 'wrong'
+    const matchedSiblingId =
+      verdict.kind === 'collision' ? verdict.matched.id : null
     setIsCorrect(correct)
+    setCollisionMatched(matchedSiblingId)
     setSubmitted(true)
     const responseMs = elapsedSince(startedAtRef.current)
+    const meta = {
+      userAnswer: value.trim(),
+      responseMs,
+      usedHint,
+      acceptedSiblingId: matchedSiblingId ?? undefined,
+    }
     if (isQuiz) {
-      setTimeout(
-        () =>
-          onAnswer(correct, {
-            userAnswer: value.trim(),
-            responseMs,
-          }),
-        QUIZ_ADVANCE_DELAY_MS,
-      )
+      setTimeout(() => onAnswer(correct, meta), QUIZ_ADVANCE_DELAY_MS)
       return
     }
     if (correct) {
       playCorrectSound()
-      setTimeout(() => onAnswer(true, { responseMs }), CORRECT_ADVANCE_DELAY_MS)
+      setTimeout(() => onAnswer(true, meta), CORRECT_ADVANCE_DELAY_MS)
     } else {
       playWrongSound()
     }
   }
-
-  const word = exercise.vocab.word
-  const revealOrder = useMemo(() => buildShuffledRevealOrder(word), [word])
-  const maxRevealCount =
-    word.length <= 1
-      ? 0
-      : Math.max(1, Math.floor(word.length * HINT_MAX_REVEAL_RATIO))
-  const maxLevels = Math.min(HINT_MAX_LEVELS, maxRevealCount)
-  const revealPerLevel =
-    maxLevels > 0 ? Math.ceil(maxRevealCount / maxLevels) : 0
-  const revealCount = Math.min(hintLevel * revealPerLevel, maxRevealCount)
-  const revealedSet = useMemo(
-    () => new Set(revealOrder.slice(0, revealCount)),
-    [revealOrder, revealCount],
-  )
-  const canShowMoreHint = revealCount < maxRevealCount
-  const hint = buildHintFromRevealedSet(word, revealedSet)
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,16 +155,7 @@ export function TypingExerciseCard({
               </p>
             </>
           )}
-          {/* {exercise.vocab.phonetic && (
-            <p className="text-muted-foreground/50 mt-1 font-mono text-xs">
-              {exercise.vocab.phonetic}
-            </p>
-          )} */}
-          {!isQuiz && (
-            <p className="text-muted-foreground/60 mt-2 font-mono text-sm tracking-widest">
-              {hint}
-            </p>
-          )}
+          <FillPatternDisplay slots={slots} className="mt-3" />
         </motion.div>
       </AnimatePresence>
 
@@ -209,6 +188,16 @@ export function TypingExerciseCard({
           </Button>
         </div>
 
+        {!isQuiz && submitted && isCorrect && collisionMatched && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs text-amber-300/90"
+          >
+            {t('synonymAccepted', { expected: exercise.vocab.word })}
+          </motion.p>
+        )}
+
         {!isQuiz && (
           <ExerciseFeedback
             show={submitted}
@@ -217,21 +206,22 @@ export function TypingExerciseCard({
               onAnswer(false, {
                 userAnswer: value.trim(),
                 responseMs: elapsedSince(startedAtRef.current),
+                usedHint,
               })
             }
             correctAnswer={exercise.vocab.word}
           />
         )}
 
-        {!isQuiz && !submitted && canShowMoreHint && (
+        {!isQuiz && canShowHint && (
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground w-fit"
-            onClick={() => setHintLevel((level) => level + 1)}
+            onClick={() => setManualHintCount((c) => c + 1)}
           >
             <Lightbulb size={14} className="mr-1.5" />
-            {hintLevel === 0 ? t('showHint') : t('showMoreHint')}
+            {manualHintCount === 0 ? t('showHint') : t('showMoreHint')}
           </Button>
         )}
       </div>

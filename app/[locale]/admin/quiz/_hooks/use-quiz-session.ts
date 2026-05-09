@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 
+import { findSiblings } from '~/lib/answer-pattern'
+
 import type { QuizExerciseResult, QuizSetup } from '../_types/quiz.types'
 import type {
   AnswerMeta,
@@ -39,7 +41,11 @@ function makeExercise(
       isReinforcement: false,
     }
   }
-  return { type, vocab, isReinforcement: false }
+  if (type === 'speak-word') {
+    return { type, vocab, isReinforcement: false }
+  }
+  const siblings = type === 'meaning-to-word' ? findSiblings(vocab, pool) : []
+  return { type, vocab, siblings, isReinforcement: false }
 }
 
 function buildQueue(vocab: ReviewVocab[], types: ExerciseType[]): Exercise[] {
@@ -82,6 +88,7 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
           isCorrect,
           userAnswer: meta?.userAnswer,
           responseMs: meta?.responseMs,
+          usedHint: meta?.usedHint,
         },
       ])
       const nextIndex = currentIndex + 1

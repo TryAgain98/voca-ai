@@ -71,9 +71,9 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
   } = useReviewSession(setup)
 
   const handleAnswer = useCallback<AnswerHandler>(
-    (isCorrect) => {
+    (isCorrect, meta) => {
       if (!currentExercise) return
-      submitAnswer(isCorrect)
+      submitAnswer(isCorrect, meta)
     },
     [currentExercise, submitAnswer],
   )

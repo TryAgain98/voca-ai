@@ -44,6 +44,7 @@ export interface QuizWordResult {
   wordId: string
   isCorrect: boolean
   responseMs?: number
+  usedHint?: boolean
 }
 
 export interface QuizCandidatesResult {
@@ -498,6 +499,7 @@ class WordMasteryService {
       const grade: Grade = deriveGrade({
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
+        usedHint: r.usedHint,
       })
 
       const schedule = nextSchedule({
