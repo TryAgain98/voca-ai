@@ -4,7 +4,12 @@ import { wordMasteryService } from '~/services/word-mastery.service'
 
 import type { QuizWordResult } from '~/services/word-mastery.service'
 
-export { type DashboardStats } from '~/services/word-mastery.service'
+export {
+  type DashboardStats,
+  type ForecastDay,
+  type ForecastDayBreakdown,
+  type ReviewForecast,
+} from '~/services/word-mastery.service'
 
 const QUERY_KEY = 'word-mastery'
 
@@ -32,6 +37,14 @@ export function useDashboardStats(userId: string) {
   return useQuery({
     queryKey: [QUERY_KEY, 'dashboard', userId],
     queryFn: () => wordMasteryService.getDashboardStats(userId),
+    enabled: !!userId,
+  })
+}
+
+export function useReviewForecast(userId: string, days?: number) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'forecast', userId, days ?? null],
+    queryFn: () => wordMasteryService.getReviewForecast(userId, days),
     enabled: !!userId,
   })
 }

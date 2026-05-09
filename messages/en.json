@@ -148,6 +148,22 @@
         "cta": "Discover {count} new"
       }
     },
+    "forecastNextReview": "Next Review",
+    "forecastNoUpcoming": "No upcoming reviews",
+    "forecastNoUpcomingHint": "You're all caught up — new words you test today will appear here.",
+    "forecastTomorrow": "Tomorrow",
+    "forecastInDays": "{count, plural, =1 {In 1 day} other {In # days}}",
+    "forecastWordsCount": "{count, plural, =0 {no words} =1 {1 word} other {# words}}",
+    "forecastNext14Days": "Next 14 days",
+    "forecastTotalUpcoming": "{count} total",
+    "forecastDayDetailEmpty": "No reviews scheduled this day",
+    "forecastBreakdown": {
+      "practicing": "Practicing",
+      "practicingHint": "Words on their way to mastery",
+      "relearning": "Relearning",
+      "relearningHint": "Mastered words that recently slipped"
+    },
+    "forecastPrivacyHint": "We hide which words are scheduled to keep your memory test honest. You'll see them when it's time to review.",
     "memoryStrength": {
       "title": "Memory Strength",
       "tier": {

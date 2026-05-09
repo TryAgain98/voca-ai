@@ -6,9 +6,10 @@ import { useTranslations } from 'next-intl'
 
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
 import { useStreak } from '~/hooks/use-streak'
-import { useDashboardStats } from '~/hooks/use-word-mastery'
+import { useDashboardStats, useReviewForecast } from '~/hooks/use-word-mastery'
 
 import { MasteryCard } from './_components/mastery-card'
+import { ReviewForecastCard } from './_components/review-forecast-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
 import { StreakCard } from './_components/streak-card'
 import { TestPerformanceCard } from './_components/test-performance-card'
@@ -30,6 +31,8 @@ export default function DashboardPage() {
   const { data: stats, isLoading } = useDashboardStats(userId)
   const { data: perf, isLoading: isPerfLoading } = useQuizPerformance(userId)
   const { data: streak, isLoading: isStreakLoading } = useStreak(userId)
+  const { data: forecast, isLoading: isForecastLoading } =
+    useReviewForecast(userId)
 
   const greeting = getGreeting()
   const firstName = user?.firstName ?? user?.username ?? ''
@@ -73,6 +76,8 @@ export default function DashboardPage() {
         totalWords={stats?.totalWords ?? 0}
         isLoading={isLoading}
       />
+
+      <ReviewForecastCard forecast={forecast} isLoading={isForecastLoading} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TestPerformanceCard

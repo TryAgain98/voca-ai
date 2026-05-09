@@ -51,6 +51,29 @@ export interface QuizCandidatesResult {
   totalCandidates: number
 }
 
+export interface ForecastDayBreakdown {
+  practicing: number
+  relearning: number
+}
+
+export interface ForecastDay {
+  date: string
+  count: number
+  breakdown: ForecastDayBreakdown
+}
+
+export interface ReviewForecast {
+  todayCount: number
+  nextFutureDate: string | null
+  nextFutureCount: number
+  daysUntilNextFuture: number | null
+  overdueCount: number
+  totalUpcoming: number
+  forecast: ForecastDay[]
+}
+
+const FORECAST_DAYS = 14
+
 function daysBetween(a: Date, b: Date): number {
   return Math.max(0, (b.getTime() - a.getTime()) / DAY_MS)
 }
@@ -107,6 +130,23 @@ function isSameLocalDay(a: Date, b: Date): boolean {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   )
+}
+
+function localDayKey(d: Date): string {
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function startOfLocalDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+function localDayOffset(from: Date, to: Date): number {
+  const a = startOfLocalDay(from).getTime()
+  const b = startOfLocalDay(to).getTime()
+  return Math.round((b - a) / DAY_MS)
 }
 
 function wasWrongToday(progress: WordMastery, now: Date): boolean {
@@ -290,6 +330,98 @@ class WordMasteryService {
       wrongTodayCount,
       wrongTodayWords: wrongTodayList.slice(0, WRONG_TODAY_PREVIEW_LIMIT),
       averageRetention: retentionN > 0 ? retentionSum / retentionN : 1,
+    }
+  }
+
+  async getReviewForecast(
+    userId: string,
+    days: number = FORECAST_DAYS,
+  ): Promise<ReviewForecast> {
+    const { data: vocabs, error: vocabError } = await supabase
+      .from('vocabularies')
+      .select('id')
+
+    if (vocabError) throw vocabError
+    if (!vocabs || vocabs.length === 0) {
+      return {
+        todayCount: 0,
+        nextFutureDate: null,
+        nextFutureCount: 0,
+        daysUntilNextFuture: null,
+        overdueCount: 0,
+        totalUpcoming: 0,
+        forecast: [],
+      }
+    }
+
+    const wordIds = vocabs.map((v) => v.id)
+    const { data: progressRows, error: progressError } = await supabase
+      .from('word_mastery')
+      .select('*')
+      .eq('user_id', userId)
+      .in('word_id', wordIds)
+
+    if (progressError) throw progressError
+
+    const now = new Date()
+    const today = startOfLocalDay(now)
+
+    const buckets = new Map<string, ForecastDayBreakdown>()
+    for (let i = 0; i < days; i += 1) {
+      const d = new Date(today)
+      d.setDate(today.getDate() + i)
+      buckets.set(localDayKey(d), { practicing: 0, relearning: 0 })
+    }
+
+    let overdueCount = 0
+    for (const progress of (progressRows ?? []) as WordMastery[]) {
+      if (!progress.due_at) continue
+      if (isMastered(progress.level)) continue
+
+      const dueDate = new Date(progress.due_at)
+      const offset = localDayOffset(today, dueDate)
+
+      if (offset < 0) {
+        overdueCount += 1
+        continue
+      }
+      if (offset >= days) continue
+
+      const breakdown = buckets.get(localDayKey(dueDate))
+      if (!breakdown) continue
+      if (progress.is_relearning) {
+        breakdown.relearning += 1
+      } else {
+        breakdown.practicing += 1
+      }
+    }
+
+    const forecast: ForecastDay[] = Array.from(
+      buckets,
+      ([date, breakdown]) => ({
+        date,
+        count: breakdown.practicing + breakdown.relearning,
+        breakdown,
+      }),
+    ).sort((a, b) => a.date.localeCompare(b.date))
+
+    const totalUpcoming = forecast.reduce((sum, d) => sum + d.count, 0)
+    const todayCount = forecast[0]?.count ?? 0
+    const nextFuture = forecast.slice(1).find((d) => d.count > 0) ?? null
+    const nextFutureDate = nextFuture?.date ?? null
+    const nextFutureCount = nextFuture?.count ?? 0
+    const daysUntilNextFuture = nextFutureDate
+      ? localDayOffset(today, new Date(`${nextFutureDate}T00:00:00`))
+      : null
+
+    return {
+      todayCount,
+      nextFutureDate,
+      nextFutureCount,
+      daysUntilNextFuture,
+      overdueCount,
+      totalUpcoming,
+      forecast,
     }
   }
 

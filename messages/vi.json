@@ -148,6 +148,22 @@
         "cta": "Khám phá {count} từ mới"
       }
     },
+    "forecastNextReview": "Lần ôn tiếp theo",
+    "forecastNoUpcoming": "Chưa có lịch ôn nào",
+    "forecastNoUpcomingHint": "Đã hoàn thành — các từ bạn kiểm tra hôm nay sẽ xuất hiện ở đây.",
+    "forecastTomorrow": "Ngày mai",
+    "forecastInDays": "{count, plural, =1 {1 ngày nữa} other {# ngày nữa}}",
+    "forecastWordsCount": "{count, plural, =0 {không có từ} =1 {1 từ} other {# từ}}",
+    "forecastNext14Days": "14 ngày tới",
+    "forecastTotalUpcoming": "Tổng {count}",
+    "forecastDayDetailEmpty": "Không có từ nào ngày này",
+    "forecastBreakdown": {
+      "practicing": "Đang ôn",
+      "practicingHint": "Các từ đang trên hành trình thuộc",
+      "relearning": "Vừa quên",
+      "relearningHint": "Từ đã thuộc nhưng vừa trượt khỏi mức thuộc"
+    },
+    "forecastPrivacyHint": "Chúng tôi ẩn các từ cụ thể để bài kiểm tra trí nhớ được trung thực — bạn sẽ thấy chúng khi đến lúc ôn.",
     "memoryStrength": {
       "title": "Độ bền trí nhớ",
       "tier": {
