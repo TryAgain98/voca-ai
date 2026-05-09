@@ -156,6 +156,8 @@
     "forecastWordsCount": "{count, plural, =0 {không có từ} =1 {1 từ} other {# từ}}",
     "forecastNext14Days": "14 ngày tới",
     "forecastTotalUpcoming": "Tổng {count}",
+    "forecastLegendLess": "Ít",
+    "forecastLegendMore": "Nhiều",
     "forecastDayDetailEmpty": "Không có từ nào ngày này",
     "forecastBreakdown": {
       "practicing": "Đang ôn",
