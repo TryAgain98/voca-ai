@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import { ClipboardList } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 
@@ -30,6 +30,12 @@ export default function QuizPage() {
   const pendingVocab = useQuizQuickStartStore((s) => s.pendingVocab)
   const clearPendingVocab = useQuizQuickStartStore((s) => s.clearPendingVocab)
   const userId = user?.id ?? null
+
+  useEffect(() => {
+    return () => {
+      clearPendingVocab()
+    }
+  }, [clearPendingVocab])
 
   const quickStartSetup = useMemo<QuizSetupType | null>(() => {
     if (!userId || !pendingVocab) return null
