@@ -50,14 +50,23 @@ function makeExercise(
   return { type, vocab, siblings, isReinforcement }
 }
 
+function deduplicateVocab(vocab: ReviewVocab[]): ReviewVocab[] {
+  const seen = new Set<string>()
+  return vocab.filter((v) => {
+    if (seen.has(v.word)) return false
+    seen.add(v.word)
+    return true
+  })
+}
+
 function buildInitialQueue(
   vocab: ReviewVocab[],
   types: ExerciseType[],
 ): Exercise[] {
-  const selected = [...vocab]
-  return selected.map((v) => {
+  const unique = deduplicateVocab(vocab)
+  return unique.map((v) => {
     const type = types[Math.floor(Math.random() * types.length)]
-    return makeExercise(v, type, vocab)
+    return makeExercise(v, type, unique)
   })
 }
 
