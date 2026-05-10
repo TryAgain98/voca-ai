@@ -1,28 +1,19 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckCircle2, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-import { SpeakButton } from '~/components/layout/speak-button'
 import { cn } from '~/lib/cn'
 
+import { AnswerRow } from './answer-row'
+
 import type { QuizExerciseResult } from '../../_types/quiz.types'
-import type { Exercise } from '~admin/review/_types/review.types'
 
 type FilterMode = 'all' | 'mistakes'
 
 interface AnswersBreakdownProps {
   results: QuizExerciseResult[]
-}
-
-function getExpectedAnswer(exercise: Exercise): string {
-  // word-to-meaning: question was the word, expected = meaning.
-  // Other types (typing/listening/speaking): expected = the word itself.
-  return exercise.type === 'word-to-meaning'
-    ? exercise.vocab.meaning
-    : exercise.vocab.word
 }
 
 export function AnswersBreakdown({ results }: AnswersBreakdownProps) {
@@ -110,80 +101,5 @@ function FilterTab({ active, onClick, label, danger }: FilterTabProps) {
     >
       {label}
     </button>
-  )
-}
-
-interface AnswerRowProps {
-  result: QuizExerciseResult
-  index: number
-}
-
-function AnswerRow({ result, index }: AnswerRowProps) {
-  const t = useTranslations('Quiz.results')
-  const expected = getExpectedAnswer(result.exercise)
-  const isCorrect = result.isCorrect
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 8 }}
-      transition={{ delay: index * 0.03, duration: 0.25 }}
-      className={cn(
-        'flex items-start gap-2.5 rounded-lg border px-3 py-2',
-        isCorrect
-          ? 'border-emerald-500/15 bg-emerald-500/[0.04]'
-          : 'border-rose-500/20 bg-rose-500/[0.05]',
-      )}
-    >
-      {isCorrect ? (
-        <CheckCircle2
-          size={16}
-          className="mt-0.5 shrink-0 text-emerald-500"
-          strokeWidth={2}
-        />
-      ) : (
-        <XCircle
-          size={16}
-          className="mt-0.5 shrink-0 text-rose-500"
-          strokeWidth={2}
-        />
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-foreground text-sm font-[590]">
-            {result.exercise.vocab.word}
-          </span>
-          <SpeakButton
-            text={result.exercise.vocab.word}
-            className="-my-1 size-6"
-          />
-          <span className="text-muted-foreground text-xs">
-            — {result.exercise.vocab.meaning}
-          </span>
-        </div>
-        {!isCorrect && (
-          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
-            <span className="text-emerald-500">
-              <span className="text-muted-foreground/80">
-                {t('expected')}:{' '}
-              </span>
-              <span className="font-[510]">{expected}</span>
-            </span>
-            {result.userAnswer && (
-              <span className="text-rose-400">
-                <span className="text-muted-foreground/80">
-                  {t('yourAnswer')}:{' '}
-                </span>
-                <span className="font-[510] line-through">
-                  {result.userAnswer}
-                </span>
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </motion.div>
   )
 }

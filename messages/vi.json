@@ -357,7 +357,12 @@
       "filterMistakes": "Sai ({count})",
       "noMistakes": "Hoàn hảo — không sai câu nào ✨",
       "expected": "Đáp án",
-      "yourAnswer": "Bạn gõ"
+      "yourAnswer": "Bạn gõ",
+      "difficulty": {
+        "easy": "Dễ",
+        "good": "Ổn",
+        "hard": "Khó"
+      }
     }
   },
   "Settings": {

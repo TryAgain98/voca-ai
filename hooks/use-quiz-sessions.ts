@@ -32,6 +32,9 @@ export function useSaveQuizSession() {
       quizSessionService.create(payload),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY, data.user_id] })
+      qc.invalidateQueries({
+        queryKey: [QUERY_KEY, 'performance', data.user_id],
+      })
     },
     onError: () => toast.error('Failed to save quiz session'),
   })

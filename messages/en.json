@@ -357,7 +357,12 @@
       "filterMistakes": "Mistakes ({count})",
       "noMistakes": "Clean run — no mistakes ✨",
       "expected": "Expected",
-      "yourAnswer": "You typed"
+      "yourAnswer": "You typed",
+      "difficulty": {
+        "easy": "Easy",
+        "good": "Good",
+        "hard": "Hard"
+      }
     }
   },
   "Settings": {
