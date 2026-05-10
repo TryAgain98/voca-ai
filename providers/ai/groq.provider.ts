@@ -76,6 +76,7 @@ export class GroqProvider extends BaseAIProvider {
     }
     return {
       valid: true,
+      word_type: String(fill.word_type ?? ''),
       meaning: String(fill.meaning ?? ''),
       phonetic: String(fill.phonetic ?? ''),
       example: String(fill.example ?? ''),

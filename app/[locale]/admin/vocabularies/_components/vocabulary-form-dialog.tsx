@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import { ExampleField } from '~/app/[locale]/admin/vocabularies/_components/example-field'
 import { IpaField } from '~/app/[locale]/admin/vocabularies/_components/ipa-field'
+import { SuggestionHint } from '~/app/[locale]/admin/vocabularies/_components/suggestion-hint'
 import { WordMeaningFields } from '~/app/[locale]/admin/vocabularies/_components/word-meaning-fields'
 import { useVocabForm } from '~/app/[locale]/admin/vocabularies/_hooks/use-vocab-form'
 import { Button } from '~/components/ui/button'
@@ -25,6 +26,17 @@ import {
 
 import type { Lesson, Vocabulary } from '~/types'
 
+const WORD_TYPES = [
+  { value: 'n', label: 'Noun (n)' },
+  { value: 'v', label: 'Verb (v)' },
+  { value: 'adj', label: 'Adjective (adj)' },
+  { value: 'adv', label: 'Adverb (adv)' },
+  { value: 'prep', label: 'Preposition (prep)' },
+  { value: 'phr.v', label: 'Phrasal Verb (phr.v)' },
+  { value: 'p.p', label: 'Past Participle (p.p)' },
+  { value: 'phrase', label: 'Phrase / Expression' },
+] as const
+
 interface VocabularyFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -34,6 +46,7 @@ interface VocabularyFormDialogProps {
   onSubmit: (data: {
     lesson_id: string
     word: string
+    word_type?: string
     meaning: string
     phonetic: string
     example?: string
@@ -68,6 +81,7 @@ export function VocabularyFormDialog({
     onSubmit({
       lesson_id: form.lesson_id,
       word: form.word.trim(),
+      word_type: form.word_type.trim() || undefined,
       meaning: form.meaning.trim(),
       phonetic: form.phonetic.trim(),
       example: form.example.trim() || undefined,
@@ -112,6 +126,38 @@ export function VocabularyFormDialog({
             {errors.lesson_id && (
               <p className="text-destructive text-xs">{errors.lesson_id}</p>
             )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>{t('wordTypeLabel')}</Label>
+            <Select
+              value={form.word_type}
+              onValueChange={(v) => set('word_type', v ?? '')}
+            >
+              <SelectTrigger className="w-full">
+                <span
+                  className={`min-w-0 flex-1 truncate text-left text-sm ${!form.word_type ? 'text-muted-foreground' : ''}`}
+                >
+                  {WORD_TYPES.find((t) => t.value === form.word_type)?.label ??
+                    t('wordTypePlaceholder')}
+                </span>
+              </SelectTrigger>
+              <SelectContent>
+                {WORD_TYPES.map((wt) => (
+                  <SelectItem key={wt.value} value={wt.value}>
+                    {wt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <SuggestionHint
+              suggestion={(() => {
+                const s = suggestions.word_type.suggestion
+                if (!s) return null
+                return WORD_TYPES.find((wt) => wt.value === s)?.label ?? s
+              })()}
+              isLoading={suggestions.word_type.isLoading}
+            />
           </div>
 
           <WordMeaningFields

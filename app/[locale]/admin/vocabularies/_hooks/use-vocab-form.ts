@@ -12,6 +12,7 @@ import type { Lesson, Vocabulary } from '~/types'
 interface FormState {
   lesson_id: string
   word: string
+  word_type: string
   meaning: string
   example: string
   phonetic: string
@@ -21,6 +22,7 @@ type FieldError = Partial<Record<keyof FormState, string>>
 
 export interface VocabFormSuggestions {
   word: UseSuggestionReturn
+  word_type: UseSuggestionReturn
   meaning: UseSuggestionReturn
   phonetic: UseSuggestionReturn
   example: UseSuggestionReturn
@@ -47,6 +49,7 @@ export function useVocabForm(
   const [form, setForm] = useState<FormState>({
     lesson_id: editing?.lesson_id ?? '',
     word: editing?.word ?? '',
+    word_type: editing?.word_type ?? '',
     meaning: editing?.meaning ?? '',
     example: editing?.example ?? '',
     phonetic: editing?.phonetic ?? '',
@@ -85,6 +88,11 @@ export function useVocabForm(
 
   const suggestions: VocabFormSuggestions = {
     word: meaningToWord,
+    word_type: {
+      suggestion: form.word_type.trim() ? null : fill.word_type,
+      isLoading: form.word_type.trim() ? false : fill.isLoading,
+      clear: clearFill,
+    },
     meaning: {
       suggestion: form.meaning.trim() ? null : fill.meaning,
       isLoading: form.meaning.trim() ? false : fill.isLoading,
@@ -104,6 +112,7 @@ export function useVocabForm(
 
   const hasAnySuggestion =
     !!suggestions.word.suggestion ||
+    !!suggestions.word_type.suggestion ||
     !!suggestions.meaning.suggestion ||
     !!suggestions.phonetic.suggestion ||
     !!suggestions.example.suggestion
@@ -115,6 +124,8 @@ export function useVocabForm(
         !f.word.trim() && meaningToWord.suggestion
           ? meaningToWord.suggestion
           : f.word,
+      word_type:
+        !f.word_type.trim() && fill.word_type ? fill.word_type : f.word_type,
       meaning: !f.meaning.trim() && fill.meaning ? fill.meaning : f.meaning,
       phonetic:
         !f.phonetic.trim() && fill.phonetic ? fill.phonetic : f.phonetic,

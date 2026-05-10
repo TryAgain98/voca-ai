@@ -71,6 +71,7 @@ export default function VocabulariesPage() {
   const handleSubmit = async (data: {
     lesson_id: string
     word: string
+    word_type?: string
     meaning: string
     phonetic: string
     example?: string
@@ -80,6 +81,7 @@ export default function VocabulariesPage() {
         id: editing.id,
         lessonId: editing.lesson_id,
         word: data.word,
+        word_type: data.word_type,
         meaning: data.meaning,
         example: data.example,
         phonetic: data.phonetic,

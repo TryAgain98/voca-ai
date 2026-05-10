@@ -6,6 +6,20 @@ import { toast } from 'sonner'
 
 import { vocabulariesService } from '~/services/vocabularies.service'
 
+import type { Vocabulary } from '~/types'
+
+function fireSynonymSync(
+  body: { vocab: Vocabulary } | { vocabs: Vocabulary[] } | { vocabId: string },
+): Promise<void> {
+  return fetch('/api/vocab/sync-synonyms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+    .then(() => {})
+    .catch(() => {})
+}
+
 export function useVocabularies(lessonId?: string) {
   return useQuery({
     queryKey: ['vocabularies', lessonId],
@@ -31,14 +45,18 @@ export function useCreateVocabulary() {
     mutationFn: (payload: {
       lesson_id: string
       word: string
+      word_type?: string
       meaning: string
       example?: string
       phonetic?: string
     }) => vocabulariesService.create(payload),
-    onSuccess: (_, vars) => {
+    onSuccess: (vocab, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lesson_id] })
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
       toast.success(t('createSuccess'))
+      fireSynonymSync({ vocab }).then(() => {
+        qc.invalidateQueries({ queryKey: ['vocabularies'] })
+      })
     },
     onError: () => toast.error(t('createError')),
   })
@@ -52,12 +70,14 @@ export function useUpdateVocabulary() {
       id: string
       lessonId: string
       word: string
+      word_type?: string
       meaning: string
       example?: string
       phonetic?: string
     }) =>
       vocabulariesService.update(vars.id, {
         word: vars.word,
+        word_type: vars.word_type,
         meaning: vars.meaning,
         example: vars.example,
         phonetic: vars.phonetic,
@@ -66,6 +86,9 @@ export function useUpdateVocabulary() {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lessonId] })
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
       toast.success(t('updateSuccess'))
+      fireSynonymSync({ vocabId: vars.id }).then(() => {
+        qc.invalidateQueries({ queryKey: ['vocabularies'] })
+      })
     },
     onError: () => toast.error(t('updateError')),
   })
@@ -76,8 +99,11 @@ export function useBulkCreateVocabularies() {
   return useMutation({
     mutationFn: (items: Parameters<typeof vocabulariesService.bulkCreate>[0]) =>
       vocabulariesService.bulkCreate(items),
-    onSuccess: () => {
+    onSuccess: (vocabs) => {
       qc.invalidateQueries({ queryKey: ['vocabularies'] })
+      fireSynonymSync({ vocabs }).then(() => {
+        qc.invalidateQueries({ queryKey: ['vocabularies'] })
+      })
     },
     onError: () => toast.error('Failed to import vocabularies'),
   })

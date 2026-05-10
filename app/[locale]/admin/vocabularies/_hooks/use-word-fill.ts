@@ -9,6 +9,7 @@ interface FillState {
 }
 
 export interface WordFillData {
+  word_type: string | null
   meaning: string | null
   phonetic: string | null
   example: string | null
@@ -64,6 +65,7 @@ export function useWordFill(word: string): UseWordFillReturn {
 
   return {
     fill: {
+      word_type: wordIsValid ? state.data?.word_type || null : null,
       meaning: wordIsValid ? state.data?.meaning || null : null,
       phonetic: wordIsValid ? state.data?.phonetic || null : null,
       example: wordIsValid ? state.data?.example || null : null,

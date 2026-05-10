@@ -450,6 +450,8 @@
     "wordRequired": "Word is required",
     "meaningLabel": "Meaning",
     "meaningRequired": "Meaning is required",
+    "wordTypeLabel": "Word Type",
+    "wordTypePlaceholder": "Select type (optional)",
     "exampleLabel": "Example",
     "phoneticLabel": "Phonetic (IPA)",
     "phoneticRequired": "Phonetic is required",

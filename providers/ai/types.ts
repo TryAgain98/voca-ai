@@ -11,6 +11,7 @@ export type TranslationDirection = 'word-to-meaning' | 'meaning-to-word'
 
 export interface VocabularyFill {
   valid: boolean
+  word_type?: string
   meaning: string
   phonetic: string
   example: string

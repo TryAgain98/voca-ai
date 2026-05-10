@@ -450,6 +450,8 @@
     "wordRequired": "Từ là bắt buộc",
     "meaningLabel": "Nghĩa",
     "meaningRequired": "Nghĩa là bắt buộc",
+    "wordTypeLabel": "Loại từ",
+    "wordTypePlaceholder": "Chọn loại từ (tùy chọn)",
     "exampleLabel": "Ví dụ",
     "phoneticLabel": "Phiên âm (IPA)",
     "phoneticRequired": "Phiên âm là bắt buộc",
