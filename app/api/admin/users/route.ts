@@ -1,6 +1,7 @@
 import { clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
+import { dayjs } from '~/lib/dayjs'
 import { supabase } from '~/lib/supabase'
 
 export interface AdminUser {
@@ -47,7 +48,7 @@ export async function GET(): Promise<NextResponse> {
     ])
 
     const totalWords = vocabResult.count ?? 0
-    const now = new Date()
+    const now = dayjs()
 
     const progressMap = new Map<
       string,
@@ -59,7 +60,7 @@ export async function GET(): Promise<NextResponse> {
         dueCount: 0,
       }
       existing.learnedCount++
-      if (row.due_at && new Date(row.due_at) <= now) existing.dueCount++
+      if (row.due_at && !dayjs(row.due_at).isAfter(now)) existing.dueCount++
       progressMap.set(row.user_id, existing)
     }
 

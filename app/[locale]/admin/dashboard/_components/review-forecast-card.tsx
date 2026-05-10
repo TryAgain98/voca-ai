@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Skeleton } from '~/components/ui/skeleton'
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 import { cn } from '~/lib/utils'
 
 import { ForecastDayDetailDialog } from './forecast-day-detail-dialog'
@@ -17,15 +18,8 @@ interface ReviewForecastCardProps {
   isLoading: boolean
 }
 
-const tzFormatter = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Asia/Ho_Chi_Minh',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-})
-
 function todayKey(): string {
-  return tzFormatter.format(new Date())
+  return dayjs().tz(APP_TIMEZONE).format('YYYY-MM-DD')
 }
 
 type IntensityStyle = { bg: string; text: string }
@@ -102,7 +96,7 @@ export function ReviewForecastCard({
   }
 
   const subtitle = nextDate
-    ? format.dateTime(new Date(`${nextDate}T00:00:00`), {
+    ? format.dateTime(dayjs(`${nextDate}T00:00:00`).toDate(), {
         weekday: 'long',
         month: 'short',
         day: 'numeric',
@@ -148,12 +142,14 @@ export function ReviewForecastCard({
         <div className="flex gap-1.5">
           {days.map((day, index) => {
             const isToday = day.date === todayId
-            const dayLabel = format.dateTime(new Date(`${day.date}T00:00:00`), {
-              weekday: 'narrow',
-            })
-            const dateNum = format.dateTime(new Date(`${day.date}T00:00:00`), {
-              day: 'numeric',
-            })
+            const dayLabel = format.dateTime(
+              dayjs(`${day.date}T00:00:00`).toDate(),
+              { weekday: 'narrow' },
+            )
+            const dateNum = format.dateTime(
+              dayjs(`${day.date}T00:00:00`).toDate(),
+              { day: 'numeric' },
+            )
             const hasReviews = day.count > 0
             const showDayLabel = index === 0 || index % 2 === 0
             const style = intensityStyle(day.count, maxCount)

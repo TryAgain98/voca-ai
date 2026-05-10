@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { dayjs } from '~/lib/dayjs'
 import { sendStreakReminder } from '~/lib/streak-email'
 import { streakService } from '~/services/streak.service'
 
@@ -70,7 +71,7 @@ export async function GET(request: Request) {
   }
 
   const rows = await streakService.findEnabledReminderRows()
-  const now = new Date()
+  const now = dayjs().toDate()
   const results = { candidates: rows.length, sent: 0, skipped: 0, errors: 0 }
 
   for (const row of rows) {

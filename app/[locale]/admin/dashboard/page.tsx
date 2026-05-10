@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
 import { useStreak } from '~/hooks/use-streak'
 import { useDashboardStats, useReviewForecast } from '~/hooks/use-word-mastery'
+import { dayjs } from '~/lib/dayjs'
 
 import { MasteryCard } from './_components/mastery-card'
 import { ReviewForecastCard } from './_components/review-forecast-card'
@@ -16,7 +17,7 @@ import { TestPerformanceCard } from './_components/test-performance-card'
 import { TrickyWordsCard } from './_components/tricky-words-card'
 
 function getGreeting(): 'morning' | 'afternoon' | 'evening' {
-  const hour = new Date().getHours()
+  const hour = dayjs().hour()
   if (hour < 12) return 'morning'
   if (hour < 18) return 'afternoon'
   return 'evening'

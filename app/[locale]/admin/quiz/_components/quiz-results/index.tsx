@@ -10,6 +10,7 @@ import { Button } from '~/components/ui/button'
 import { useSaveQuizSession } from '~/hooks/use-quiz-sessions'
 import { useRecordStreakActivity } from '~/hooks/use-streak'
 import { useApplyQuizMastery } from '~/hooks/use-word-mastery'
+import { dayjs } from '~/lib/dayjs'
 
 import { AnswersBreakdown } from './answers-breakdown'
 import { ConfettiBurst } from './confetti-burst'
@@ -73,7 +74,7 @@ export function QuizResults({
         user_id: setup.userId,
         lesson_ids: setup.lessonIds,
         start_time: startTime.toISOString(),
-        end_time: new Date().toISOString(),
+        end_time: dayjs().toISOString(),
         total_questions: total,
         correct_count: correctCount,
         score,

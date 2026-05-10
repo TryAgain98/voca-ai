@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { Skeleton } from '~/components/ui/skeleton'
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 
 import type { UserStreak } from '~/types'
 
@@ -15,22 +16,15 @@ interface StreakCardProps {
 }
 
 const COUNT_ANIMATION_MS = 700
-const MS_PER_DAY = 1000 * 60 * 60 * 24
 
 type StreakStatus = 'active' | 'at-risk' | 'idle'
 
 function todayLocalDate(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return dayjs().tz(APP_TIMEZONE).format('YYYY-MM-DD')
 }
 
 function daysBetween(fromIso: string, toIso: string): number {
-  const from = new Date(`${fromIso}T00:00:00`).getTime()
-  const to = new Date(`${toIso}T00:00:00`).getTime()
-  return Math.round((to - from) / MS_PER_DAY)
+  return dayjs(toIso).diff(dayjs(fromIso), 'day')
 }
 
 function deriveStatus(streak: UserStreak | null | undefined): StreakStatus {

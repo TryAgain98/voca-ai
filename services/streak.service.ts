@@ -1,23 +1,17 @@
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 import { supabase } from '~/lib/supabase'
 
 import type { StreakReminderPrefs, UserStreak } from '~/types'
 
 const FREEZE_CAP = 2
 const FREEZE_REPLENISH_DAYS = 7
-const MS_PER_DAY = 1000 * 60 * 60 * 24
 
 function todayLocalDate(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return dayjs().tz(APP_TIMEZONE).format('YYYY-MM-DD')
 }
 
 function daysBetween(fromIso: string, toIso: string): number {
-  const from = new Date(`${fromIso}T00:00:00`).getTime()
-  const to = new Date(`${toIso}T00:00:00`).getTime()
-  return Math.round((to - from) / MS_PER_DAY)
+  return dayjs(toIso).diff(dayjs(fromIso), 'day')
 }
 
 interface NextStreakState {
@@ -111,7 +105,7 @@ class StreakService {
     const { data, error } = await supabase
       .from('user_streaks')
       .upsert(
-        { user_id: userId, ...next, updated_at: new Date().toISOString() },
+        { user_id: userId, ...next, updated_at: dayjs().toISOString() },
         { onConflict: 'user_id' },
       )
       .select()
@@ -133,7 +127,7 @@ class StreakService {
           timezone: prefs.timezone,
           reminder_hour: prefs.reminder_hour,
           email_reminders_enabled: prefs.email_reminders_enabled,
-          updated_at: new Date().toISOString(),
+          updated_at: dayjs().toISOString(),
         },
         { onConflict: 'user_id' },
       )

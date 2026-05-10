@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 
 import { findSiblings } from '~/lib/answer-pattern'
+import { dayjs } from '~/lib/dayjs'
 
 import type { QuizExerciseResult, QuizSetup } from '../_types/quiz.types'
 import type {
@@ -80,7 +81,7 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
   const [queue] = useState<Exercise[]>(() =>
     buildQueue(setup.vocab, setup.exerciseTypes),
   )
-  const [startTime] = useState<Date>(() => new Date())
+  const [startTime] = useState<Date>(() => dayjs().toDate())
   const [currentIndex, setCurrentIndex] = useState(0)
   const [results, setResults] = useState<QuizExerciseResult[]>([])
   const [endTime, setEndTime] = useState<Date | null>(null)
@@ -104,7 +105,7 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
       const nextIndex = currentIndex + 1
       setCurrentIndex(nextIndex)
       if (nextIndex >= queue.length) {
-        setEndTime(new Date())
+        setEndTime(dayjs().toDate())
       }
     },
     [currentExercise, currentIndex, queue.length],

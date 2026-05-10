@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
+import { dayjs } from '~/lib/dayjs'
 import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 
 import type { ReviewWord } from '~/types'
@@ -36,8 +37,7 @@ function toReviewVocab(word: ReviewWord): ReviewVocab {
 function getDaysOverdue(word: ReviewWord, now: Date): number {
   const dueAt = word.progress?.due_at
   if (!dueAt) return 0
-  const diffMs = now.getTime() - new Date(dueAt).getTime()
-  return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)))
+  return Math.max(0, dayjs(now).diff(dayjs(dueAt), 'day'))
 }
 
 export function NeedsTestingCard({
@@ -55,7 +55,7 @@ export function NeedsTestingCard({
   const canStart = needsTestingCount >= MIN_TEST_WORDS
   const preview = needsTestingWords.slice(0, PREVIEW_COUNT)
   const remaining = needsTestingCount - PREVIEW_COUNT
-  const now = new Date()
+  const now = dayjs().toDate()
 
   const handleStartTest = () => {
     setPendingVocab(needsTestingWords.map(toReviewVocab))

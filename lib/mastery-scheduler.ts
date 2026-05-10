@@ -1,11 +1,4 @@
-/**
- * FSRS-lite scheduler — combines Leitner level, ease factor, retrievability,
- * and lapse handling into one model. Each test produces a grade 1-4 that
- * adjusts both per-word difficulty (how hard *this* word is for *this* user)
- * and stability (how long memory will hold).
- *
- * Reference: SuperMemo SM-2 + FSRS retrievability curve.
- */
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 
 export const MAX_MASTERY_LEVEL = 5
 export const MASTERED_THRESHOLD = 3
@@ -113,7 +106,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function addMs(date: Date, ms: number): Date {
-  return new Date(date.getTime() + ms)
+  return dayjs(date).add(ms, 'millisecond').toDate()
 }
 
 function nextStability(
@@ -154,9 +147,7 @@ function relearningDueAt(step: number, now: Date): Date {
 }
 
 function startOfNextDay(now: Date): Date {
-  const next = new Date(now)
-  next.setHours(24, 0, 0, 0)
-  return next
+  return dayjs(now).tz(APP_TIMEZONE).add(1, 'day').startOf('day').toDate()
 }
 
 function lapseDueAt(now: Date): Date {
@@ -166,7 +157,7 @@ function lapseDueAt(now: Date): Date {
 }
 
 export function nextSchedule(input: SchedulerInput): SchedulerOutput {
-  const now = input.now ?? new Date()
+  const now = input.now ?? dayjs().toDate()
   const grade = input.grade
   const wasMastered = input.prevMastery >= MASTERED_THRESHOLD
 

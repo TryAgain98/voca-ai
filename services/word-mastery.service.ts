@@ -1,3 +1,4 @@
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 import {
   DEFAULTS,
   deriveGrade,
@@ -36,7 +37,6 @@ const NEEDS_TESTING_PREVIEW_LIMIT = 50
 const FADING_PREVIEW_LIMIT = 20
 const WRONG_TODAY_PREVIEW_LIMIT = 20
 const FADING_RETENTION_THRESHOLD = 0.85
-const DAY_MS = 1000 * 60 * 60 * 24
 const RECENT_TEST_COOLDOWN_MS = 60 * 60 * 1000
 const UNTESTED_PRIORITY = 50
 
@@ -76,18 +76,18 @@ export interface ReviewForecast {
 const FORECAST_DAYS = 14
 
 function daysBetween(a: Date, b: Date): number {
-  return Math.max(0, (b.getTime() - a.getTime()) / DAY_MS)
+  return Math.max(0, dayjs(b).diff(dayjs(a), 'day'))
 }
 
 function progressRetention(progress: WordMastery, now: Date): number {
   if (!progress.tested_at || progress.stability <= 0) return 1
-  const elapsed = daysBetween(new Date(progress.tested_at), now)
+  const elapsed = daysBetween(dayjs(progress.tested_at).toDate(), now)
   return retrievability(progress.stability, elapsed)
 }
 
 function computePracticeScore(progress: WordMastery | null): number {
   if (!progress) return 100
-  const retention = progressRetention(progress, new Date())
+  const retention = progressRetention(progress, dayjs().toDate())
   const masteryGap = (5 - progress.level) * 8
   const difficultyBoost = (progress.difficulty - 5) * 4
   return masteryGap + difficultyBoost + (1 - retention) * 30
@@ -96,21 +96,20 @@ function computePracticeScore(progress: WordMastery | null): number {
 function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   if (!progress) return UNTESTED_PRIORITY
   if (progress.is_relearning && progress.due_at) {
-    const due = new Date(progress.due_at)
-    if (due > now) return -1
+    if (dayjs(progress.due_at).isAfter(now)) return -1
     return 100
   }
   if (!progress.tested_at) {
     return 30 - progress.level * 2
   }
   if (!progress.due_at) return 35
-  const dueDate = new Date(progress.due_at)
-  const overdueDays = (now.getTime() - dueDate.getTime()) / DAY_MS
-  if (dueDate <= now) {
+  const dueDate = dayjs(progress.due_at)
+  const overdueDays = dayjs(now).diff(dueDate, 'day')
+  if (!dueDate.isAfter(now)) {
     return 70 + Math.min(30, overdueDays * 4) - progress.level * 3
   }
   if (isMastered(progress.level)) return -1
-  const msSinceTest = now.getTime() - new Date(progress.tested_at).getTime()
+  const msSinceTest = dayjs(now).diff(dayjs(progress.tested_at), 'millisecond')
   if (msSinceTest < RECENT_TEST_COOLDOWN_MS) {
     return msSinceTest / RECENT_TEST_COOLDOWN_MS
   }
@@ -120,28 +119,17 @@ function computeQuizPriority(progress: WordMastery | null, now: Date): number {
 
 function isDueForDashboard(progress: WordMastery, now: Date): boolean {
   if (progress.due_at) {
-    return new Date(progress.due_at) <= now
+    return !dayjs(progress.due_at).isAfter(now)
   }
   return !progress.tested_at
 }
 
-const APP_TIMEZONE = 'Asia/Ho_Chi_Minh'
-
-const tzFormatter = new Intl.DateTimeFormat('en-CA', {
-  timeZone: APP_TIMEZONE,
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-})
-
 function localDayKey(d: Date): string {
-  return tzFormatter.format(d)
+  return dayjs(d).tz(APP_TIMEZONE).format('YYYY-MM-DD')
 }
 
 function dayOffsetFromKeys(fromKey: string, toKey: string): number {
-  const a = new Date(`${fromKey}T00:00:00Z`).getTime()
-  const b = new Date(`${toKey}T00:00:00Z`).getTime()
-  return Math.round((b - a) / DAY_MS)
+  return dayjs.utc(toKey).diff(dayjs.utc(fromKey), 'day')
 }
 
 function isSameLocalDay(a: Date, b: Date): boolean {
@@ -234,7 +222,7 @@ class WordMasteryService {
       (progressRows ?? []).map((p: WordMastery) => [p.word_id, p]),
     )
 
-    const now = new Date()
+    const now = dayjs().toDate()
     const learnedCount = progressRows?.length ?? 0
 
     const unlearnedWords: ReviewWord[] = vocabs
@@ -363,18 +351,15 @@ class WordMasteryService {
 
     if (progressError) throw progressError
 
-    const now = new Date()
+    const now = dayjs().toDate()
     const todayKey = localDayKey(now)
 
     const buckets = new Map<string, ForecastDayBreakdown>()
     for (let i = 0; i < days; i += 1) {
-      const d = new Date(
-        new Date(`${todayKey}T00:00:00Z`).getTime() + i * DAY_MS,
-      )
-      buckets.set(
-        `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`,
-        { practicing: 0, relearning: 0 },
-      )
+      buckets.set(dayjs.utc(todayKey).add(i, 'day').format('YYYY-MM-DD'), {
+        practicing: 0,
+        relearning: 0,
+      })
     }
 
     let overdueCount = 0
@@ -382,7 +367,7 @@ class WordMasteryService {
       if (!progress.due_at) continue
       if (isMastered(progress.level)) continue
 
-      const dueDateKey = localDayKey(new Date(progress.due_at))
+      const dueDateKey = localDayKey(dayjs(progress.due_at).toDate())
       const offset = dayOffsetFromKeys(todayKey, dueDateKey)
 
       if (offset < 0) {
@@ -455,7 +440,7 @@ class WordMasteryService {
     const progressMap = new Map<string, WordMastery>(
       (progressRows ?? []).map((p: WordMastery) => [p.word_id, p]),
     )
-    const now = new Date()
+    const now = dayjs().toDate()
 
     const candidates: { word: ReviewWord; priority: number }[] = []
     for (const vocab of vocabs) {
@@ -482,7 +467,7 @@ class WordMasteryService {
     results: QuizWordResult[],
   ): Promise<void> {
     if (results.length === 0) return
-    const now = new Date()
+    const now = dayjs().toDate()
     const wordIds = results.map((r) => r.wordId)
 
     const { data: existing, error: fetchError } = await supabase
@@ -544,7 +529,7 @@ class WordMasteryService {
   }
 
   async softDemoteMastery(userId: string, wordId: string): Promise<void> {
-    const now = new Date()
+    const now = dayjs().toDate()
     const { data: existing, error: fetchError } = await supabase
       .from('word_mastery')
       .select('*')

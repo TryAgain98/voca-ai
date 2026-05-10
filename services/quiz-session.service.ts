@@ -1,3 +1,4 @@
+import { dayjs } from '~/lib/dayjs'
 import { supabase } from '~/lib/supabase'
 
 import type {
@@ -83,10 +84,9 @@ class QuizSessionService {
         ? recentScores.reduce((sum, s) => sum + s, 0) / recentScores.length
         : 0
 
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - WEEK_DAYS)
+    const weekAgo = dayjs().subtract(WEEK_DAYS, 'day')
     const sessionsThisWeek = rows.filter(
-      (r) => new Date(r.created_at) >= weekAgo,
+      (r) => !dayjs(r.created_at).isBefore(weekAgo),
     ).length
 
     const tally = new Map<
