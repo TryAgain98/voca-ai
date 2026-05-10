@@ -34,17 +34,26 @@ export function MCQExerciseCard({
 }: MCQExerciseCardProps) {
   const t = useTranslations('Review')
   const [selected, setSelected] = useState<number | null>(null)
-  const { speak } = useTTS(exercise.vocab.word)
+  const { speak, isSpeaking } = useTTS(exercise.vocab.word)
   const isQuiz = mode === 'quiz'
   const startedAtRef = useRef<number>(0)
+  const speechStartedRef = useRef(false)
 
   useEffect(() => {
-    startedAtRef.current = Date.now()
+    speechStartedRef.current = false
     const timer = setTimeout(() => speak(), 400)
     return () => clearTimeout(timer)
     // speak is stable within TTS module lifecycle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Reset timer when audio actually begins (accounts for Windows TTS cold-start latency)
+  useEffect(() => {
+    if (isSpeaking && !speechStartedRef.current) {
+      speechStartedRef.current = true
+      startedAtRef.current = Date.now()
+    }
+  }, [isSpeaking])
 
   const isCorrect = selected !== null && selected === exercise.correctIndex
 

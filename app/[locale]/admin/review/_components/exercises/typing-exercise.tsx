@@ -51,7 +51,8 @@ export function TypingExerciseCard({
   const [isSynonymMatch, setIsSynonymMatch] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const startedAtRef = useRef<number>(0)
-  const { speak } = useTTS(exercise.vocab.word)
+  const speechStartedRef = useRef(false)
+  const { speak, isSpeaking } = useTTS(exercise.vocab.word)
   const isListenMode = exercise.type === 'listen-to-word'
   const accentColor = isListenMode ? 'amber' : 'sky'
   const isQuiz = mode === 'quiz'
@@ -80,9 +81,10 @@ export function TypingExerciseCard({
   const canShowHint = !submitted && manualHintCount < maxManualHints
 
   useEffect(() => {
-    startedAtRef.current = Date.now()
+    if (!isListenMode) startedAtRef.current = Date.now()
+    speechStartedRef.current = false
     inputRef.current?.focus()
-  }, [])
+  }, [isListenMode])
 
   useEffect(() => {
     if (!isListenMode) return
@@ -91,6 +93,13 @@ export function TypingExerciseCard({
     // speak is stable within TTS module lifecycle; no dep needed
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isListenMode])
+
+  // For listen mode: reset timer when audio actually begins (accounts for Windows TTS cold-start latency)
+  useEffect(() => {
+    if (!isListenMode || !isSpeaking || speechStartedRef.current) return
+    speechStartedRef.current = true
+    startedAtRef.current = Date.now()
+  }, [isListenMode, isSpeaking])
 
   const handleSubmit = () => {
     if (submitted || !value.trim()) return

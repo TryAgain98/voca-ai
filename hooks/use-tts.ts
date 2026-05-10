@@ -1,9 +1,26 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { useTTSSettingsStore } from '~/stores/tts-settings'
 
 // Module-level ref so only one audio plays at a time across all SpeakButtons
 let currentAudio: HTMLAudioElement | null = null
+
+// Prewarm the Web Speech engine once to eliminate Windows cold-start delay (~1-2s)
+let speechPrewarmed = false
+function prewarmSpeechEngine(): void {
+  if (
+    speechPrewarmed ||
+    typeof window === 'undefined' ||
+    !('speechSynthesis' in window)
+  )
+    return
+  speechPrewarmed = true
+  const warmup = new SpeechSynthesisUtterance(' ')
+  warmup.volume = 0
+  warmup.rate = 10
+  window.speechSynthesis.speak(warmup)
+  setTimeout(() => window.speechSynthesis.cancel(), 200)
+}
 
 interface UseTTSReturn {
   speak: () => void
@@ -14,6 +31,10 @@ interface UseTTSReturn {
 
 export function useTTS(text: string): UseTTSReturn {
   const engine = useTTSSettingsStore((s) => s.engine)
+
+  useEffect(() => {
+    if (engine === 'web-speech') prewarmSpeechEngine()
+  }, [engine])
   const webSpeechRate = useTTSSettingsStore((s) => s.webSpeechRate)
   const webSpeechPitch = useTTSSettingsStore((s) => s.webSpeechPitch)
   const webSpeechVoiceURI = useTTSSettingsStore((s) => s.webSpeechVoiceURI)
