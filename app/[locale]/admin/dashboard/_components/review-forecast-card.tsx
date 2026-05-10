@@ -36,15 +36,15 @@ function intensityStyle(count: number, max: number): IntensityStyle {
   }
   const ratio = count / max
   if (ratio <= 0.25) {
-    return { bg: 'bg-emerald-500/35', text: 'text-emerald-100' }
+    return { bg: 'bg-primary/25', text: 'text-primary/80' }
   }
   if (ratio <= 0.5) {
-    return { bg: 'bg-sky-500/55', text: 'text-sky-50' }
+    return { bg: 'bg-primary/45', text: 'text-primary-foreground/90' }
   }
   if (ratio <= 0.75) {
-    return { bg: 'bg-primary/75', text: 'text-white' }
+    return { bg: 'bg-primary/65', text: 'text-white' }
   }
-  return { bg: 'bg-violet-500/90', text: 'text-white' }
+  return { bg: 'bg-primary/90', text: 'text-white' }
 }
 
 export function ReviewForecastCard({
@@ -229,14 +229,19 @@ export function ReviewForecastCard({
         </div>
 
         {totalUpcoming > 0 && (
-          <div className="text-muted-foreground/60 mt-3 flex items-center justify-end gap-1.5 text-[10px]">
-            <span>{t('forecastLegendLess')}</span>
-            <span className="bg-muted/30 size-2.5 rounded-sm" />
-            <span className="size-2.5 rounded-sm bg-emerald-500/35" />
-            <span className="size-2.5 rounded-sm bg-sky-500/55" />
-            <span className="bg-primary/75 size-2.5 rounded-sm" />
-            <span className="size-2.5 rounded-sm bg-violet-500/90" />
-            <span>{t('forecastLegendMore')}</span>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="text-muted-foreground/50 text-[10px] leading-tight">
+              {t('forecastCountHint')}
+            </p>
+            <div className="text-muted-foreground/60 flex shrink-0 items-center gap-1.5 text-[10px]">
+              <span>{t('forecastLegendLess')}</span>
+              <span className="bg-muted/30 size-2.5 rounded-sm" />
+              <span className="bg-primary/25 size-2.5 rounded-sm" />
+              <span className="bg-primary/45 size-2.5 rounded-sm" />
+              <span className="bg-primary/65 size-2.5 rounded-sm" />
+              <span className="bg-primary/90 size-2.5 rounded-sm" />
+              <span>{t('forecastLegendMore')}</span>
+            </div>
           </div>
         )}
       </div>

@@ -158,6 +158,7 @@
     "forecastTotalUpcoming": "Tổng {count}",
     "forecastLegendLess": "Ít",
     "forecastLegendMore": "Nhiều",
+    "forecastCountHint": "Số lượng có thể thay đổi sau khi bạn hoàn thành ôn tập",
     "forecastDayDetailEmpty": "Không có từ nào ngày này",
     "forecastBreakdown": {
       "practicing": "Đang ôn",

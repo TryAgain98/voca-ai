@@ -158,6 +158,7 @@
     "forecastTotalUpcoming": "{count} total",
     "forecastLegendLess": "Less",
     "forecastLegendMore": "More",
+    "forecastCountHint": "Counts may shift after you complete a review session",
     "forecastDayDetailEmpty": "No reviews scheduled this day",
     "forecastBreakdown": {
       "practicing": "Practicing",
