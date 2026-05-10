@@ -226,7 +226,26 @@
       "mastered": "Chưa có từ nào đạt mức thuộc. Cứ kiểm tra đều đặn — kết quả sẽ đến."
     },
     "noMatch": "Không tìm thấy từ nào khớp bộ lọc",
-    "clearFilters": "Xoá bộ lọc"
+    "clearFilters": "Xoá bộ lọc",
+    "table": {
+      "colNo": "#",
+      "colWord": "Từ",
+      "colMeaning": "Nghĩa",
+      "colLesson": "Bài học",
+      "colDifficulty": "Độ khó",
+      "colNextReview": "Ôn lại lúc",
+      "pageOf": "{current} / {total}",
+      "difficulty": {
+        "easy": "Dễ",
+        "medium": "Thường",
+        "hard": "Khó"
+      },
+      "nextReview": {
+        "overdue": "Quá hạn",
+        "today": "Hôm nay",
+        "tomorrow": "Ngày mai"
+      }
+    }
   },
   "Review": {
     "setupTitle": "Ôn tập",

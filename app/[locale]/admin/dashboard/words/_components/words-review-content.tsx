@@ -4,10 +4,10 @@ import { RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
-import { VocabularyTable } from '~admin/vocabularies/_components/vocabulary-table'
 
 import { TAB_VISUALS } from '../_types/words-review.types'
 
+import { WordsMasteryTable } from './words-mastery-table'
 import { TabEmptyState } from './words-review-states'
 
 import type { TabKey } from '../_types/words-review.types'
@@ -26,8 +26,6 @@ interface WordsReviewContentProps {
   onRowClick: (voca: Vocabulary) => void
   onUnmaster: (voca: Vocabulary) => void
 }
-
-const NOOP = () => {}
 
 export function WordsReviewContent({
   activeTab,
@@ -74,16 +72,13 @@ export function WordsReviewContent({
         />
       ) : (
         <div className="border-border bg-card/40 overflow-hidden rounded-xl border">
-          <VocabularyTable
-            vocabularies={words}
+          <WordsMasteryTable
+            words={words}
             lessons={lessons}
-            searchQuery=""
             isLoading={isLoading}
-            isFiltering={false}
             page={page}
             onPageChange={onPageChange}
             onRowClick={onRowClick}
-            onClearFilters={NOOP}
             renderRowActions={renderRowActions}
           />
         </div>

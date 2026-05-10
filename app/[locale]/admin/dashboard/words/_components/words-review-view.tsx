@@ -58,7 +58,7 @@ export function WordsReviewView({
 
   const initialTab = isTabKey(searchParams.get('tab'))
     ? (searchParams.get('tab') as TabKey)
-    : 'untouched'
+    : 'mastered'
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab)
 
   const { data: lessons = [] } = useLessons()

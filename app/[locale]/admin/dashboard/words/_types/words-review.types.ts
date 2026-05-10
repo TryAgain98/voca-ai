@@ -2,7 +2,7 @@ import { Award, Brain, CheckCircle2, Compass, Sparkles } from 'lucide-react'
 
 import type { LucideIcon } from 'lucide-react'
 
-export const TAB_KEYS = ['untouched', 'practicing', 'mastered'] as const
+export const TAB_KEYS = ['mastered', 'practicing', 'untouched'] as const
 export type TabKey = (typeof TAB_KEYS)[number]
 
 export interface TabVisual {

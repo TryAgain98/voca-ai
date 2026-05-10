@@ -226,7 +226,26 @@
       "mastered": "No mastered words yet. Keep testing — the results will come."
     },
     "noMatch": "No words match your filters",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "table": {
+      "colNo": "#",
+      "colWord": "Word",
+      "colMeaning": "Meaning",
+      "colLesson": "Lesson",
+      "colDifficulty": "Difficulty",
+      "colNextReview": "Next Review",
+      "pageOf": "{current} / {total}",
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Normal",
+        "hard": "Hard"
+      },
+      "nextReview": {
+        "overdue": "Overdue",
+        "today": "Today",
+        "tomorrow": "Tomorrow"
+      }
+    }
   },
   "Review": {
     "setupTitle": "Review",
