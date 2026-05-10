@@ -46,6 +46,7 @@ export function useReviewForecast(userId: string, days?: number) {
     queryKey: [QUERY_KEY, 'forecast', userId, days ?? null],
     queryFn: () => wordMasteryService.getReviewForecast(userId, days),
     enabled: !!userId,
+    staleTime: 0,
   })
 }
 

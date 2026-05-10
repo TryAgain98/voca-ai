@@ -96,7 +96,7 @@ export function ReviewForecastCard({
   }
 
   const subtitle = nextDate
-    ? format.dateTime(dayjs(`${nextDate}T00:00:00`).toDate(), {
+    ? format.dateTime(dayjs.utc(nextDate).toDate(), {
         weekday: 'long',
         month: 'short',
         day: 'numeric',
@@ -142,14 +142,12 @@ export function ReviewForecastCard({
         <div className="flex gap-1.5">
           {days.map((day, index) => {
             const isToday = day.date === todayId
-            const dayLabel = format.dateTime(
-              dayjs(`${day.date}T00:00:00`).toDate(),
-              { weekday: 'narrow' },
-            )
-            const dateNum = format.dateTime(
-              dayjs(`${day.date}T00:00:00`).toDate(),
-              { day: 'numeric' },
-            )
+            const dayLabel = format.dateTime(dayjs.utc(day.date).toDate(), {
+              weekday: 'narrow',
+            })
+            const dateNum = format.dateTime(dayjs.utc(day.date).toDate(), {
+              day: 'numeric',
+            })
             const hasReviews = day.count > 0
             const showDayLabel = index === 0 || index % 2 === 0
             const style = intensityStyle(day.count, maxCount)
