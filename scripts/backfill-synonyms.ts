@@ -5,8 +5,10 @@ import { config } from 'dotenv'
 
 config({ path: resolve(process.cwd(), '.env.local') })
 
+import { findCandidates, normalize, tokenize } from '~/lib/synonym-matcher'
 import { AnthropicProvider, GroqProvider, OpenAIProvider } from '~/providers/ai'
 
+import type { SynonymCandidate } from '~/lib/synonym-matcher'
 import type { BaseAIProvider } from '~/providers/ai'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,6 +16,10 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !serviceRoleKey) {
   console.error('Missing: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY')
+  process.exit(1)
+}
+if (!process.env.GROQ_API_KEY) {
+  console.error('Missing: GROQ_API_KEY')
   process.exit(1)
 }
 
@@ -27,86 +33,9 @@ const providers: BaseAIProvider[] = [
 
 const AI_REQUEST_DELAY_MS = 2100
 
-const VI_STOP_WORDS = new Set([
-  'là',
-  'có',
-  'của',
-  'và',
-  'hoặc',
-  'để',
-  'trong',
-  'khi',
-  'với',
-  'một',
-  'các',
-  'những',
-  'được',
-  'không',
-  'nhiều',
-  'về',
-  'cho',
-  'từ',
-  'theo',
-  'đến',
-  'trên',
-  'dưới',
-  'tại',
-  'vào',
-  'ra',
-  'lên',
-  'xuống',
-  'này',
-  'đó',
-  'the',
-  'a',
-  'an',
-  'of',
-  'to',
-  'in',
-  'is',
-  'are',
-  'or',
-  'and',
-  'for',
-])
-
-interface VocabRow {
-  id: string
-  word: string
-  word_type: string | null
-  meaning: string
-  synonyms: string[]
-}
-
-function normalize(s: string): string {
-  return s.trim().toLowerCase().replace(/\s+/g, ' ')
-}
-
-function tokenize(meaning: string): Set<string> {
-  return new Set(
-    normalize(meaning)
-      .split(/[\s,;.()/]+/)
-      .map((t) => t.trim())
-      .filter((t) => t.length > 2 && !VI_STOP_WORDS.has(t)),
-  )
-}
-
-function sharedTokenCount(a: Set<string>, b: Set<string>): number {
-  let count = 0
-  for (const token of a) {
-    if (b.has(token)) count++
-  }
-  return count
-}
-
-function overlapScore(a: Set<string>, b: Set<string>, shared: number): number {
-  const minSize = Math.min(a.size, b.size)
-  return minSize === 0 ? 0 : shared / minSize
-}
-
-async function checkSynonymsWithFallback(
-  a: VocabRow,
-  b: VocabRow,
+async function checkWithFallback(
+  a: SynonymCandidate,
+  b: SynonymCandidate,
 ): Promise<boolean> {
   const errors: string[] = []
   for (const provider of providers) {
@@ -129,25 +58,24 @@ async function checkSynonymsWithFallback(
   return false
 }
 
-async function step0Reset(vocab: VocabRow[]): Promise<void> {
+async function step0Reset(vocab: SynonymCandidate[]): Promise<void> {
   console.log('\nStep 0 — Clearing all existing synonyms...')
-  const ids = vocab.map((v) => v.id)
-
   const { error } = await supabase
     .from('vocabularies')
     .update({ synonyms: [] })
-    .in('id', ids)
-
+    .in(
+      'id',
+      vocab.map((v) => v.id),
+    )
   if (error) throw error
-
   for (const v of vocab) v.synonyms = []
-  console.log(`  → Cleared synonyms for ${ids.length} words`)
+  console.log(`  → Cleared ${vocab.length} words`)
 }
 
-async function step1ExactMatch(vocab: VocabRow[]): Promise<void> {
-  console.log('\nStep 1 — Exact meaning match (no AI needed)...')
+async function step1ExactMatch(vocab: SynonymCandidate[]): Promise<void> {
+  console.log('\nStep 1 — Exact meaning match (no AI)...')
 
-  const groups = new Map<string, VocabRow[]>()
+  const groups = new Map<string, SynonymCandidate[]>()
   for (const v of vocab) {
     const key = normalize(v.meaning)
     const group = groups.get(key) ?? []
@@ -156,23 +84,19 @@ async function step1ExactMatch(vocab: VocabRow[]): Promise<void> {
   }
 
   let updated = 0
-  const multiGroups = [...groups.values()].filter((g) => g.length >= 2)
-  console.log(`  Found ${multiGroups.length} exact-match groups`)
-
-  for (const group of multiGroups) {
+  for (const group of groups.values()) {
+    if (group.length < 2) continue
     for (const v of group) {
       const siblings = group
         .filter((g) => g.id !== v.id)
         .map((g) => normalize(g.word))
         .filter((w) => w !== normalize(v.word))
-
       if (siblings.length === 0) continue
 
       const { error } = await supabase
         .from('vocabularies')
         .update({ synonyms: siblings })
         .eq('id', v.id)
-
       if (error) {
         console.error(`  ✗ ${v.word}: ${error.message}`)
       } else {
@@ -182,49 +106,35 @@ async function step1ExactMatch(vocab: VocabRow[]): Promise<void> {
       }
     }
   }
-
   console.log(`  → Updated: ${updated}`)
 }
 
-interface SynonymCandidate {
-  a: VocabRow
-  b: VocabRow
-}
-
-async function step2PartialMatchWithAI(vocab: VocabRow[]): Promise<void> {
+async function step2PartialMatchWithAI(
+  vocab: SynonymCandidate[],
+): Promise<void> {
   console.log('\nStep 2 — Partial meaning match → AI verification...')
 
-  const candidates: SynonymCandidate[] = []
+  const pairs: [SynonymCandidate, SynonymCandidate][] = []
+  const seen = new Set<string>()
 
-  for (let i = 0; i < vocab.length; i++) {
-    const tokensI = tokenize(vocab[i].meaning)
-    if (tokensI.size === 0) continue
-
-    for (let j = i + 1; j < vocab.length; j++) {
-      if (vocab[i].synonyms.includes(normalize(vocab[j].word))) continue
-
-      const typeI = vocab[i].word_type?.toLowerCase().trim()
-      const typeJ = vocab[j].word_type?.toLowerCase().trim()
-      if (typeI && typeJ && typeI !== typeJ) continue
-
-      const tokensJ = tokenize(vocab[j].meaning)
-      if (tokensJ.size === 0) continue
-
-      const shared = sharedTokenCount(tokensI, tokensJ)
-      if (shared >= 2 && overlapScore(tokensI, tokensJ, shared) >= 0.5) {
-        candidates.push({ a: vocab[i], b: vocab[j] })
+  for (const v of vocab) {
+    for (const candidate of findCandidates(v, vocab)) {
+      const key = [v.id, candidate.id].sort().join('|')
+      if (!seen.has(key)) {
+        seen.add(key)
+        pairs.push([v, candidate])
       }
     }
   }
 
-  console.log(`  Found ${candidates.length} candidate pairs for AI review`)
+  console.log(`  Found ${pairs.length} candidate pairs for AI review`)
 
   let confirmed = 0
   let rejected = 0
 
-  for (let i = 0; i < candidates.length; i++) {
-    const { a, b } = candidates[i]
-    const isSynonym = await checkSynonymsWithFallback(a, b)
+  for (let i = 0; i < pairs.length; i++) {
+    const [a, b] = pairs[i]
+    const isSynonym = await checkWithFallback(a, b)
 
     if (!isSynonym) {
       rejected++
@@ -248,14 +158,14 @@ async function step2PartialMatchWithAI(vocab: VocabRow[]): Promise<void> {
       } else if (resB.error) {
         console.error(`  ✗ ${b.word}: ${resB.error.message}`)
       } else {
-        console.log(`  ✓ ${a.word} ↔ ${b.word} (${i + 1}/${candidates.length})`)
+        console.log(`  ✓ ${a.word} ↔ ${b.word} (${i + 1}/${pairs.length})`)
         a.synonyms = newSynA
         b.synonyms = newSynB
         confirmed++
       }
     }
 
-    if (i < candidates.length - 1) {
+    if (i < pairs.length - 1) {
       await new Promise((r) => setTimeout(r, AI_REQUEST_DELAY_MS))
     }
   }
@@ -264,23 +174,21 @@ async function step2PartialMatchWithAI(vocab: VocabRow[]): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const { data: vocab, error } = await supabase
+  const { data, error } = await supabase
     .from('vocabularies')
     .select('id, word, word_type, meaning, synonyms')
-
   if (error) throw error
-  if (!vocab?.length) {
+  if (!data?.length) {
     console.log('No vocabulary found.')
     return
   }
 
+  const vocab = data as SynonymCandidate[]
   console.log(`Loaded ${vocab.length} words.`)
 
-  const rows = vocab as VocabRow[]
-
-  await step0Reset(rows)
-  await step1ExactMatch(rows)
-  await step2PartialMatchWithAI(rows)
+  await step0Reset(vocab)
+  await step1ExactMatch(vocab)
+  await step2PartialMatchWithAI(vocab)
 
   console.log('\nDone.')
 }
@@ -289,3 +197,5 @@ main().catch((err) => {
   console.error(err)
   process.exit(1)
 })
+
+export { tokenize }

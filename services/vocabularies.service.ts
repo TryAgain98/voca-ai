@@ -25,8 +25,14 @@ class VocabulariesService extends BaseService<
     super('vocabularies')
   }
 
-  async create(payload: VocabularyInsert): Promise<void> {
-    return super.create({ ...payload, synonyms: payload.synonyms ?? [] })
+  async create(payload: VocabularyInsert): Promise<Vocabulary> {
+    const { data, error } = await supabase
+      .from('vocabularies')
+      .insert({ ...payload, synonyms: payload.synonyms ?? [] })
+      .select()
+      .single()
+    if (error) throw error
+    return data as Vocabulary
   }
 
   async update(id: string, payload: VocabularyUpdate): Promise<void> {

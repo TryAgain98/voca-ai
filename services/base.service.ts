@@ -23,9 +23,14 @@ export class BaseService<
     return data as TRow
   }
 
-  async create(payload: TInsert): Promise<void> {
-    const { error } = await supabase.from(this.table).insert(payload as never)
+  async create(payload: TInsert): Promise<TRow> {
+    const { data, error } = await supabase
+      .from(this.table)
+      .insert(payload as never)
+      .select()
+      .single()
     if (error) throw error
+    return data as TRow
   }
 
   async update(id: string, payload: TUpdate): Promise<void> {
