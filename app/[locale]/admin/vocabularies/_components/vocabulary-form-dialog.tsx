@@ -27,15 +27,43 @@ import {
 import type { Lesson, Vocabulary } from '~/types'
 
 const WORD_TYPES = [
-  { value: 'n', label: 'Noun (n)' },
-  { value: 'v', label: 'Verb (v)' },
-  { value: 'adj', label: 'Adjective (adj)' },
-  { value: 'adv', label: 'Adverb (adv)' },
-  { value: 'prep', label: 'Preposition (prep)' },
-  { value: 'prep phr.', label: 'Prepositional Phrase (prep phr.)' },
-  { value: 'phr.v', label: 'Phrasal Verb (phr.v)' },
-  { value: 'p.p', label: 'Past Participle (p.p)' },
-  { value: 'phrase', label: 'Phrase / Expression' },
+  { value: 'n', label: 'Noun (n)', desc: 'Danh từ — book, city, freedom' },
+  { value: 'v', label: 'Verb (v)', desc: 'Động từ — run, display, achieve' },
+  {
+    value: 'adj',
+    label: 'Adjective (adj)',
+    desc: 'Tính từ — beautiful, fast, clear',
+  },
+  {
+    value: 'adv',
+    label: 'Adverb (adv)',
+    desc: 'Trạng từ — quickly, very, already',
+  },
+  {
+    value: 'prep',
+    label: 'Preposition (prep)',
+    desc: 'Giới từ đơn — in, on, at, by',
+  },
+  {
+    value: 'prep phr.',
+    label: 'Prepositional Phrase (prep phr.)',
+    desc: 'Cụm giới từ — in front of, because of',
+  },
+  {
+    value: 'phr.v',
+    label: 'Phrasal Verb (phr.v)',
+    desc: 'Động từ kép — give up, look after, put off',
+  },
+  {
+    value: 'p.p',
+    label: 'Past Participle (p.p)',
+    desc: 'Quá khứ phân từ — broken, displayed, laid out',
+  },
+  {
+    value: 'phrase',
+    label: 'Phrase / Expression',
+    desc: 'Cụm từ cố định — as soon as, by the way',
+  },
 ] as const
 
 interface VocabularyFormDialogProps {
@@ -146,11 +174,21 @@ export function VocabularyFormDialog({
               <SelectContent>
                 {WORD_TYPES.map((wt) => (
                   <SelectItem key={wt.value} value={wt.value}>
-                    {wt.label}
+                    <span className="flex flex-col gap-0.5">
+                      <span>{wt.label}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {wt.desc}
+                      </span>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {form.word_type && !suggestions.word_type.suggestion && (
+              <p className="text-muted-foreground text-xs">
+                {WORD_TYPES.find((wt) => wt.value === form.word_type)?.desc}
+              </p>
+            )}
             <SuggestionHint
               suggestion={(() => {
                 const s = suggestions.word_type.suggestion
