@@ -45,7 +45,7 @@ export function QuizResults({
 }: QuizResultsProps) {
   const t = useTranslations('Quiz')
   const { mutate: saveSession } = useSaveQuizSession()
-  const { mutate: applyMastery } = useApplyQuizMastery()
+  const { mutate: applyMastery, isPending: isSaving } = useApplyQuizMastery()
   const { mutate: recordStreak } = useRecordStreakActivity()
   const savedRef = useRef(false)
 
@@ -124,11 +124,16 @@ export function QuizResults({
             variant="outline"
             className="flex-1 gap-2"
             onClick={onChangeSetup}
+            disabled={isSaving}
           >
             <ClipboardList size={14} />
             {t('viewHistory')}
           </Button>
-          <Button className="flex-1 gap-2" onClick={onPlayAgain}>
+          <Button
+            className="flex-1 gap-2"
+            onClick={onPlayAgain}
+            disabled={isSaving}
+          >
             <RefreshCw size={14} />
             {t('playAgain')}
           </Button>
