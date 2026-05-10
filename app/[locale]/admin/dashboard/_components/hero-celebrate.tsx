@@ -24,6 +24,11 @@ export function HeroCelebrate({
   const hasWrongToday = wrongTodayCount > 0
   const hasUnlearned = unlearnedCount > 0
 
+  // Priority: guide user to one action at a time
+  // 1) explore new words first, 2) then review missed words
+  const showNewWords = hasUnlearned
+  const showMissed = !hasUnlearned && hasWrongToday
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -86,18 +91,7 @@ export function HeroCelebrate({
         </motion.div>
       </div>
 
-      {hasWrongToday && (
-        <CelebrateActionCard
-          accent="amber"
-          icon={<Sparkles size={16} strokeWidth={1.8} />}
-          headline={t('celebrateWrong.headline', { count: wrongTodayCount })}
-          encourage={t('celebrateWrong.encourage')}
-          ctaLabel={t('celebrateWrong.cta', { count: wrongTodayCount })}
-          onCta={onPracticeWrong}
-        />
-      )}
-
-      {hasUnlearned && (
+      {showNewWords && (
         <CelebrateActionCard
           accent="sky"
           icon={<Wand2 size={16} strokeWidth={1.8} />}
@@ -105,6 +99,17 @@ export function HeroCelebrate({
           encourage={t('celebrateLearn.encourage', { count: unlearnedCount })}
           ctaLabel={t('celebrateLearn.cta', { count: unlearnedCount })}
           onCta={onLearnNew}
+        />
+      )}
+
+      {showMissed && (
+        <CelebrateActionCard
+          accent="amber"
+          icon={<Sparkles size={16} strokeWidth={1.8} />}
+          headline={t('celebrateWrong.headline', { count: wrongTodayCount })}
+          encourage={t('celebrateWrong.encourage')}
+          ctaLabel={t('celebrateWrong.cta', { count: wrongTodayCount })}
+          onCta={onPracticeWrong}
         />
       )}
     </motion.div>
