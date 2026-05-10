@@ -102,6 +102,25 @@ export function VocabularyDetailSheet({
                 <p className="mt-1 text-base font-semibold">{voca.meaning}</p>
               </div>
 
+              {/* Synonyms */}
+              {voca.synonyms.length > 0 && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                  <p className="text-xs font-semibold tracking-wider text-emerald-600 uppercase dark:text-emerald-400">
+                    {t('detailSynonyms')}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {voca.synonyms.map((syn) => (
+                      <span
+                        key={syn}
+                        className="rounded-md border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                      >
+                        {syn}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Example */}
               {voca.example && (
                 <div className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/30">

@@ -49,6 +49,7 @@ export function QuizSetup({ onStart }: QuizSetupProps) {
     word_type: v.word_type,
     phonetic: v.phonetic,
     example: v.example,
+    synonyms: v.synonyms,
   }))
   const totalCandidates = candidates?.totalCandidates ?? 0
 

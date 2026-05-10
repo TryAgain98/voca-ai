@@ -14,7 +14,8 @@
     "db:push": "npx supabase db push",
     "db:pull": "npx supabase db pull",
     "db:status": "npx supabase migration list",
-    "db:link": "npx supabase link --project-ref $(grep SUPABASE_PROJECT_REF .env.local | cut -d= -f2)"
+    "db:link": "npx supabase link --project-ref $(grep SUPABASE_PROJECT_REF .env.local | cut -d= -f2)",
+    "vocab:sync-synonyms": "npx tsx scripts/backfill-synonyms.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs}": [

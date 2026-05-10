@@ -1,7 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 
 import { BaseAIProvider } from './base.provider'
-import { EXTRACT_VOCABULARY_PROMPT, parseVocabularyJson } from './utils'
+import {
+  EXTRACT_VOCABULARY_PROMPT,
+  buildSynonymCheckPrompt,
+  parseVocabularyJson,
+} from './utils'
 
 import type { ExtractedVocabulary } from './types'
 
@@ -51,5 +55,34 @@ export class AnthropicProvider extends BaseAIProvider {
     })
     const text = res.content[0].type === 'text' ? res.content[0].text : '[]'
     return parseVocabularyJson(text)
+  }
+
+  async checkSynonyms(
+    wordA: string,
+    typeA: string | null,
+    meaningA: string,
+    wordB: string,
+    typeB: string | null,
+    meaningB: string,
+  ): Promise<boolean> {
+    const res = await this.client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 5,
+      messages: [
+        {
+          role: 'user',
+          content: buildSynonymCheckPrompt(
+            wordA,
+            typeA,
+            meaningA,
+            wordB,
+            typeB,
+            meaningB,
+          ),
+        },
+      ],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : ''
+    return text.trim().toLowerCase().startsWith('yes')
   }
 }

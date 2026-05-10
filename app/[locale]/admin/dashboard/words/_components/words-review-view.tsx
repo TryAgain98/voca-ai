@@ -39,6 +39,7 @@ const toReviewVocab = (w: ReviewWord): ReviewVocab => ({
   word_type: w.word_type,
   phonetic: w.phonetic,
   example: w.example,
+  synonyms: w.synonyms,
 })
 
 export function WordsReviewView({

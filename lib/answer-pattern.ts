@@ -57,6 +57,7 @@ interface CollidableVocab {
   id: string
   word: string
   meaning: string
+  synonyms: string[]
 }
 
 export function findSiblings<T extends CollidableVocab>(
@@ -71,6 +72,7 @@ export function findSiblings<T extends CollidableVocab>(
 
 export type AnswerVerdict =
   | { kind: 'correct' }
+  | { kind: 'synonym' }
   | { kind: 'collision'; matched: CollidableVocab }
   | { kind: 'wrong' }
 
@@ -82,6 +84,10 @@ export function checkAnswer<T extends CollidableVocab>(
   const input = normalizeAnswer(userInput)
   if (!input) return { kind: 'wrong' }
   if (input === normalizeAnswer(card.word)) return { kind: 'correct' }
+
+  for (const syn of card.synonyms) {
+    if (input === normalizeAnswer(syn)) return { kind: 'synonym' }
+  }
 
   const cardKey = getPatternKey(card.word)
   for (const sibling of siblings) {

@@ -20,6 +20,7 @@ export interface Vocabulary {
   word_type: string | null
   phonetic: string | null
   description: string | null
+  synonyms: string[]
   created_at: string
   updated_at: string
   deleted_at: string | null

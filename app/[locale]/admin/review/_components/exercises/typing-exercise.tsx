@@ -48,6 +48,7 @@ export function TypingExerciseCard({
   const [isCorrect, setIsCorrect] = useState(false)
   const [manualHintCount, setManualHintCount] = useState(0)
   const [collisionMatched, setCollisionMatched] = useState<string | null>(null)
+  const [isSynonymMatch, setIsSynonymMatch] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const startedAtRef = useRef<number>(0)
   const { speak } = useTTS(exercise.vocab.word)
@@ -99,6 +100,7 @@ export function TypingExerciseCard({
       verdict.kind === 'collision' ? verdict.matched.id : null
     setIsCorrect(correct)
     setCollisionMatched(matchedSiblingId)
+    setIsSynonymMatch(verdict.kind === 'synonym')
     setSubmitted(true)
     const responseMs = elapsedSince(startedAtRef.current)
     const meta = {
@@ -188,15 +190,18 @@ export function TypingExerciseCard({
           </Button>
         </div>
 
-        {!isQuiz && submitted && isCorrect && collisionMatched && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-amber-300/90"
-          >
-            {t('synonymAccepted', { expected: exercise.vocab.word })}
-          </motion.p>
-        )}
+        {!isQuiz &&
+          submitted &&
+          isCorrect &&
+          (collisionMatched || isSynonymMatch) && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-xs text-amber-300/90"
+            >
+              {t('synonymAccepted', { expected: exercise.vocab.word })}
+            </motion.p>
+          )}
 
         {!isQuiz && (
           <ExerciseFeedback
@@ -210,6 +215,7 @@ export function TypingExerciseCard({
               })
             }
             correctAnswer={exercise.vocab.word}
+            synonyms={exercise.vocab.synonyms}
           />
         )}
 

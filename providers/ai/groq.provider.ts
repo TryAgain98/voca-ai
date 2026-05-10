@@ -3,6 +3,7 @@ import Groq from 'groq-sdk'
 import { BaseAIProvider } from './base.provider'
 import {
   EXTRACT_VOCABULARY_PROMPT,
+  buildSynonymCheckPrompt,
   buildTranslationPrompt,
   buildVocabularyFillPrompt,
   parseVocabularyJson,
@@ -88,5 +89,35 @@ export class GroqProvider extends BaseAIProvider {
       language: 'en',
     })
     return transcription.text
+  }
+
+  async checkSynonyms(
+    wordA: string,
+    typeA: string | null,
+    meaningA: string,
+    wordB: string,
+    typeB: string | null,
+    meaningB: string,
+  ): Promise<boolean> {
+    const res = await this.client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 5,
+      temperature: 0,
+      messages: [
+        {
+          role: 'user',
+          content: buildSynonymCheckPrompt(
+            wordA,
+            typeA,
+            meaningA,
+            wordB,
+            typeB,
+            meaningB,
+          ),
+        },
+      ],
+    })
+    const answer = res.choices[0]?.message?.content?.trim().toLowerCase() ?? ''
+    return answer.startsWith('yes')
   }
 }

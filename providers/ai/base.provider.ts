@@ -26,4 +26,17 @@ export abstract class BaseAIProvider {
       new Error(`${this.name} does not support suggestVocabularyFill`),
     )
   }
+
+  checkSynonyms(
+    _wordA: string,
+    _typeA: string | null,
+    _meaningA: string,
+    _wordB: string,
+    _typeB: string | null,
+    _meaningB: string,
+  ): Promise<boolean> {
+    return Promise.reject(
+      new Error(`${this.name} does not support checkSynonyms`),
+    )
+  }
 }

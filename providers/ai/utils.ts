@@ -42,6 +42,19 @@ export function buildVocabularyFillPrompt(word: string): string {
 Return ONLY valid JSON, no markdown, no explanation.`
 }
 
+export function buildSynonymCheckPrompt(
+  wordA: string,
+  typeA: string | null,
+  meaningA: string,
+  wordB: string,
+  typeB: string | null,
+  meaningB: string,
+): string {
+  const labelA = typeA ? `${wordA} (${typeA})` : wordA
+  const labelB = typeB ? `${wordB} (${typeB})` : wordB
+  return `Do "${labelA}" (${meaningA}) and "${labelB}" (${meaningB}) mean the EXACT same thing and can fully replace each other in any sentence? Must be same part of speech. "near the X" vs "near the Y" = no. Related but different = no. Reply ONLY "yes" or "no".`
+}
+
 export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
   const cleaned = raw
     .trim()

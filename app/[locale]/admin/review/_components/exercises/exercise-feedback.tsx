@@ -11,6 +11,7 @@ interface ExerciseFeedbackProps {
   isCorrect: boolean
   onContinue: () => void
   correctAnswer?: string
+  synonyms?: string[]
 }
 
 export function ExerciseFeedback({
@@ -18,6 +19,7 @@ export function ExerciseFeedback({
   isCorrect,
   onContinue,
   correctAnswer,
+  synonyms,
 }: ExerciseFeedbackProps) {
   const t = useTranslations('Review')
   const showContinue = show && !isCorrect
@@ -63,6 +65,16 @@ export function ExerciseFeedback({
               </span>
               <span className="font-semibold text-green-400">
                 {correctAnswer}
+              </span>
+            </p>
+          )}
+          {synonyms && synonyms.length > 0 && (
+            <p className="text-sm">
+              <span className="text-muted-foreground">
+                {t('alsoAccepted')}:{' '}
+              </span>
+              <span className="text-muted-foreground font-medium">
+                {synonyms.join(', ')}
               </span>
             </p>
           )}

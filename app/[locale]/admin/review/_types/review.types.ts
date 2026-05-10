@@ -11,6 +11,7 @@ export interface ReviewVocab {
   word_type: string | null
   phonetic?: string | null
   example?: string | null
+  synonyms: string[]
 }
 
 export interface MCQExercise {

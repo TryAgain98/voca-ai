@@ -75,6 +75,7 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
     word_type: v.word_type,
     phonetic: v.phonetic,
     example: v.example,
+    synonyms: v.synonyms,
   }))
 
   const toggleLesson = (id: string) =>

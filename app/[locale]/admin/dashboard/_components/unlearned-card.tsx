@@ -26,6 +26,7 @@ function toReviewVocab(word: ReviewWord): ReviewVocab {
     word_type: word.word_type,
     phonetic: word.phonetic,
     example: word.example,
+    synonyms: word.synonyms,
   }
 }
 

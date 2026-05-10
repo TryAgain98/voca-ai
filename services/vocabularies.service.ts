@@ -12,6 +12,7 @@ type VocabularyInsert = {
   word_type?: string
   phonetic?: string
   description?: string
+  synonyms?: string[]
 }
 type VocabularyUpdate = Partial<Omit<VocabularyInsert, 'lesson_id'>>
 
@@ -22,6 +23,14 @@ class VocabulariesService extends BaseService<
 > {
   constructor() {
     super('vocabularies')
+  }
+
+  async create(payload: VocabularyInsert): Promise<void> {
+    return super.create({ ...payload, synonyms: payload.synonyms ?? [] })
+  }
+
+  async update(id: string, payload: VocabularyUpdate): Promise<void> {
+    return super.update(id, payload)
   }
 
   async findByLessonId(lessonId: string): Promise<Vocabulary[]> {
@@ -54,9 +63,13 @@ class VocabulariesService extends BaseService<
   }
 
   async bulkCreate(items: VocabularyInsert[]): Promise<Vocabulary[]> {
+    const withSynonyms = items.map((item) => ({
+      ...item,
+      synonyms: item.synonyms ?? [],
+    }))
     const { data, error } = await supabase
       .from('vocabularies')
-      .insert(items)
+      .insert(withSynonyms)
       .select()
     if (error) throw error
     return data as Vocabulary[]
