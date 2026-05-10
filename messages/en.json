@@ -159,6 +159,8 @@
     "forecastLegendLess": "Less",
     "forecastLegendMore": "More",
     "forecastCountHint": "Counts may shift after you complete a review session",
+    "viewingBanner": "Viewing {name}'s dashboard",
+    "viewingBannerBack": "Back to learners",
     "forecastDayDetailEmpty": "No reviews scheduled this day",
     "forecastBreakdown": {
       "practicing": "Practicing",
@@ -494,7 +496,11 @@
     "joinedAt": "Joined {date}",
     "lastActive": "Last active {date}",
     "rankLabel": "Rank #{rank}",
-    "quizSessions": "{count} quizzes taken"
+    "quizSessions": "{count} quizzes taken",
+    "scoreTooltipTitle": "Score breakdown",
+    "scoreTooltipCompletion": "Completion",
+    "scoreTooltipDiscipline": "On-time",
+    "scoreTooltipStreak": "Streak"
   },
   "Import": {
     "title": "Import vocabulary from image",

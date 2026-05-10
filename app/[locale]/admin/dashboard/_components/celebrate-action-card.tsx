@@ -43,6 +43,7 @@ interface CelebrateActionCardProps {
   ctaLabel: string
   onCta: () => void
   delay?: number
+  disabled?: boolean
 }
 
 export function CelebrateActionCard({
@@ -53,6 +54,7 @@ export function CelebrateActionCard({
   ctaLabel,
   onCta,
   delay = 0.26,
+  disabled,
 }: CelebrateActionCardProps) {
   const cls = ACCENT_CLASSES[accent]
   return (
@@ -75,16 +77,18 @@ export function CelebrateActionCard({
           </p>
         </div>
       </div>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Button
-          size="sm"
-          onClick={onCta}
-          className={`w-full gap-2 sm:w-auto ${cls.button}`}
-        >
-          {ctaLabel}
-          <ArrowRight size={14} />
-        </Button>
-      </motion.div>
+      {!disabled && (
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            size="sm"
+            onClick={onCta}
+            className={`w-full gap-2 sm:w-auto ${cls.button}`}
+          >
+            {ctaLabel}
+            <ArrowRight size={14} />
+          </Button>
+        </motion.div>
+      )}
     </motion.div>
   )
 }

@@ -12,6 +12,7 @@ interface HeroCelebrateProps {
   unlearnedCount: number
   onPracticeWrong: () => void
   onLearnNew: () => void
+  isViewMode?: boolean
 }
 
 export function HeroCelebrate({
@@ -19,6 +20,7 @@ export function HeroCelebrate({
   unlearnedCount,
   onPracticeWrong,
   onLearnNew,
+  isViewMode,
 }: HeroCelebrateProps) {
   const t = useTranslations('Dashboard.hero')
   const hasWrongToday = wrongTodayCount > 0
@@ -99,6 +101,7 @@ export function HeroCelebrate({
           encourage={t('celebrateLearn.encourage', { count: unlearnedCount })}
           ctaLabel={t('celebrateLearn.cta', { count: unlearnedCount })}
           onCta={onLearnNew}
+          disabled={isViewMode}
         />
       )}
 
@@ -110,6 +113,7 @@ export function HeroCelebrate({
           encourage={t('celebrateWrong.encourage')}
           ctaLabel={t('celebrateWrong.cta', { count: wrongTodayCount })}
           onCta={onPracticeWrong}
+          disabled={isViewMode}
         />
       )}
     </motion.div>

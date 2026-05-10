@@ -28,6 +28,7 @@ interface SmartHeroCardProps {
   masteredCount: number
   totalWords: number
   isLoading: boolean
+  isViewMode?: boolean
 }
 
 function toReviewVocab(word: ReviewWord): ReviewVocab {
@@ -50,7 +51,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
 
   if (props.isLoading) {
     return (
-      <div className="border-border bg-card relative h-[210px] overflow-hidden rounded-2xl border p-7">
+      <div className="border-border bg-card relative h-52.5 overflow-hidden rounded-2xl border p-7">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="mt-4 h-12 w-40" />
         <Skeleton className="mt-3 h-4 w-72" />
@@ -83,6 +84,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
         total={total}
         batch={batch}
         onCta={() => goQuizWith(words)}
+        isViewMode={props.isViewMode}
       />
     )
   }
@@ -97,6 +99,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
         total={props.unlearnedCount}
         batch={Math.min(props.unlearnedCount, HERO_BATCH_LIMIT)}
         onCta={() => goReviewWith(props.unlearnedWords)}
+        isViewMode={props.isViewMode}
       />
     )
   }
@@ -107,6 +110,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
       unlearnedCount={props.unlearnedCount}
       onPracticeWrong={() => goReviewWith(props.wrongTodayWords)}
       onLearnNew={() => goReviewWith(props.unlearnedWords)}
+      isViewMode={props.isViewMode}
     />
   )
 }

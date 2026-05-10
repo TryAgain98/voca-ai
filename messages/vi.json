@@ -159,6 +159,8 @@
     "forecastLegendLess": "Ít",
     "forecastLegendMore": "Nhiều",
     "forecastCountHint": "Số lượng có thể thay đổi sau khi bạn hoàn thành ôn tập",
+    "viewingBanner": "Đang xem dashboard của {name}",
+    "viewingBannerBack": "Quay lại danh sách",
     "forecastDayDetailEmpty": "Không có từ nào ngày này",
     "forecastBreakdown": {
       "practicing": "Đang ôn",
@@ -494,7 +496,11 @@
     "joinedAt": "Tham gia {date}",
     "lastActive": "Hoạt động {date}",
     "rankLabel": "Hạng #{rank}",
-    "quizSessions": "{count} lần kiểm tra"
+    "quizSessions": "{count} lần kiểm tra",
+    "scoreTooltipTitle": "Phân tích điểm",
+    "scoreTooltipCompletion": "Học được",
+    "scoreTooltipDiscipline": "Đúng hạn",
+    "scoreTooltipStreak": "Chuỗi ngày"
   },
   "Import": {
     "title": "Nhập từ vựng từ ảnh",

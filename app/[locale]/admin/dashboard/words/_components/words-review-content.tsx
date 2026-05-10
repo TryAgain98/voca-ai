@@ -1,9 +1,6 @@
 'use client'
 
-import { RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-
-import { Button } from '~/components/ui/button'
 
 import { TAB_VISUALS } from '../_types/words-review.types'
 
@@ -11,6 +8,7 @@ import { WordsMasteryTable } from './words-mastery-table'
 import { TabEmptyState } from './words-review-states'
 
 import type { TabKey } from '../_types/words-review.types'
+import type { ReactNode } from 'react'
 import type { Lesson, ReviewWord, Vocabulary } from '~/types'
 
 interface WordsReviewContentProps {
@@ -25,6 +23,7 @@ interface WordsReviewContentProps {
   onPageChange: (page: number) => void
   onRowClick: (voca: Vocabulary) => void
   onUnmaster: (voca: Vocabulary) => void
+  renderRowActions?: (voca: Vocabulary) => ReactNode
 }
 
 export function WordsReviewContent({
@@ -39,25 +38,26 @@ export function WordsReviewContent({
   onPageChange,
   onRowClick,
   onUnmaster,
+  renderRowActions: renderRowActionsProp,
 }: WordsReviewContentProps) {
   const t = useTranslations('DashboardWords')
   const visual = TAB_VISUALS[activeTab]
 
   const renderRowActions =
-    activeTab === 'mastered'
-      ? (voca: Vocabulary) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground hover:bg-muted h-7 gap-1.5 border border-white/[0.06] text-xs"
-            onClick={() => onUnmaster(voca)}
-            disabled={isUnmasterPending}
-          >
-            <RotateCcw size={11} />
-            {t('actions.unmaster')}
-          </Button>
-        )
-      : undefined
+    renderRowActionsProp !== undefined
+      ? renderRowActionsProp
+      : activeTab === 'mastered'
+        ? (voca: Vocabulary) => (
+            <button
+              type="button"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex h-7 items-center gap-1.5 rounded border border-white/6 px-2 text-xs"
+              onClick={() => onUnmaster(voca)}
+              disabled={isUnmasterPending}
+            >
+              {t('actions.unmaster')}
+            </button>
+          )
+        : undefined
 
   return (
     <div className="space-y-3 pt-1">

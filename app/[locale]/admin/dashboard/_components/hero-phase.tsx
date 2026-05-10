@@ -57,9 +57,16 @@ interface HeroPhaseProps {
   total: number
   batch: number
   onCta: () => void
+  isViewMode?: boolean
 }
 
-export function HeroPhase({ track, total, batch, onCta }: HeroPhaseProps) {
+export function HeroPhase({
+  track,
+  total,
+  batch,
+  onCta,
+  isViewMode,
+}: HeroPhaseProps) {
   const t = useTranslations('Dashboard.hero')
   const cfg = ACTION_PHASE_CONFIG[track]
   const Icon = cfg.icon
@@ -131,27 +138,29 @@ export function HeroPhase({ track, total, batch, onCta }: HeroPhaseProps) {
             {t(`subtitle.${track}`)}
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.24 }}
-            className="mt-5"
-          >
+          {!isViewMode && (
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-block"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.24 }}
+              className="mt-5"
             >
-              <Button
-                size="lg"
-                onClick={onCta}
-                className={`gap-2 px-5 ${cfg.ctaClass}`}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-block"
               >
-                {t(`cta.${track}`, { count: batch })}
-                <ArrowRight size={16} />
-              </Button>
+                <Button
+                  size="lg"
+                  onClick={onCta}
+                  className={`gap-2 px-5 ${cfg.ctaClass}`}
+                >
+                  {t(`cta.${track}`, { count: batch })}
+                  <ArrowRight size={16} />
+                </Button>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          )}
         </div>
 
         <motion.div

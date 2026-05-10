@@ -14,6 +14,7 @@ interface MasteryCardProps {
   masteredCount: number
   practicingCount: number
   isLoading: boolean
+  viewAs?: string
 }
 
 const COUNT_ANIMATION_MS = 700
@@ -44,6 +45,7 @@ export function MasteryCard({
   masteredCount,
   practicingCount,
   isLoading,
+  viewAs,
 }: MasteryCardProps) {
   const t = useTranslations('Dashboard')
   const router = useRouter()
@@ -59,8 +61,13 @@ export function MasteryCard({
   const masteredPercent = Math.round(masteredRatio * 100)
   const isPerfect = masteredCount === totalWords && totalWords > 0
 
+  const wordsUrl = (tab: 'mastered' | 'practicing' | 'untouched') => {
+    const base = `/${locale}/admin/dashboard/words?tab=${tab}`
+    return viewAs ? `${base}&viewAs=${viewAs}` : base
+  }
+
   const goToTab = (tab: 'mastered' | 'practicing' | 'untouched') => {
-    router.push(`/${locale}/admin/dashboard/words?tab=${tab}`)
+    router.push(wordsUrl(tab))
   }
 
   return (
@@ -73,7 +80,7 @@ export function MasteryCard({
       {isPerfect && (
         <>
           <motion.div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent"
+            className="pointer-events-none absolute inset-0 bg-linear-to-br from-amber-500/10 via-transparent to-transparent"
             animate={{ opacity: [0.4, 0.9, 0.4] }}
             transition={{ duration: 3, repeat: Infinity }}
           />
@@ -134,7 +141,11 @@ export function MasteryCard({
 
         <div className="flex shrink-0 flex-col items-end gap-2">
           <Link
-            href={`/${locale}/admin/dashboard/words`}
+            href={
+              viewAs
+                ? `/${locale}/admin/dashboard/words?viewAs=${viewAs}`
+                : `/${locale}/admin/dashboard/words`
+            }
             className="text-primary hover:text-primary/80 group inline-flex items-center gap-1 text-[11px] font-[510] tracking-widest uppercase transition-colors"
           >
             {t('viewLibrary')}
@@ -172,8 +183,8 @@ export function MasteryCard({
               transition={{ duration: 0.7, ease: 'easeOut' }}
               className={
                 isPerfect
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-300'
-                  : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                  ? 'bg-linear-to-r from-amber-500 to-amber-300'
+                  : 'bg-linear-to-r from-emerald-500 to-emerald-400'
               }
             />
             <motion.div
@@ -290,7 +301,7 @@ function Legend({
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.97, y: 0 }}
       onClick={onClick}
-      className={`group focus-visible:ring-ring relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5 text-left shadow-[0_0_0_0_rgba(0,0,0,0)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:shadow-lg ${a.hoverBg} ${a.hoverBorder} ${a.shadow} focus-visible:ring-2 focus-visible:outline-none`}
+      className={`group focus-visible:ring-ring relative flex cursor-pointer flex-col gap-1 rounded-lg border border-white/6 bg-white/2 p-2.5 text-left shadow-[0_0_0_0_rgba(0,0,0,0)] transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out hover:shadow-lg ${a.hoverBg} ${a.hoverBorder} ${a.shadow} focus-visible:ring-2 focus-visible:outline-none`}
     >
       <span
         aria-hidden

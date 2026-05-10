@@ -1,13 +1,11 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
-import { buttonVariants } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Skeleton } from '~/components/ui/skeleton'
 import { cn } from '~/lib/cn'
@@ -160,6 +158,7 @@ function TableSkeleton() {
 export function UsersTable({ users, isLoading }: UsersTableProps) {
   const t = useTranslations('Users')
   const params = useParams()
+  const router = useRouter()
   const locale = params.locale as string
   const [query, setQuery] = useState('')
 
@@ -220,14 +219,17 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                 <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-[510] tracking-wider uppercase sm:table-cell">
                   {t('colDueToday')}
                 </th>
-                <th className="px-4 py-3" />
+                <th className="w-8 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {filtered.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-border border-t transition-colors first:border-t-0 hover:bg-white/[0.02]"
+                  onClick={() =>
+                    router.push(`/${locale}/admin/dashboard?viewAs=${user.id}`)
+                  }
+                  className="border-border cursor-pointer border-t transition-colors first:border-t-0 hover:bg-white/2"
                 >
                   <td className="w-14 px-4 py-4 text-center">
                     <RankCell rank={user.rank} />
@@ -236,7 +238,10 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                     <UserCell user={user} />
                   </td>
                   <td className="px-4 py-4 text-center">
-                    <UserScoreBadge score={user.score} />
+                    <UserScoreBadge
+                      score={user.score}
+                      breakdown={user.scoreBreakdown}
+                    />
                   </td>
                   <td className="hidden px-4 py-4 md:table-cell">
                     <ProgressCell
@@ -248,15 +253,10 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                     <DueTodayCell count={user.dueCount} />
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <Link
-                      href={`/${locale}/admin/users/${user.id}`}
-                      className={buttonVariants({
-                        variant: 'ghost',
-                        size: 'sm',
-                      })}
-                    >
-                      {t('viewDashboard')}
-                    </Link>
+                    <ChevronRight
+                      size={16}
+                      className="text-muted-foreground/40 inline-block"
+                    />
                   </td>
                 </tr>
               ))}

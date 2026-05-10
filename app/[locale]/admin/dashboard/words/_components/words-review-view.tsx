@@ -28,6 +28,8 @@ interface WordsReviewViewProps {
   practicingWords: ReviewWord[]
   masteredWords: ReviewWord[]
   isLoading: boolean
+  isViewMode?: boolean
+  viewAs?: string
 }
 
 const toReviewVocab = (w: ReviewWord): ReviewVocab => ({
@@ -44,6 +46,8 @@ export function WordsReviewView({
   practicingWords,
   masteredWords,
   isLoading,
+  isViewMode,
+  viewAs,
 }: WordsReviewViewProps) {
   const t = useTranslations('DashboardWords')
   const router = useRouter()
@@ -78,18 +82,18 @@ export function WordsReviewView({
   const sourceIsEmpty = !hasWords
 
   const startQuiz = (words: ReviewWord[]) => {
-    if (words.length === 0) return
+    if (words.length === 0 || isViewMode) return
     setPendingQuiz(words.map(toReviewVocab))
     router.push(`/${locale}/admin/quiz`)
   }
 
   const startReview = (words: ReviewWord[]) => {
-    if (words.length === 0) return
+    if (words.length === 0 || isViewMode) return
     setPendingReview(words.map(toReviewVocab))
     router.push(`/${locale}/admin/review`)
   }
 
-  const ctas = useTabCtas({
+  const baseCtas = useTabCtas({
     activeTab,
     filteredCount: activeWords.length,
     hasFilteredWords: hasWords,
@@ -97,17 +101,27 @@ export function WordsReviewView({
     onStartReview: () => startReview(activeWords),
   })
 
+  const ctas = isViewMode
+    ? {
+        primary: { ...baseCtas.primary, disabled: true },
+        secondary: baseCtas.secondary
+          ? { ...baseCtas.secondary, disabled: true }
+          : undefined,
+      }
+    : baseCtas
+
   const handleTabChange = (value: TabKey) => {
     setActiveTab(value)
     setPage(1)
   }
 
   const handleBack = () => {
-    router.push(`/${locale}/admin/dashboard`)
+    const base = `/${locale}/admin/dashboard`
+    router.push(viewAs ? `${base}?viewAs=${viewAs}` : base)
   }
 
   const handleUnmaster = (voca: Vocabulary) => {
-    if (!user?.id) return
+    if (!user?.id || isViewMode) return
     softDemote.mutate(
       { userId: user.id, wordId: voca.id },
       {
@@ -118,9 +132,23 @@ export function WordsReviewView({
     )
   }
 
+  const renderRowActions =
+    !isViewMode && activeTab === 'mastered'
+      ? (voca: Vocabulary) => (
+          <button
+            type="button"
+            onClick={() => handleUnmaster(voca)}
+            disabled={softDemote.isPending}
+            className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex h-7 items-center gap-1.5 rounded border border-white/6 px-2 text-xs"
+          >
+            {t('actions.unmaster')}
+          </button>
+        )
+      : undefined
+
   return (
     <div className="space-y-3">
-      <div className="bg-background/85 supports-[backdrop-filter]:bg-background/75 top-0 z-20 -mx-4 space-y-2 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:px-6">
+      <div className="bg-background/85 supports-backdrop-filter:bg-background/75 top-0 z-20 -mx-4 space-y-2 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:px-6">
         <WordsReviewHeader totalCount={totalCount} onBack={handleBack} />
 
         <WordsReviewToolbar
@@ -148,6 +176,7 @@ export function WordsReviewView({
         onPageChange={setPage}
         onRowClick={setViewingVoca}
         onUnmaster={handleUnmaster}
+        renderRowActions={renderRowActions}
       />
 
       <VocabularyDetailSheet

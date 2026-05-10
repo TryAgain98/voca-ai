@@ -2,7 +2,12 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 
 import { dayjs } from '~/lib/dayjs'
+import { SCORE_MAX, STREAK_CAP } from '~/lib/score-config'
 import { supabase } from '~/lib/supabase'
+
+import type { ScoreBreakdown } from '~/lib/score-config'
+
+export type { ScoreBreakdown }
 
 export interface AdminUser {
   id: string
@@ -16,7 +21,9 @@ export interface AdminUser {
   dueCount: number
   quizCount: number
   totalWords: number
+  streakDays: number
   score: number
+  scoreBreakdown: ScoreBreakdown
   rank: number
   createdAt: number
   lastActiveAt: number | null
@@ -26,12 +33,27 @@ function calculateScore(
   learnedCount: number,
   dueCount: number,
   totalWords: number,
-): number {
-  if (totalWords === 0) return 0
-  const completionScore = (learnedCount / totalWords) * 60
-  const disciplineScore =
-    Math.max(0, 1 - dueCount / Math.max(learnedCount, 1)) * 40
-  return Math.round(completionScore + disciplineScore)
+  currentStreak: number,
+): { score: number; breakdown: ScoreBreakdown } {
+  if (totalWords === 0) {
+    return { score: 0, breakdown: { completion: 0, discipline: 0, streak: 0 } }
+  }
+  const completion = Math.round(
+    (learnedCount / totalWords) * SCORE_MAX.completion,
+  )
+  const discipline =
+    learnedCount === 0
+      ? 0
+      : Math.round(
+          Math.max(0, 1 - dueCount / learnedCount) * SCORE_MAX.discipline,
+        )
+  const streak = Math.round(
+    (Math.min(currentStreak, STREAK_CAP) / STREAK_CAP) * SCORE_MAX.streak,
+  )
+  return {
+    score: completion + discipline + streak,
+    breakdown: { completion, discipline, streak },
+  }
 }
 
 export async function GET(): Promise<NextResponse> {
@@ -39,13 +61,15 @@ export async function GET(): Promise<NextResponse> {
     const clerk = await clerkClient()
     const { data: clerkUsers } = await clerk.users.getUserList({ limit: 500 })
 
-    const [progressResult, vocabResult, quizResult] = await Promise.all([
-      supabase.from('word_mastery').select('user_id, due_at'),
-      supabase
-        .from('vocabularies')
-        .select('id', { count: 'exact', head: true }),
-      supabase.from('quiz_sessions').select('user_id'),
-    ])
+    const [progressResult, vocabResult, quizResult, streakResult] =
+      await Promise.all([
+        supabase.from('word_mastery').select('user_id, due_at'),
+        supabase
+          .from('vocabularies')
+          .select('id', { count: 'exact', head: true }),
+        supabase.from('quiz_sessions').select('user_id'),
+        supabase.from('user_streaks').select('user_id, current_streak'),
+      ])
 
     const totalWords = vocabResult.count ?? 0
     const now = dayjs()
@@ -69,11 +93,23 @@ export async function GET(): Promise<NextResponse> {
       quizMap.set(row.user_id, (quizMap.get(row.user_id) ?? 0) + 1)
     }
 
+    const streakMap = new Map<string, number>()
+    for (const row of streakResult.data ?? []) {
+      streakMap.set(row.user_id, row.current_streak ?? 0)
+    }
+
     const unsorted = clerkUsers.map((u) => {
       const stats = progressMap.get(u.id) ?? {
         learnedCount: 0,
         dueCount: 0,
       }
+      const streakDays = streakMap.get(u.id) ?? 0
+      const { score, breakdown } = calculateScore(
+        stats.learnedCount,
+        stats.dueCount,
+        totalWords,
+        streakDays,
+      )
       return {
         id: u.id,
         firstName: u.firstName,
@@ -86,7 +122,9 @@ export async function GET(): Promise<NextResponse> {
         dueCount: stats.dueCount,
         quizCount: quizMap.get(u.id) ?? 0,
         totalWords,
-        score: calculateScore(stats.learnedCount, stats.dueCount, totalWords),
+        streakDays,
+        score,
+        scoreBreakdown: breakdown,
         createdAt: u.createdAt,
         lastActiveAt: u.lastActiveAt,
       }

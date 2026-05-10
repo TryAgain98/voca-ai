@@ -3,7 +3,16 @@
 import { Flame, Sparkles, Star, TrendingUp, Zap } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
 import { cn } from '~/lib/cn'
+import { SCORE_MAX } from '~/lib/score-config'
+
+import type { ScoreBreakdown } from '~/lib/score-config'
 
 interface ScoreTier {
   label: string
@@ -78,26 +87,32 @@ const TIER_STYLES: Record<string, ScoreTier> = {
 interface UserScoreBadgeProps {
   score: number
   size?: 'sm' | 'md' | 'lg'
+  breakdown?: ScoreBreakdown
 }
 
-export function UserScoreBadge({ score, size = 'md' }: UserScoreBadgeProps) {
+export function UserScoreBadge({
+  score,
+  size = 'md',
+  breakdown,
+}: UserScoreBadgeProps) {
   const t = useTranslations('Users')
   const tierKey = getTier(score)
   const tier = TIER_STYLES[tierKey]!
   const Icon = TIER_ICONS[tierKey]
 
-  return (
+  const badge = (
     <div className="flex flex-col items-center gap-1">
       <div
         className={cn(
-          'flex items-center gap-1.5 rounded-lg border px-3 py-1.5',
+          'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5',
           tier.bg,
           tier.border,
           tier.glow,
+          breakdown && 'cursor-help',
         )}
       >
         <Icon
-          size={size === 'lg' ? 16 : 14}
+          size={size === 'lg' ? 14 : 12}
           className={cn(tier.color, 'shrink-0')}
           strokeWidth={2}
         />
@@ -105,7 +120,11 @@ export function UserScoreBadge({ score, size = 'md' }: UserScoreBadgeProps) {
           className={cn(
             'leading-none font-[590] tabular-nums',
             tier.color,
-            size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-2xl' : 'text-lg',
+            size === 'lg'
+              ? 'text-2xl'
+              : size === 'md'
+                ? 'text-xl'
+                : 'text-base',
           )}
         >
           {score}
@@ -119,6 +138,83 @@ export function UserScoreBadge({ score, size = 'md' }: UserScoreBadgeProps) {
       >
         {t(tier.label as Parameters<typeof t>[0])}
       </span>
+    </div>
+  )
+
+  if (!breakdown) return badge
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>{badge}</TooltipTrigger>
+        <TooltipContent side="left" className="overflow-hidden p-0">
+          <div className="min-w-45">
+            <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-[590] tracking-widest uppercase opacity-60">
+              {t('scoreTooltipTitle')}
+            </p>
+            <div className="divide-y divide-white/6">
+              <ScoreRow
+                label={t('scoreTooltipStreak')}
+                pts={breakdown.streak}
+                max={SCORE_MAX.streak}
+                color="text-orange-400"
+              />
+              <ScoreRow
+                label={t('scoreTooltipCompletion')}
+                pts={breakdown.completion}
+                max={SCORE_MAX.completion}
+                color="text-emerald-400"
+              />
+              <ScoreRow
+                label={t('scoreTooltipDiscipline')}
+                pts={breakdown.discipline}
+                max={SCORE_MAX.discipline}
+                color="text-sky-400"
+              />
+            </div>
+            <div className="flex items-center justify-between border-t border-white/6 px-3 py-2">
+              <span className="text-[10px] font-[510] opacity-50">Total</span>
+              <span className="text-[11px] font-[590] tabular-nums">
+                {score} / 100
+              </span>
+            </div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function ScoreRow({
+  label,
+  pts,
+  max,
+  color,
+}: {
+  label: string
+  pts: number
+  max: number
+  color: string
+}) {
+  const ratio = max > 0 ? pts / max : 0
+  return (
+    <div className="space-y-1.5 px-3 py-2">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[11px] font-[510]">{label}</span>
+        <span className={cn('text-[11px] font-[590] tabular-nums', color)}>
+          {pts}
+          <span className="text-white/30">/{max}</span>
+        </span>
+      </div>
+      <div className="h-0.5 overflow-hidden rounded-full bg-white/8">
+        <div
+          className={cn(
+            'h-full rounded-full transition-all',
+            color.replace('text-', 'bg-'),
+          )}
+          style={{ width: `${ratio * 100}%` }}
+        />
+      </div>
     </div>
   )
 }

@@ -2,8 +2,13 @@
 
 import { useUser } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
+import { buttonVariants } from '~/components/ui/button'
+import { useAdminUsers } from '~/hooks/use-admin-users'
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
 import { useStreak } from '~/hooks/use-streak'
 import { useDashboardStats, useReviewForecast } from '~/hooks/use-word-mastery'
@@ -28,7 +33,19 @@ const GREETING_EMOJI = { morning: '☀️', afternoon: '👋', evening: '🌙' }
 export default function DashboardPage() {
   const t = useTranslations('Dashboard')
   const { user } = useUser()
-  const userId = user?.id ?? ''
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const locale = params.locale as string
+
+  const viewAs = searchParams.get('viewAs') ?? ''
+  const isViewMode = !!viewAs
+  const userId = viewAs || user?.id || ''
+
+  const { data: viewAsUser } = useAdminUsers()
+  const viewedUser = isViewMode
+    ? viewAsUser?.find((u) => u.id === viewAs)
+    : null
+
   const { data: stats, isLoading } = useDashboardStats(userId)
   const { data: perf, isLoading: isPerfLoading } = useQuizPerformance(userId)
   const { data: streak, isLoading: isStreakLoading } = useStreak(userId)
@@ -36,23 +53,47 @@ export default function DashboardPage() {
     useReviewForecast(userId)
 
   const greeting = getGreeting()
-  const firstName = user?.firstName ?? user?.username ?? ''
+  const firstName = isViewMode
+    ? (viewedUser?.firstName ?? viewedUser?.username ?? '')
+    : (user?.firstName ?? user?.username ?? '')
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
-        <h1 className="text-foreground text-2xl font-[590] tracking-[-0.5px]">
-          {t(`greeting.${greeting}`)}
-          {firstName ? `, ${firstName}` : ''} {GREETING_EMOJI[greeting]}
-        </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          {t('greetingSubtitle')}
-        </p>
-      </motion.div>
+      {isViewMode && (
+        <div className="border-border bg-card flex items-center justify-between gap-3 rounded-xl border px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <span className="bg-primary/10 text-primary flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-[590]">
+              👁
+            </span>
+            <p className="text-muted-foreground text-sm">
+              {t('viewingBanner', { name: firstName || '...' })}
+            </p>
+          </div>
+          <Link
+            href={`/${locale}/admin/users`}
+            className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+          >
+            <ArrowLeft size={13} className="mr-1" />
+            {t('viewingBannerBack')}
+          </Link>
+        </div>
+      )}
+
+      {!isViewMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+        >
+          <h1 className="text-foreground text-2xl font-[590] tracking-[-0.5px]">
+            {t(`greeting.${greeting}`)}
+            {firstName ? `, ${firstName}` : ''} {GREETING_EMOJI[greeting]}
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t('greetingSubtitle')}
+          </p>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <StreakCard streak={streak} isLoading={isStreakLoading} />
@@ -61,6 +102,7 @@ export default function DashboardPage() {
           masteredCount={stats?.masteredCount ?? 0}
           practicingCount={stats?.practicingCount ?? 0}
           isLoading={isLoading}
+          viewAs={viewAs || undefined}
         />
       </div>
 
@@ -76,6 +118,7 @@ export default function DashboardPage() {
         masteredCount={stats?.masteredCount ?? 0}
         totalWords={stats?.totalWords ?? 0}
         isLoading={isLoading}
+        isViewMode={isViewMode}
       />
 
       <ReviewForecastCard forecast={forecast} isLoading={isForecastLoading} />
