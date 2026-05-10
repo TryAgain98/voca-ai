@@ -125,29 +125,27 @@ function isDueForDashboard(progress: WordMastery, now: Date): boolean {
   return !progress.tested_at
 }
 
-function isSameLocalDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  )
-}
+const APP_TIMEZONE = 'Asia/Ho_Chi_Minh'
+
+const tzFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: APP_TIMEZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
 
 function localDayKey(d: Date): string {
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return tzFormatter.format(d)
 }
 
-function startOfLocalDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
-}
-
-function localDayOffset(from: Date, to: Date): number {
-  const a = startOfLocalDay(from).getTime()
-  const b = startOfLocalDay(to).getTime()
+function dayOffsetFromKeys(fromKey: string, toKey: string): number {
+  const a = new Date(`${fromKey}T00:00:00Z`).getTime()
+  const b = new Date(`${toKey}T00:00:00Z`).getTime()
   return Math.round((b - a) / DAY_MS)
+}
+
+function isSameLocalDay(a: Date, b: Date): boolean {
+  return localDayKey(a) === localDayKey(b)
 }
 
 function wasWrongToday(progress: WordMastery, now: Date): boolean {
@@ -302,6 +300,7 @@ class WordMasteryService {
 
       if (!isDueForDashboard(progress, now)) continue
       const priority = computeQuizPriority(progress, now)
+      if (priority < 0) continue
       needsTestingCount += 1
       needsTestingPriorityList.push({ word: reviewWord, priority })
     }
@@ -365,13 +364,17 @@ class WordMasteryService {
     if (progressError) throw progressError
 
     const now = new Date()
-    const today = startOfLocalDay(now)
+    const todayKey = localDayKey(now)
 
     const buckets = new Map<string, ForecastDayBreakdown>()
     for (let i = 0; i < days; i += 1) {
-      const d = new Date(today)
-      d.setDate(today.getDate() + i)
-      buckets.set(localDayKey(d), { practicing: 0, relearning: 0 })
+      const d = new Date(
+        new Date(`${todayKey}T00:00:00Z`).getTime() + i * DAY_MS,
+      )
+      buckets.set(
+        `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`,
+        { practicing: 0, relearning: 0 },
+      )
     }
 
     let overdueCount = 0
@@ -379,8 +382,8 @@ class WordMasteryService {
       if (!progress.due_at) continue
       if (isMastered(progress.level)) continue
 
-      const dueDate = new Date(progress.due_at)
-      const offset = localDayOffset(today, dueDate)
+      const dueDateKey = localDayKey(new Date(progress.due_at))
+      const offset = dayOffsetFromKeys(todayKey, dueDateKey)
 
       if (offset < 0) {
         overdueCount += 1
@@ -388,7 +391,7 @@ class WordMasteryService {
       }
       if (offset >= days) continue
 
-      const breakdown = buckets.get(localDayKey(dueDate))
+      const breakdown = buckets.get(dueDateKey)
       if (!breakdown) continue
       if (progress.is_relearning) {
         breakdown.relearning += 1
@@ -412,7 +415,7 @@ class WordMasteryService {
     const nextFutureDate = nextFuture?.date ?? null
     const nextFutureCount = nextFuture?.count ?? 0
     const daysUntilNextFuture = nextFutureDate
-      ? localDayOffset(today, new Date(`${nextFutureDate}T00:00:00`))
+      ? dayOffsetFromKeys(todayKey, nextFutureDate)
       : null
 
     return {
