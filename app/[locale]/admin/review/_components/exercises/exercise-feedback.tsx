@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 
 import { Button } from '~/components/ui/button'
 
@@ -19,6 +20,22 @@ export function ExerciseFeedback({
   correctAnswer,
 }: ExerciseFeedbackProps) {
   const t = useTranslations('Review')
+  const showContinue = show && !isCorrect
+
+  useEffect(() => {
+    if (!showContinue) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') onContinue()
+    }
+    // Delay to avoid catching the same Enter keydown that triggered submission
+    const timer = setTimeout(() => {
+      window.addEventListener('keydown', handleKeyDown)
+    }, 300)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showContinue, onContinue])
 
   return (
     <AnimatePresence>
@@ -33,7 +50,7 @@ export function ExerciseFeedback({
           {t('correct')}
         </motion.p>
       )}
-      {show && !isCorrect && (
+      {showContinue && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
