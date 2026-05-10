@@ -59,7 +59,7 @@ function deduplicateVocab(vocab: ReviewVocab[]): ReviewVocab[] {
 }
 
 function buildQueue(vocab: ReviewVocab[], types: ExerciseType[]): Exercise[] {
-  const unique = deduplicateVocab(vocab)
+  const unique = deduplicateVocab(vocab).sort(() => Math.random() - 0.5)
   return unique.map((v) => {
     const type = types[Math.floor(Math.random() * types.length)]
     return makeExercise(v, type, unique)
