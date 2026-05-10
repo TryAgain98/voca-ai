@@ -36,7 +36,7 @@ export function buildTranslationPrompt(
 
 export function buildVocabularyFillPrompt(word: string): string {
   return `You are an English-Vietnamese dictionary. Given the input "${word}":
-- If it IS a real English word or phrase, return exactly: {"valid":true,"word_type":"<part of speech: n|v|adj|adv|prep|phr.v|p.p|phrase>","meaning":"<Vietnamese, 1-6 words>","phonetic":"</IPA/>","example":"<natural English sentence>"}
+- If it IS a real English word or phrase, return exactly: {"valid":true,"word_type":"<part of speech: n|v|adj|adv|prep|prep phr.|phr.v|p.p|phrase>","meaning":"<Vietnamese, 1-6 words>","phonetic":"</IPA/>","example":"<natural English sentence>"}
 - If it is NOT a real English word, return exactly: {"valid":false}
 
 Return ONLY valid JSON, no markdown, no explanation.`

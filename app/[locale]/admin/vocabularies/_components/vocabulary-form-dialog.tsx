@@ -32,6 +32,7 @@ const WORD_TYPES = [
   { value: 'adj', label: 'Adjective (adj)' },
   { value: 'adv', label: 'Adverb (adv)' },
   { value: 'prep', label: 'Preposition (prep)' },
+  { value: 'prep phr.', label: 'Prepositional Phrase (prep phr.)' },
   { value: 'phr.v', label: 'Phrasal Verb (phr.v)' },
   { value: 'p.p', label: 'Past Participle (p.p)' },
   { value: 'phrase', label: 'Phrase / Expression' },
