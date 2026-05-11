@@ -15,13 +15,9 @@ import { QuizEmptyState } from './quiz-empty-state'
 import type { ExerciseType, QuizSetup } from '../_types/quiz.types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'
 
-// speak-word disabled in quiz: speech recognition isn't reliable enough
-// to score mastery fairly. Re-enable once accuracy improves.
-const QUIZ_EXERCISE_TYPES: ExerciseType[] = [
-  'meaning-to-word',
-  'listen-to-word',
-  // 'speak-word',
-]
+// speak-word disabled: speech recognition isn't reliable enough to score mastery fairly.
+// listen-to-word disabled: too easy to be a meaningful test.
+const QUIZ_EXERCISE_TYPES: ExerciseType[] = ['meaning-to-word']
 
 const QUIZ_BATCH_LIMIT = 20
 const MIN_VOCAB = 1
