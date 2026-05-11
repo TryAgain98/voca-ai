@@ -12,8 +12,6 @@ import { useRecordStreakActivity } from '~/hooks/use-streak'
 import { useApplyQuizMastery } from '~/hooks/use-word-mastery'
 import { dayjs } from '~/lib/dayjs'
 
-import { ScoringGuide } from '../scoring-guide'
-
 import { AnswersBreakdown } from './answers-breakdown'
 import { ConfettiBurst } from './confetti-burst'
 import { ResultsHero } from './results-hero'
@@ -117,14 +115,6 @@ export function QuizResults({
         />
 
         <AnswersBreakdown results={results} />
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55 }}
-        >
-          <ScoringGuide />
-        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 8 }}

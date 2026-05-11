@@ -12,16 +12,24 @@ import type {
 } from '~admin/review/_types/review.types'
 
 function pickDistractors(vocab: ReviewVocab, pool: ReviewVocab[]): string[] {
-  const sameType = pool.filter(
-    (v) => v.id !== vocab.id && v.word_type === vocab.word_type,
+  const correctMeaning = vocab.meaning.trim().toLowerCase()
+  const candidates = pool.filter(
+    (v) =>
+      v.id !== vocab.id && v.meaning.trim().toLowerCase() !== correctMeaning,
   )
-  const others = pool.filter(
-    (v) => v.id !== vocab.id && v.word_type !== vocab.word_type,
-  )
-  return [...sameType, ...others]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3)
-    .map((v) => v.meaning)
+  const sameType = candidates.filter((v) => v.word_type === vocab.word_type)
+  const others = candidates.filter((v) => v.word_type !== vocab.word_type)
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const v of [...sameType, ...others].sort(() => Math.random() - 0.5)) {
+    const normalized = v.meaning.trim().toLowerCase()
+    if (!seen.has(normalized)) {
+      seen.add(normalized)
+      result.push(v.meaning)
+      if (result.length === 3) break
+    }
+  }
+  return result
 }
 
 function makeExercise(
@@ -52,8 +60,9 @@ function makeExercise(
 function deduplicateVocab(vocab: ReviewVocab[]): ReviewVocab[] {
   const seen = new Set<string>()
   return vocab.filter((v) => {
-    if (seen.has(v.word)) return false
-    seen.add(v.word)
+    const key = v.word.trim().toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
     return true
   })
 }

@@ -5,6 +5,15 @@ import { Clock, Target } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+
+import { ScoringGuidePopup } from './scoring-guide-popup'
+
 import type { ScoreTier } from './score-tier'
 
 const RING_SIZE = 156
@@ -83,14 +92,29 @@ export function ResultsHero({
           </motion.span>
         </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className={`text-sm font-[590] tracking-wider uppercase ${tier.accent}`}
-        >
-          {t(`tier.${tier.key}`)}
-        </motion.p>
+        <TooltipProvider delay={300}>
+          <Tooltip>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.35 }}
+            >
+              <TooltipTrigger
+                className={`cursor-help border-none bg-transparent p-0 text-sm font-[590] tracking-wider uppercase underline decoration-dotted underline-offset-2 ${tier.accent}`}
+              >
+                {t(`tier.${tier.key}`)}
+              </TooltipTrigger>
+            </motion.div>
+            <TooltipContent
+              side="bottom"
+              sideOffset={10}
+              className="max-w-none rounded-xl border border-white/[0.08] bg-[#191a1b] px-4 py-3"
+              style={{ '--color-foreground': '#191a1b' } as React.CSSProperties}
+            >
+              <ScoringGuidePopup />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         <div className="relative mx-auto mt-4 flex items-center justify-center">
           <svg

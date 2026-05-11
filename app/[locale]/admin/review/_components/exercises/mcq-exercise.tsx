@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
+import { Volume2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
@@ -34,7 +35,7 @@ export function MCQExerciseCard({
 }: MCQExerciseCardProps) {
   const t = useTranslations('Review')
   const [selected, setSelected] = useState<number | null>(null)
-  const { speak, isSpeaking } = useTTS(exercise.vocab.word)
+  const { speak, isSpeaking, isLoading } = useTTS(exercise.vocab.word)
   const isQuiz = mode === 'quiz'
   const startedAtRef = useRef<number>(0)
   const speechStartedRef = useRef(false)
@@ -107,7 +108,7 @@ export function MCQExerciseCard({
           className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-indigo-500/5 px-6 py-5"
         >
           <div className="absolute inset-x-0 top-0 h-px bg-indigo-400/40" />
-          <div className="flex items-baseline gap-2.5">
+          <div className="flex items-center gap-2.5">
             <p className="text-3xl font-semibold tracking-tight">
               {exercise.vocab.word}
             </p>
@@ -116,6 +117,23 @@ export function MCQExerciseCard({
                 {exercise.vocab.phonetic}
               </span>
             )}
+            <button
+              onClick={speak}
+              className={cn(
+                'ml-0.5 rounded-md p-1 transition-colors',
+                isSpeaking || isLoading
+                  ? 'text-indigo-400'
+                  : 'text-muted-foreground hover:text-indigo-300',
+              )}
+              aria-label="Play pronunciation"
+            >
+              <Volume2
+                className={cn(
+                  'size-4',
+                  (isSpeaking || isLoading) && 'animate-pulse',
+                )}
+              />
+            </button>
           </div>
           {exercise.vocab.word_type && (
             <span className="mt-1 inline-block rounded bg-indigo-500/15 px-1.5 py-0.5 text-xs text-indigo-300">

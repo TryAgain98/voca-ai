@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 
 import { cn } from '~/lib/cn'
 
-const ROWS = [
+export const ROWS = [
   {
     icon: '⚡',
     labelKey: 'fast' as const,
