@@ -365,8 +365,17 @@
       "difficulty": {
         "easy": "Dễ",
         "good": "Ổn",
-        "hard": "Khó"
+        "hard": "Khó",
+        "again": "Sai"
       }
+    },
+    "scoringGuide": {
+      "title": "Cách tính điểm",
+      "fast": "Nhanh (< 5s)",
+      "normal": "Tốc độ bình thường",
+      "hintOrSlow": "Dùng gợi ý hoặc chậm",
+      "wrong": "Sai",
+      "masteredAt": "Thuộc từ khi đạt level 3 / 5"
     }
   },
   "Settings": {

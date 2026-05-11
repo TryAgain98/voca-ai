@@ -365,8 +365,17 @@
       "difficulty": {
         "easy": "Easy",
         "good": "Good",
-        "hard": "Hard"
+        "hard": "Hard",
+        "again": "Wrong"
       }
+    },
+    "scoringGuide": {
+      "title": "How scoring works",
+      "fast": "Fast (< 5s)",
+      "normal": "Normal speed",
+      "hintOrSlow": "Hint used or slow",
+      "wrong": "Wrong answer",
+      "masteredAt": "Memorized at level 3 out of 5"
     }
   },
   "Settings": {

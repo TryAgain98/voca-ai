@@ -13,7 +13,7 @@ import { markActualChars } from './diff-chars'
 import type { QuizExerciseResult } from '../../_types/quiz.types'
 import type { Exercise } from '~admin/review/_types/review.types'
 
-type DifficultyLevel = 'easy' | 'good' | 'hard'
+type GradeLevel = 'easy' | 'good' | 'hard' | 'again'
 
 function getExpectedAnswer(exercise: Exercise): string {
   return exercise.type === 'word-to-meaning'
@@ -21,12 +21,13 @@ function getExpectedAnswer(exercise: Exercise): string {
     : exercise.vocab.word
 }
 
-function getDifficultyLevel(
+function getGradeLevel(
   isCorrect: boolean,
   word: string,
   responseMs?: number,
   usedHint?: boolean,
-): DifficultyLevel {
+): GradeLevel {
+  if (!isCorrect) return 'again'
   const grade = deriveGrade({ isCorrect, responseMs, usedHint, word })
   if (grade >= GRADE_EASY) return 'easy'
   if (grade >= GRADE_GOOD) return 'good'
@@ -39,26 +40,40 @@ function formatResponseTime(ms?: number): string {
   return `${(ms / 1000).toFixed(1)}s`
 }
 
-const DIFFICULTY_STYLES: Record<DifficultyLevel, string> = {
-  easy: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  good: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
-  hard: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+const GRADE_CONFIG: Record<GradeLevel, { style: string; delta: string }> = {
+  easy: {
+    style: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    delta: '+2',
+  },
+  good: {
+    style: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    delta: '+1',
+  },
+  hard: {
+    style: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    delta: '±0',
+  },
+  again: {
+    style: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+    delta: '−1',
+  },
 }
 
-interface DifficultyBadgeProps {
-  level: DifficultyLevel
+interface GradeBadgeProps {
+  level: GradeLevel
 }
 
-function DifficultyBadge({ level }: DifficultyBadgeProps) {
+function GradeBadge({ level }: GradeBadgeProps) {
   const t = useTranslations('Quiz.results.difficulty')
+  const { style, delta } = GRADE_CONFIG[level]
   return (
     <span
       className={cn(
         'rounded border px-1.5 py-0.5 text-[10px] leading-none font-[510]',
-        DIFFICULTY_STYLES[level],
+        style,
       )}
     >
-      {t(level)}
+      {t(level)} <span className="opacity-60">{delta}</span>
     </span>
   )
 }
@@ -93,9 +108,9 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
   const t = useTranslations('Quiz.results')
   const expected = getExpectedAnswer(result.exercise)
   const { isCorrect, responseMs, usedHint } = result
-  const difficulty = getDifficultyLevel(
+  const gradeLevel = getGradeLevel(
     isCorrect,
-    expected,
+    result.exercise.vocab.word,
     responseMs,
     usedHint,
   )
@@ -139,7 +154,7 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
           <span className="text-muted-foreground text-xs">
             — {result.exercise.vocab.meaning}
           </span>
-          <DifficultyBadge level={difficulty} />
+          <GradeBadge level={gradeLevel} />
           {responseMs != null && (
             <span className="text-muted-foreground/60 flex items-center gap-0.5 text-[10px]">
               <Clock size={10} />
