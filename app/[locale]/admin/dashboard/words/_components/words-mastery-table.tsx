@@ -43,7 +43,11 @@ function NextReviewLabel({ dueAt }: { dueAt: string | null | undefined }) {
   if (diffDays < 0)
     return <span className="font-[510] text-red-400">{t('overdue')}</span>
   if (diffDays === 0)
-    return <span className="font-[510] text-yellow-400">{t('today')}</span>
+    return (
+      <span className="font-[510] text-yellow-400">
+        {t('today')} {dayjs(dueAt).format('HH:mm')}
+      </span>
+    )
   return (
     <span className="text-muted-foreground tabular-nums">
       {dayjs(dueAt).format('DD/MM/YYYY')}
