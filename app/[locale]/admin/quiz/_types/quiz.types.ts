@@ -6,6 +6,10 @@ import type {
 
 export type { ExerciseType, ReviewVocab }
 
+// speak-word disabled: speech recognition isn't reliable enough to score mastery fairly.
+// listen-to-word disabled: too easy to be a meaningful test.
+export const QUIZ_EXERCISE_TYPES: ExerciseType[] = ['meaning-to-word']
+
 export interface QuizSetup {
   userId: string
   lessonIds: string[]

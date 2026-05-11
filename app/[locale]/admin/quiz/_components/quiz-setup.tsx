@@ -9,15 +9,13 @@ import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import { useQuizCandidates } from '~/hooks/use-word-mastery'
 
+import { QUIZ_EXERCISE_TYPES } from '../_types/quiz.types'
+
 import { QuizChallengeBadges } from './quiz-challenge-badges'
 import { QuizEmptyState } from './quiz-empty-state'
 
-import type { ExerciseType, QuizSetup } from '../_types/quiz.types'
+import type { QuizSetup } from '../_types/quiz.types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'
-
-// speak-word disabled: speech recognition isn't reliable enough to score mastery fairly.
-// listen-to-word disabled: too easy to be a meaningful test.
-const QUIZ_EXERCISE_TYPES: ExerciseType[] = ['meaning-to-word']
 
 const QUIZ_BATCH_LIMIT = 20
 const MIN_VOCAB = 1

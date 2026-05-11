@@ -3,52 +3,54 @@
 import { useUser } from '@clerk/nextjs'
 import { ClipboardList } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 
 import { QuizSessionView } from './_components/quiz-session'
 import { QuizSetup } from './_components/quiz-setup'
+import { QUIZ_EXERCISE_TYPES } from './_types/quiz.types'
 import { QuizHistoryTable } from './history/_components/quiz-history-table'
 
 import type { QuizSetup as QuizSetupType } from './_types/quiz.types'
 
-// speak-word disabled in quiz: speech recognition isn't reliable enough
-// to score mastery fairly. Re-enable once accuracy improves.
-const QUICK_START_EXERCISE_TYPES = [
-  'meaning-to-word',
-  'listen-to-word',
-  // 'speak-word',
-] as const
 const MIN_QUICK_START_VOCAB = 1
 
 export default function QuizPage() {
   const t = useTranslations('Quiz')
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const [setup, setSetup] = useState<QuizSetupType | null>(null)
   const [sessionKey, setSessionKey] = useState(0)
-  const pendingVocab = useQuizQuickStartStore((s) => s.pendingVocab)
-  const clearPendingVocab = useQuizQuickStartStore((s) => s.clearPendingVocab)
   const userId = user?.id ?? null
 
-  useEffect(() => {
-    return () => {
-      clearPendingVocab()
-    }
-  }, [clearPendingVocab])
+  const [quickStartVocab] = useState(() => {
+    const { pendingVocab, clearPendingVocab } =
+      useQuizQuickStartStore.getState()
+    if (pendingVocab) clearPendingVocab()
+    return pendingVocab
+  })
 
   const quickStartSetup = useMemo<QuizSetupType | null>(() => {
-    if (!userId || !pendingVocab) return null
-    if (pendingVocab.length < MIN_QUICK_START_VOCAB) return null
+    if (
+      !isLoaded ||
+      !userId ||
+      !quickStartVocab ||
+      quickStartVocab.length < MIN_QUICK_START_VOCAB
+    )
+      return null
     return {
       userId,
       lessonIds: [],
-      exerciseTypes: [...QUICK_START_EXERCISE_TYPES],
-      vocab: pendingVocab,
+      exerciseTypes: [...QUIZ_EXERCISE_TYPES],
+      vocab: quickStartVocab,
     }
-  }, [userId, pendingVocab])
+  }, [isLoaded, userId, quickStartVocab])
 
   const activeSetup = setup ?? quickStartSetup
+
+  if (quickStartVocab && !isLoaded) {
+    return null
+  }
 
   if (activeSetup) {
     return (
@@ -57,7 +59,6 @@ export default function QuizPage() {
         setup={activeSetup}
         onExit={() => {
           setSetup(null)
-          clearPendingVocab()
           setSessionKey((k) => k + 1)
         }}
       />
