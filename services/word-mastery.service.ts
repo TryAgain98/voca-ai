@@ -42,6 +42,7 @@ const UNTESTED_PRIORITY = 50
 
 export interface QuizWordResult {
   wordId: string
+  word?: string
   isCorrect: boolean
   responseMs?: number
   usedHint?: boolean
@@ -488,6 +489,7 @@ class WordMasteryService {
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
         usedHint: r.usedHint,
+        word: r.word,
       })
 
       const schedule = nextSchedule({

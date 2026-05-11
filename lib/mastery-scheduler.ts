@@ -33,6 +33,7 @@ const RELEARNING_STEPS_MIN = [10, 1440] as const
 const FAST_GOOD_THRESHOLD_MS = 5000
 const SLOW_GOOD_THRESHOLD_MS = 10000
 const NO_PROGRESS_TIMEOUT_MS = 20000
+const LONG_WORD_LETTER_THRESHOLD = 8
 
 const EASE_DELTA: Record<Grade, number> = {
   [GRADE_AGAIN]: -0.2,
@@ -81,19 +82,26 @@ interface DeriveGradeInput {
   isCorrect: boolean
   responseMs?: number | null
   usedHint?: boolean | null
+  word?: string | null
 }
 
 export function deriveGrade({
   isCorrect,
   responseMs,
   usedHint,
+  word,
 }: DeriveGradeInput): Grade {
   if (!isCorrect) return GRADE_AGAIN
   if (usedHint) return GRADE_HARD
   if (responseMs == null) return GRADE_GOOD
   if (responseMs >= NO_PROGRESS_TIMEOUT_MS) return GRADE_HARD
   if (responseMs <= FAST_GOOD_THRESHOLD_MS) return GRADE_EASY
-  if (responseMs >= SLOW_GOOD_THRESHOLD_MS) return GRADE_HARD
+  const letterCount = word ? word.replace(/\s/g, '').length : 0
+  if (
+    letterCount <= LONG_WORD_LETTER_THRESHOLD &&
+    responseMs >= SLOW_GOOD_THRESHOLD_MS
+  )
+    return GRADE_HARD
   return GRADE_GOOD
 }
 

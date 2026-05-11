@@ -23,10 +23,11 @@ function getExpectedAnswer(exercise: Exercise): string {
 
 function getDifficultyLevel(
   isCorrect: boolean,
+  word: string,
   responseMs?: number,
   usedHint?: boolean,
 ): DifficultyLevel {
-  const grade = deriveGrade({ isCorrect, responseMs, usedHint })
+  const grade = deriveGrade({ isCorrect, responseMs, usedHint, word })
   if (grade >= GRADE_EASY) return 'easy'
   if (grade >= GRADE_GOOD) return 'good'
   return 'hard'
@@ -92,7 +93,12 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
   const t = useTranslations('Quiz.results')
   const expected = getExpectedAnswer(result.exercise)
   const { isCorrect, responseMs, usedHint } = result
-  const difficulty = getDifficultyLevel(isCorrect, responseMs, usedHint)
+  const difficulty = getDifficultyLevel(
+    isCorrect,
+    expected,
+    responseMs,
+    usedHint,
+  )
 
   return (
     <motion.div

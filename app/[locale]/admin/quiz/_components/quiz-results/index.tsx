@@ -89,6 +89,7 @@ export function QuizResults({
       userId: setup.userId,
       results: results.map((r) => ({
         wordId: r.exercise.vocab.id,
+        word: r.exercise.vocab.word,
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
         usedHint: r.usedHint,
