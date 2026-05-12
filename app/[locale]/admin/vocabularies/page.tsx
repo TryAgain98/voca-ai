@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
@@ -10,8 +11,8 @@ import {
   useCreateVocabulary,
   useDeleteVocabulary,
   useUpdateVocabulary,
-  useVocabularies,
 } from '~/hooks/use-vocabularies'
+import { useVocabulariesWithMastery } from '~/hooks/use-vocabularies-with-mastery'
 
 import { VocabularyDeleteDialog } from './_components/vocabulary-delete-dialog'
 import { VocabularyDetailSheet } from './_components/vocabulary-detail-sheet'
@@ -19,38 +20,70 @@ import { VocabularyFilter } from './_components/vocabulary-filter'
 import { VocabularyFormDialog } from './_components/vocabulary-form-dialog'
 import { VocabularyTable } from './_components/vocabulary-table'
 
-import type { Vocabulary } from '~/types'
+import type { MasteryStatus, VocabWithMastery, Vocabulary } from '~/types'
 
 const ALL = 'all'
 
 export default function VocabulariesPage() {
   const t = useTranslations('Vocabularies')
+  const { user } = useUser()
   const { data: lessons = [] } = useLessons()
+
   const [lessonFilter, setLessonFilter] = useState(ALL)
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<MasteryStatus | 'all'>(ALL)
+  const [sortByDue, setSortByDue] = useState<'asc' | 'desc' | null>(null)
   const [page, setPage] = useState(1)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Vocabulary | null>(null)
-  const [deletingVoca, setDeletingVoca] = useState<Vocabulary | null>(null)
-  const [viewingVoca, setViewingVoca] = useState<Vocabulary | null>(null)
+  const [deletingVoca, setDeletingVoca] = useState<VocabWithMastery | null>(
+    null,
+  )
+  const [viewingVoca, setViewingVoca] = useState<VocabWithMastery | null>(null)
 
   const lessonId = lessonFilter === ALL ? undefined : lessonFilter
-  const { data: vocabularies = [], isLoading } = useVocabularies(lessonId)
+  const { data: vocabularies, isLoading } = useVocabulariesWithMastery(
+    user?.id ?? '',
+    lessonId,
+  )
 
   const createVocabulary = useCreateVocabulary()
   const updateVocabulary = useUpdateVocabulary()
   const deleteVocabulary = useDeleteVocabulary()
 
   const filtered = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
-    if (!q) return vocabularies
-    return vocabularies.filter(
-      (v) =>
-        v.word.toLowerCase().includes(q) || v.meaning.toLowerCase().includes(q),
-    )
-  }, [vocabularies, searchQuery])
+    let result = vocabularies
 
-  const isFiltering = lessonFilter !== ALL || searchQuery.trim() !== ''
+    const q = searchQuery.toLowerCase().trim()
+    if (q) {
+      result = result.filter(
+        (v) =>
+          v.word.toLowerCase().includes(q) ||
+          v.meaning.toLowerCase().includes(q),
+      )
+    }
+
+    if (statusFilter !== ALL) {
+      result = result.filter((v) => v.masteryStatus === statusFilter)
+    }
+
+    if (sortByDue) {
+      const dir = sortByDue === 'asc' ? 1 : -1
+      result = [...result].sort((a, b) => {
+        const aDue = a.mastery?.due_at
+        const bDue = b.mastery?.due_at
+        if (!aDue && !bDue) return 0
+        if (!aDue) return 1
+        if (!bDue) return -1
+        return (new Date(aDue).getTime() - new Date(bDue).getTime()) * dir
+      })
+    }
+
+    return result
+  }, [vocabularies, searchQuery, statusFilter, sortByDue])
+
+  const isFiltering =
+    lessonFilter !== ALL || searchQuery.trim() !== '' || statusFilter !== ALL
 
   const handleLessonChange = (value: string) => {
     setLessonFilter(value)
@@ -62,9 +95,15 @@ export default function VocabulariesPage() {
     setPage(1)
   }
 
+  const handleStatusChange = (value: MasteryStatus | 'all') => {
+    setStatusFilter(value)
+    setPage(1)
+  }
+
   const handleClearFilters = () => {
     setLessonFilter(ALL)
     setSearchQuery('')
+    setStatusFilter(ALL)
     setPage(1)
   }
 
@@ -130,8 +169,10 @@ export default function VocabulariesPage() {
         lessons={lessons}
         lessonFilter={lessonFilter}
         searchQuery={searchQuery}
+        statusFilter={statusFilter}
         onLessonChange={handleLessonChange}
         onSearchChange={handleSearchChange}
+        onStatusChange={handleStatusChange}
         onClearFilters={handleClearFilters}
       />
 
@@ -142,8 +183,10 @@ export default function VocabulariesPage() {
           searchQuery={searchQuery}
           isLoading={isLoading}
           isFiltering={isFiltering}
+          sortByDue={sortByDue}
           page={page}
           onPageChange={setPage}
+          onSortByDueChange={setSortByDue}
           onRowClick={setViewingVoca}
           onEdit={(v) => {
             setEditing(v)

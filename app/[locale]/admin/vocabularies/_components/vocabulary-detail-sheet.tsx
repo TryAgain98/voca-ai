@@ -14,10 +14,12 @@ import {
 } from '~/components/ui/sheet'
 import { dayjs } from '~/lib/dayjs'
 
-import type { Lesson, Vocabulary } from '~/types'
+import { VocabularyDetailMastery } from './vocabulary-detail-mastery'
+
+import type { Lesson, VocabWithMastery } from '~/types'
 
 interface VocabularyDetailSheetProps {
-  voca: Vocabulary | null
+  voca: VocabWithMastery | null
   lessons: Lesson[]
   onClose: () => void
 }
@@ -144,6 +146,12 @@ export function VocabularyDetailSheet({
                   </p>
                 </div>
               )}
+
+              {/* Mastery */}
+              <VocabularyDetailMastery
+                mastery={voca.mastery}
+                masteryStatus={voca.masteryStatus}
+              />
 
               <Separator />
 

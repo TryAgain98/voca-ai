@@ -52,6 +52,13 @@ export interface ReviewWord extends Vocabulary {
   score: number
 }
 
+export type MasteryStatus = 'mastered' | 'practicing' | 'untested'
+
+export interface VocabWithMastery extends Vocabulary {
+  mastery: WordMastery | null
+  masteryStatus: MasteryStatus
+}
+
 export interface QuizIncorrectWord {
   word_id: string
   word: string

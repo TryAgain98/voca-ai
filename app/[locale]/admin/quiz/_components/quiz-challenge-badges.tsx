@@ -29,7 +29,7 @@ export function QuizChallengeBadges() {
           className="border-border/60 bg-muted/30 flex items-center gap-1.5 rounded-lg border px-2.5 py-2"
         >
           <Icon size={14} className="text-primary shrink-0" />
-          <span className="text-xs font-[510] tracking-tight">
+          <span className="min-w-0 truncate text-xs font-[510] tracking-tight">
             {t(`challenge.${key}`)}
           </span>
         </motion.div>

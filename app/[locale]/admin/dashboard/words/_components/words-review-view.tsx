@@ -20,7 +20,7 @@ import { WordsReviewHeader } from './words-review-header'
 import { WordsReviewToolbar } from './words-review-toolbar'
 
 import type { TabKey } from '../_types/words-review.types'
-import type { ReviewWord, Vocabulary } from '~/types'
+import type { ReviewWord, VocabWithMastery } from '~/types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'
 
 interface WordsReviewViewProps {
@@ -68,7 +68,7 @@ export function WordsReviewView({
 
   const { data: lessons = [] } = useLessons()
   const [page, setPage] = useState(1)
-  const [viewingVoca, setViewingVoca] = useState<Vocabulary | null>(null)
+  const [viewingVoca, setViewingVoca] = useState<VocabWithMastery | null>(null)
 
   const sourceWords: Record<TabKey, ReviewWord[]> = {
     untouched: untouchedWords,
@@ -121,7 +121,19 @@ export function WordsReviewView({
     router.push(viewAs ? `${base}?viewAs=${viewAs}` : base)
   }
 
-  const handleUnmaster = (voca: Vocabulary) => {
+  const handleRowClick = (voca: ReviewWord) => {
+    setViewingVoca({
+      ...voca,
+      mastery: voca.progress,
+      masteryStatus: !voca.progress
+        ? 'untested'
+        : voca.progress.level >= 5
+          ? 'mastered'
+          : 'practicing',
+    })
+  }
+
+  const handleUnmaster = (voca: ReviewWord) => {
     if (!user?.id || isViewMode) return
     softDemote.mutate(
       { userId: user.id, wordId: voca.id },
@@ -135,7 +147,7 @@ export function WordsReviewView({
 
   const renderRowActions =
     !isViewMode && activeTab === 'mastered'
-      ? (voca: Vocabulary) => (
+      ? (voca: ReviewWord) => (
           <button
             type="button"
             onClick={() => handleUnmaster(voca)}
@@ -175,7 +187,7 @@ export function WordsReviewView({
         sourceIsEmpty={sourceIsEmpty}
         isUnmasterPending={softDemote.isPending}
         onPageChange={setPage}
-        onRowClick={setViewingVoca}
+        onRowClick={handleRowClick}
         onUnmaster={handleUnmaster}
         renderRowActions={renderRowActions}
       />

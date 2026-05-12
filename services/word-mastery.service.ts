@@ -346,8 +346,11 @@ class WordMasteryService {
 
     let overdueCount = 0
     for (const progress of (progressRows ?? []) as WordMastery[]) {
-      if (!progress.due_at) continue
       if (isMastered(progress.level)) continue
+      if (!progress.due_at) {
+        if (!progress.tested_at) overdueCount += 1
+        continue
+      }
 
       const dueDateKey = localDayKey(dayjs(progress.due_at).toDate())
       const offset = dayOffsetFromKeys(todayKey, dueDateKey)

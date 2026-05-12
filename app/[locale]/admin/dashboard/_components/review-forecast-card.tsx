@@ -6,7 +6,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 import { Skeleton } from '~/components/ui/skeleton'
-import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
+import { dayjs } from '~/lib/dayjs'
 import { cn } from '~/lib/utils'
 
 import { ForecastDayDetailDialog } from './forecast-day-detail-dialog'
@@ -16,10 +16,6 @@ import type { ForecastDay, ReviewForecast } from '~/hooks/use-word-mastery'
 interface ReviewForecastCardProps {
   forecast: ReviewForecast | null | undefined
   isLoading: boolean
-}
-
-function todayKey(): string {
-  return dayjs().tz(APP_TIMEZONE).format('YYYY-MM-DD')
 }
 
 type IntensityStyle = { bg: string; text: string }
@@ -64,15 +60,13 @@ export function ReviewForecastCard({
     )
   }
 
-  const days = forecast?.forecast ?? []
+  const days = (forecast?.forecast ?? []).slice(1)
   const maxCount = days.reduce((m, d) => Math.max(m, d.count), 0)
-  const todayId = todayKey()
 
   const nextDate = forecast?.nextFutureDate ?? null
   const nextCount = forecast?.nextFutureCount ?? 0
   const daysUntil = forecast?.daysUntilNextFuture ?? null
   const totalUpcoming = forecast?.totalUpcoming ?? 0
-
   const renderHeadline = () => {
     if (!nextDate || nextCount === 0) {
       return (
@@ -141,7 +135,6 @@ export function ReviewForecastCard({
 
         <div className="flex gap-1.5">
           {days.map((day, index) => {
-            const isToday = day.date === todayId
             const dayLabel = format.dateTime(dayjs.utc(day.date).toDate(), {
               weekday: 'narrow',
             })
@@ -180,8 +173,6 @@ export function ReviewForecastCard({
                     'relative flex aspect-square w-full items-center justify-center rounded-md transition',
                     style.bg,
                     hasReviews && 'group-hover:brightness-125',
-                    isToday &&
-                      'ring-primary ring-offset-background ring-2 ring-offset-2',
                   )}
                 >
                   <span
@@ -198,22 +189,13 @@ export function ReviewForecastCard({
                     className={cn(
                       'text-[9px] font-[510] tracking-wide uppercase',
                       showDayLabel
-                        ? isToday
-                          ? 'text-primary'
-                          : 'text-muted-foreground/60'
+                        ? 'text-muted-foreground/60'
                         : 'text-transparent',
                     )}
                   >
                     {dayLabel}
                   </span>
-                  <span
-                    className={cn(
-                      'mt-0.5 text-[11px]',
-                      isToday
-                        ? 'text-primary font-[590]'
-                        : 'text-foreground/70 font-[510]',
-                    )}
-                  >
+                  <span className="text-foreground/70 mt-0.5 text-[11px] font-[510]">
                     {dateNum}
                   </span>
                 </div>

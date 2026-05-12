@@ -13,7 +13,7 @@ import {
   SelectTrigger,
 } from '~/components/ui/select'
 
-import type { Lesson } from '~/types'
+import type { Lesson, MasteryStatus } from '~/types'
 
 const ALL = 'all'
 
@@ -21,8 +21,10 @@ interface VocabularyFilterProps {
   lessons: Lesson[]
   lessonFilter: string
   searchQuery: string
+  statusFilter: MasteryStatus | 'all'
   onLessonChange: (value: string) => void
   onSearchChange: (value: string) => void
+  onStatusChange: (value: MasteryStatus | 'all') => void
   onClearFilters: () => void
 }
 
@@ -30,18 +32,21 @@ export function VocabularyFilter({
   lessons,
   lessonFilter,
   searchQuery,
+  statusFilter,
   onLessonChange,
   onSearchChange,
+  onStatusChange,
   onClearFilters,
 }: VocabularyFilterProps) {
   const t = useTranslations('Vocabularies')
 
-  const isFiltering = lessonFilter !== ALL || searchQuery.trim() !== ''
+  const isFiltering =
+    lessonFilter !== ALL || searchQuery.trim() !== '' || statusFilter !== ALL
   const selectedLesson = lessons.find((l) => l.id === lessonFilter)
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Select
           value={lessonFilter}
           onValueChange={(v) => v && onLessonChange(v)}
@@ -63,6 +68,29 @@ export function VocabularyFilter({
                 {l.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => v && onStatusChange(v as MasteryStatus | 'all')}
+        >
+          <SelectTrigger className="w-44">
+            <span className="flex flex-1 truncate text-left text-sm">
+              {statusFilter === ALL
+                ? t('filterStatus')
+                : t(
+                    `status${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` as Parameters<
+                      typeof t
+                    >[0],
+                  )}
+            </span>
+          </SelectTrigger>
+          <SelectContent className="w-fit min-w-(--anchor-width)">
+            <SelectItem value={ALL}>{t('filterStatus')}</SelectItem>
+            <SelectItem value="mastered">{t('statusMastered')}</SelectItem>
+            <SelectItem value="practicing">{t('statusPracticing')}</SelectItem>
+            <SelectItem value="untested">{t('statusUntested')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -104,6 +132,26 @@ export function VocabularyFilter({
               <button
                 type="button"
                 onClick={() => onLessonChange(ALL)}
+                className="hover:bg-muted rounded-sm p-0.5"
+              >
+                <X size={10} />
+              </button>
+            </Badge>
+          )}
+
+          {statusFilter !== ALL && (
+            <Badge
+              variant="secondary"
+              className="cursor-default gap-1 pr-1 text-xs font-normal"
+            >
+              {t(
+                `status${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` as Parameters<
+                  typeof t
+                >[0],
+              )}
+              <button
+                type="button"
+                onClick={() => onStatusChange(ALL)}
                 className="hover:bg-muted rounded-sm p-0.5"
               >
                 <X size={10} />

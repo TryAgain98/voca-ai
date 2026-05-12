@@ -1,80 +1,51 @@
 'use client'
 
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   BookMarked,
   ChevronLeft,
   ChevronRight,
-  Pencil,
-  Trash2,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { SpeakButton } from '~/components/layout/speak-button'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import { dayjs } from '~/lib/dayjs'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
 
-import type { Lesson, Vocabulary } from '~/types'
+import { VocabularyTableRow } from './vocabulary-table-row'
+
+import type { Lesson, VocabWithMastery } from '~/types'
 
 export const PAGE_SIZE = 20
 
 interface VocabularyTableProps {
-  vocabularies: Vocabulary[]
+  vocabularies: VocabWithMastery[]
   lessons: Lesson[]
   searchQuery: string
   isLoading: boolean
   isFiltering: boolean
+  sortByDue: 'asc' | 'desc' | null
   page: number
   onPageChange: (page: number) => void
-  onRowClick: (voca: Vocabulary) => void
-  onEdit?: (voca: Vocabulary) => void
-  onDelete?: (voca: Vocabulary) => void
-  renderRowActions?: (voca: Vocabulary) => React.ReactNode
+  onSortByDueChange: (value: 'asc' | 'desc' | null) => void
+  onRowClick: (voca: VocabWithMastery) => void
+  onEdit?: (voca: VocabWithMastery) => void
+  onDelete?: (voca: VocabWithMastery) => void
+  renderRowActions?: (voca: VocabWithMastery) => React.ReactNode
   onClearFilters: () => void
-}
-
-function formatDate(
-  primary: string | null | undefined,
-  fallback?: string | null,
-): string {
-  const target = primary || fallback
-  if (!target) return '—'
-  const d = dayjs(target)
-  if (!d.isValid()) return '—'
-  return d.format('DD/MM/YYYY')
-}
-
-function highlight(text: string, query: string) {
-  if (!query.trim()) return <>{text}</>
-  const regex = new RegExp(
-    `(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
-    'gi',
-  )
-  const parts = text.split(regex)
-  return (
-    <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <mark
-            key={i}
-            className="rounded-sm bg-yellow-200/70 px-0.5 dark:bg-yellow-800/60"
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      )}
-    </>
-  )
 }
 
 export function VocabularyTable({
@@ -83,8 +54,10 @@ export function VocabularyTable({
   searchQuery,
   isLoading,
   isFiltering,
+  sortByDue,
   page,
   onPageChange,
+  onSortByDueChange,
   onRowClick,
   onEdit,
   onDelete,
@@ -99,8 +72,14 @@ export function VocabularyTable({
   const paginated = vocabularies.slice(pageStart, pageStart + PAGE_SIZE)
   const showActions = !!onEdit || !!onDelete || !!renderRowActions
 
-  const lessonName = (id: string): string =>
+  const lessonName = (id: string) =>
     lessons.find((l) => l.id === id)?.name ?? id
+
+  const handleDueSort = () => {
+    const next =
+      sortByDue === null ? 'desc' : sortByDue === 'desc' ? 'asc' : null
+    onSortByDueChange(next)
+  }
 
   if (isLoading) {
     return (
@@ -137,105 +116,51 @@ export function VocabularyTable({
             <TableHead className="px-5">{t('colWord')}</TableHead>
             <TableHead className="px-4">{t('colMeaning')}</TableHead>
             <TableHead className="px-4">{t('colLesson')}</TableHead>
-            <TableHead className="w-28 px-4">{t('colUpdated')}</TableHead>
+            <TableHead className="w-32 px-4">{t('colStatus')}</TableHead>
+            <TableHead className="w-28 px-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default">
+                    {t('colLevel')}
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="text-xs">
+                    {t('colLevelTooltip')}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </TableHead>
+            <TableHead
+              className="w-28 cursor-pointer px-4 select-none"
+              onClick={handleDueSort}
+            >
+              <div className="flex items-center gap-1">
+                {t('colDue')}
+                {sortByDue === 'asc' ? (
+                  <ArrowUp size={12} className="text-foreground" />
+                ) : sortByDue === 'desc' ? (
+                  <ArrowDown size={12} className="text-foreground" />
+                ) : (
+                  <ArrowUpDown size={12} className="text-muted-foreground/40" />
+                )}
+              </div>
+            </TableHead>
             {showActions && <TableHead className="w-24 px-4" />}
           </TableRow>
         </TableHeader>
         <TableBody>
           {paginated.map((voca, i) => (
-            <TableRow
+            <VocabularyTableRow
               key={voca.id}
-              className="cursor-pointer"
-              onClick={() => onRowClick(voca)}
-            >
-              <TableCell className="text-muted-foreground px-4 text-center text-xs">
-                {pageStart + i + 1}
-              </TableCell>
-
-              <TableCell className="px-5">
-                <div className="flex items-start gap-2">
-                  <div
-                    className="mt-0.5 shrink-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <SpeakButton text={voca.word} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="font-semibold">
-                        {highlight(voca.word, searchQuery)}
-                      </span>
-                      {voca.word_type && (
-                        <Badge
-                          variant="outline"
-                          className="h-4 px-1.5 py-0 text-[10px] font-normal"
-                        >
-                          {voca.word_type}
-                        </Badge>
-                      )}
-                    </div>
-                    {voca.phonetic && (
-                      <span className="text-muted-foreground font-mono text-xs">
-                        {voca.phonetic}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell className="max-w-xs px-4">
-                <span className="line-clamp-2 text-sm">
-                  {highlight(voca.meaning, searchQuery)}
-                </span>
-              </TableCell>
-
-              <TableCell className="text-muted-foreground px-4 text-sm">
-                {lessonName(voca.lesson_id)}
-              </TableCell>
-
-              <TableCell className="text-muted-foreground px-4 text-xs whitespace-nowrap">
-                {formatDate(voca.updated_at, voca.created_at)}
-              </TableCell>
-
-              {showActions && (
-                <TableCell
-                  className="px-4"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {renderRowActions ? (
-                    renderRowActions(voca)
-                  ) : (
-                    <div className="inline-flex cursor-pointer items-center rounded-md border border-white/8 bg-white/2">
-                      {onEdit && (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          title={tCommon('edit')}
-                          className="rounded-r-none"
-                          onClick={() => onEdit(voca)}
-                        >
-                          <Pencil size={13} />
-                        </Button>
-                      )}
-                      {onEdit && onDelete && (
-                        <div className="h-4 w-px bg-white/8" />
-                      )}
-                      {onDelete && (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:text-destructive rounded-l-none"
-                          title={tCommon('delete')}
-                          onClick={() => onDelete(voca)}
-                        >
-                          <Trash2 size={13} />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </TableCell>
-              )}
-            </TableRow>
+              voca={voca}
+              rowNumber={pageStart + i + 1}
+              searchQuery={searchQuery}
+              lessonName={lessonName(voca.lesson_id)}
+              showActions={showActions}
+              onRowClick={onRowClick}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              renderRowActions={renderRowActions}
+            />
           ))}
         </TableBody>
       </Table>

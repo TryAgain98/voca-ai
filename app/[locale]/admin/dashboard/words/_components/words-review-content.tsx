@@ -9,7 +9,7 @@ import { TabEmptyState } from './words-review-states'
 
 import type { TabKey } from '../_types/words-review.types'
 import type { ReactNode } from 'react'
-import type { Lesson, ReviewWord, Vocabulary } from '~/types'
+import type { Lesson, ReviewWord } from '~/types'
 
 interface WordsReviewContentProps {
   activeTab: TabKey
@@ -21,9 +21,9 @@ interface WordsReviewContentProps {
   sourceIsEmpty: boolean
   isUnmasterPending: boolean
   onPageChange: (page: number) => void
-  onRowClick: (voca: Vocabulary) => void
-  onUnmaster: (voca: Vocabulary) => void
-  renderRowActions?: (voca: Vocabulary) => ReactNode
+  onRowClick: (voca: ReviewWord) => void
+  onUnmaster: (voca: ReviewWord) => void
+  renderRowActions?: (voca: ReviewWord) => ReactNode
 }
 
 export function WordsReviewContent({
@@ -47,7 +47,7 @@ export function WordsReviewContent({
     renderRowActionsProp !== undefined
       ? renderRowActionsProp
       : activeTab === 'mastered'
-        ? (voca: Vocabulary) => (
+        ? (voca: ReviewWord) => (
             <button
               type="button"
               className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex h-7 items-center gap-1.5 rounded border border-white/6 px-2 text-xs"

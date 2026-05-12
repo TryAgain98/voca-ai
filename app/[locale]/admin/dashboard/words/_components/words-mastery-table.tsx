@@ -17,7 +17,7 @@ import {
 } from '~/components/ui/table'
 import { dayjs } from '~/lib/dayjs'
 
-import type { Lesson, ReviewWord, Vocabulary } from '~/types'
+import type { Lesson, ReviewWord } from '~/types'
 
 const PAGE_SIZE = 20
 
@@ -83,8 +83,8 @@ interface WordsMasteryTableProps {
   page: number
   isLoading: boolean
   onPageChange: (page: number) => void
-  onRowClick: (voca: Vocabulary) => void
-  renderRowActions?: (voca: Vocabulary) => React.ReactNode
+  onRowClick: (voca: ReviewWord) => void
+  renderRowActions?: (voca: ReviewWord) => React.ReactNode
 }
 
 export function WordsMasteryTable({
