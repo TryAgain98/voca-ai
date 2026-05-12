@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { wordMasteryService } from '~/services/word-mastery.service'
 
@@ -85,6 +86,7 @@ export function useApplyQuizMastery() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     },
+    onError: () => toast.error('Failed to save mastery progress'),
   })
 }
 

@@ -24,6 +24,7 @@ export function useRecordStreakActivity() {
     onSuccess: (data) => {
       qc.setQueryData([QUERY_KEY, data.user_id], data)
     },
+    onError: () => toast.error('Failed to record streak'),
   })
 }
 
