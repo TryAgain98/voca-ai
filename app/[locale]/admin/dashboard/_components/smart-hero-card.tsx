@@ -9,7 +9,6 @@ import { useReviewQuickStartStore } from '~/stores/review-quick-start'
 import { HeroCelebrate } from './hero-celebrate'
 import { HeroPhase } from './hero-phase'
 
-import type { ActionTrack } from './hero-phase'
 import type { ReviewWord } from '~/types'
 import type { ReviewVocab } from '~admin/review/_types/review.types'
 
@@ -21,8 +20,6 @@ interface SmartHeroCardProps {
   needsTestingWords: ReviewWord[]
   unlearnedCount: number
   unlearnedWords: ReviewWord[]
-  relearningCount: number
-  relearningWords: ReviewWord[]
   wrongTodayCount: number
   wrongTodayWords: ReviewWord[]
   masteredCount: number
@@ -61,7 +58,6 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     )
   }
 
-  const hasRelearn = props.relearningCount >= MIN_BATCH
   const hasTest = props.needsTestingCount >= MIN_BATCH
 
   const goQuizWith = (words: ReviewWord[]) => {
@@ -73,18 +69,14 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     router.push(`/${locale}/admin/review`)
   }
 
-  if (hasRelearn || hasTest) {
-    const track: ActionTrack = hasRelearn ? 'relearn' : 'test'
-    const total = hasRelearn ? props.relearningCount : props.needsTestingCount
-    const words = hasRelearn ? props.relearningWords : props.needsTestingWords
-    const batch = Math.min(total, HERO_BATCH_LIMIT)
-
+  if (hasTest) {
+    const batch = Math.min(props.needsTestingCount, HERO_BATCH_LIMIT)
     return (
       <HeroPhase
-        track={track}
-        total={total}
+        track="test"
+        total={props.needsTestingCount}
         batch={batch}
-        onCta={() => goQuizWith(words)}
+        onCta={() => goQuizWith(props.needsTestingWords)}
         isViewMode={props.isViewMode}
       />
     )

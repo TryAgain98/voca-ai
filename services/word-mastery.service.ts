@@ -24,8 +24,6 @@ export interface DashboardStats {
   masteredWords: ReviewWord[]
   needsTestingCount: number
   needsTestingWords: ReviewWord[]
-  relearningCount: number
-  relearningWords: ReviewWord[]
   fadingCount: number
   fadingWords: ReviewWord[]
   wrongTodayCount: number
@@ -55,7 +53,6 @@ export interface QuizCandidatesResult {
 
 export interface ForecastDayBreakdown {
   practicing: number
-  relearning: number
 }
 
 export interface ForecastDay {
@@ -96,10 +93,6 @@ function computePracticeScore(progress: WordMastery | null): number {
 
 function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   if (!progress) return UNTESTED_PRIORITY
-  if (progress.is_relearning && progress.due_at) {
-    if (dayjs(progress.due_at).isAfter(now)) return -1
-    return 100
-  }
   if (!progress.tested_at) {
     return 30 - progress.level * 2
   }
@@ -199,8 +192,6 @@ class WordMasteryService {
         masteredWords: [],
         needsTestingCount: 0,
         needsTestingWords: [],
-        relearningCount: 0,
-        relearningWords: [],
         fadingCount: 0,
         fadingWords: [],
         wrongTodayCount: 0,
@@ -233,7 +224,6 @@ class WordMasteryService {
     let masteredCount = 0
     let practicingCount = 0
     let needsTestingCount = 0
-    let relearningCount = 0
     let fadingCount = 0
     let retentionSum = 0
     let retentionN = 0
@@ -241,7 +231,6 @@ class WordMasteryService {
       []
     const practicingList: ReviewWord[] = []
     const masteredList: ReviewWord[] = []
-    const relearningList: ReviewWord[] = []
     const fadingPriorityList: { word: ReviewWord; retention: number }[] = []
     let wrongTodayCount = 0
     const wrongTodayList: ReviewWord[] = []
@@ -262,11 +251,6 @@ class WordMasteryService {
       } else {
         practicingCount += 1
         practicingList.push(reviewWord)
-      }
-
-      if (progress.is_relearning) {
-        relearningCount += 1
-        relearningList.push(reviewWord)
       }
 
       const retention = progressRetention(progress, now)
@@ -310,8 +294,6 @@ class WordMasteryService {
       needsTestingWords: needsTestingPriorityList
         .slice(0, NEEDS_TESTING_PREVIEW_LIMIT)
         .map((c) => c.word),
-      relearningCount,
-      relearningWords: relearningList.slice(0, FADING_PREVIEW_LIMIT),
       fadingCount,
       fadingWords: fadingPriorityList
         .slice(0, FADING_PREVIEW_LIMIT)
@@ -359,7 +341,6 @@ class WordMasteryService {
     for (let i = 0; i < days; i += 1) {
       buckets.set(dayjs.utc(todayKey).add(i, 'day').format('YYYY-MM-DD'), {
         practicing: 0,
-        relearning: 0,
       })
     }
 
@@ -379,18 +360,14 @@ class WordMasteryService {
 
       const breakdown = buckets.get(dueDateKey)
       if (!breakdown) continue
-      if (progress.is_relearning) {
-        breakdown.relearning += 1
-      } else {
-        breakdown.practicing += 1
-      }
+      breakdown.practicing += 1
     }
 
     const forecast: ForecastDay[] = Array.from(
       buckets,
       ([date, breakdown]) => ({
         date,
-        count: breakdown.practicing + breakdown.relearning,
+        count: breakdown.practicing,
         breakdown,
       }),
     ).sort((a, b) => a.date.localeCompare(b.date))
@@ -549,7 +526,7 @@ class WordMasteryService {
       .from('word_mastery')
       .update({
         level: demotedLevel,
-        is_relearning: true,
+        is_relearning: false,
         relearning_step: 0,
         stability: demotedStability,
         due_at: now.toISOString(),

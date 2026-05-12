@@ -26,10 +26,8 @@ const TARGET_RETENTION = 0.9
 const RETRIEVABILITY_DECAY = -Math.log(TARGET_RETENTION)
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
-const MS_PER_MIN = 1000 * 60
 const LAPSE_GRACE_MS = 5 * 60 * 60 * 1000
 
-const RELEARNING_STEPS_MIN = [10, 1440] as const
 const FAST_GOOD_THRESHOLD_MS = 5000
 const SLOW_GOOD_THRESHOLD_MS = 10000
 const NO_PROGRESS_TIMEOUT_MS = 20000
@@ -149,11 +147,6 @@ function nextMasteryLevel(prevMastery: number, grade: Grade): number {
   return Math.min(prevMastery + inc, MAX_MASTERY_LEVEL)
 }
 
-function relearningDueAt(step: number, now: Date): Date {
-  const minutes = RELEARNING_STEPS_MIN[step] ?? 1440
-  return addMs(now, minutes * MS_PER_MIN)
-}
-
 function startOfNextDay(now: Date): Date {
   return dayjs(now).tz(APP_TIMEZONE).add(1, 'day').startOf('day').toDate()
 }
@@ -178,64 +171,6 @@ export function nextSchedule(input: SchedulerInput): SchedulerOutput {
   const newMastery = nextMasteryLevel(input.prevMastery, grade)
   const isLapse = grade === GRADE_AGAIN && wasMastered
 
-  if (isLapse) {
-    const stepDue = relearningDueAt(0, now)
-    return {
-      mastery: newMastery,
-      ease: nextEase,
-      stability: Math.max(0.5, input.prevStability * 0.2),
-      difficulty: nextDifficulty,
-      isRelearning: true,
-      relearningStep: 0,
-      dueAt: stepDue,
-      isLapse: true,
-    }
-  }
-
-  if (input.prevIsRelearning) {
-    if (grade === GRADE_AGAIN) {
-      return {
-        mastery: newMastery,
-        ease: nextEase,
-        stability: Math.max(0.5, input.prevStability * 0.5),
-        difficulty: nextDifficulty,
-        isRelearning: true,
-        relearningStep: 0,
-        dueAt: relearningDueAt(0, now),
-        isLapse: false,
-      }
-    }
-    const nextStep = input.prevRelearningStep + 1
-    if (nextStep < RELEARNING_STEPS_MIN.length) {
-      return {
-        mastery: newMastery,
-        ease: nextEase,
-        stability: input.prevStability,
-        difficulty: nextDifficulty,
-        isRelearning: true,
-        relearningStep: nextStep,
-        dueAt: relearningDueAt(nextStep, now),
-        isLapse: false,
-      }
-    }
-    const stability = nextStability(
-      Math.max(input.prevStability, 1),
-      nextDifficulty,
-      nextEase,
-      grade,
-    )
-    return {
-      mastery: newMastery,
-      ease: nextEase,
-      stability,
-      difficulty: nextDifficulty,
-      isRelearning: false,
-      relearningStep: 0,
-      dueAt: addMs(now, intervalDaysFromStability(stability) * MS_PER_DAY),
-      isLapse: false,
-    }
-  }
-
   if (grade === GRADE_AGAIN) {
     return {
       mastery: newMastery,
@@ -245,7 +180,7 @@ export function nextSchedule(input: SchedulerInput): SchedulerOutput {
       isRelearning: false,
       relearningStep: 0,
       dueAt: lapseDueAt(now),
-      isLapse: false,
+      isLapse,
     }
   }
 

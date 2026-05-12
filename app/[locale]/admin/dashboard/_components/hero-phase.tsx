@@ -1,12 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Stethoscope, Wand2 } from 'lucide-react'
+import { ArrowRight, Stethoscope, Wand2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 
-export type ActionTrack = 'relearn' | 'test' | 'learn'
+export type ActionTrack = 'test' | 'learn'
 
 interface PhaseConfig {
   icon: typeof Stethoscope
@@ -18,15 +18,6 @@ interface PhaseConfig {
 }
 
 export const ACTION_PHASE_CONFIG: Record<ActionTrack, PhaseConfig> = {
-  relearn: {
-    icon: AlertCircle,
-    accent: 'text-rose-500',
-    glow: 'bg-rose-500/15',
-    iconAnim: 'pulse',
-    ctaClass: 'bg-rose-500 hover:bg-rose-600 text-white',
-    containerClass:
-      'relative overflow-hidden rounded-2xl border border-rose-500/30 bg-rose-500/5 p-7',
-  },
   test: {
     icon: Stethoscope,
     accent: 'text-orange-500',

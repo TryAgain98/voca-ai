@@ -134,7 +134,6 @@ export function UserDetailView({ userId }: UserDetailViewProps) {
         <MemoryStrengthCard
           averageRetention={stats?.averageRetention ?? 1}
           fadingCount={stats?.fadingCount ?? 0}
-          relearningCount={stats?.relearningCount ?? 0}
           isLoading={isLoadingStats}
         />
       </div>

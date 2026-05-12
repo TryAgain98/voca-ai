@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Activity, Flame, ShieldAlert } from 'lucide-react'
+import { Activity, ShieldAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
@@ -10,7 +10,6 @@ import { Skeleton } from '~/components/ui/skeleton'
 interface MemoryStrengthCardProps {
   averageRetention: number
   fadingCount: number
-  relearningCount: number
   isLoading: boolean
 }
 
@@ -49,7 +48,6 @@ function useEasedRatio(target: number): number {
 export function MemoryStrengthCard({
   averageRetention,
   fadingCount,
-  relearningCount,
   isLoading,
 }: MemoryStrengthCardProps) {
   const t = useTranslations('Dashboard.memoryStrength')
@@ -150,25 +148,17 @@ export function MemoryStrengthCard({
             </>
           )}
 
-          {!isLoading && (relearningCount > 0 || fadingCount > 0) && (
+          {!isLoading && fadingCount > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="mt-3 flex flex-wrap items-center gap-3 text-xs"
             >
-              {relearningCount > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 px-2.5 py-1 text-rose-500">
-                  <Flame size={11} />
-                  {t('relearningBadge', { count: relearningCount })}
-                </span>
-              )}
-              {fadingCount > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 px-2.5 py-1 text-amber-500">
-                  <ShieldAlert size={11} />
-                  {t('fadingBadge', { count: fadingCount })}
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 px-2.5 py-1 text-amber-500">
+                <ShieldAlert size={11} />
+                {t('fadingBadge', { count: fadingCount })}
+              </span>
             </motion.div>
           )}
         </div>

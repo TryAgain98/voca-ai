@@ -113,26 +113,22 @@
     "notEnoughTestable": "Need at least {min} words due for testing",
     "hero": {
       "badge": {
-        "relearn": "Slipping fast",
         "test": "Action needed",
         "learn": "Discover",
         "celebrate": "Mission complete"
       },
       "title": {
-        "relearn": "Lock in {count} fading words",
         "test": "Test {count} words today",
         "learn": "Learn {count} new words today",
         "celebrate": "Brilliant — today's mission complete"
       },
       "queueTail": "+{count} more queued for later",
       "subtitle": {
-        "relearn": "These mastered words just slipped — a quick re-test now stops the leak before they're lost.",
         "test": "A quick test confirms what's truly stored — and reveals what's slipping.",
         "learn": "Start with a few new words today. Small, consistent steps beat cramming.",
         "celebrate": "Every word due today has been tested. You've earned the win — see you tomorrow."
       },
       "cta": {
-        "relearn": "Re-test {count} now",
         "test": "Test {count} now",
         "learn": "Start with {count}",
         "celebrate": "Take a random test"
@@ -164,9 +160,7 @@
     "forecastDayDetailEmpty": "No reviews scheduled this day",
     "forecastBreakdown": {
       "practicing": "Practicing",
-      "practicingHint": "Words on their way to mastery",
-      "relearning": "Relearning",
-      "relearningHint": "Mastered words that recently slipped"
+      "practicingHint": "Words on their way to mastery"
     },
     "forecastPrivacyHint": "We hide which words are scheduled to keep your memory test honest. You'll see them when it's time to review.",
     "memoryStrength": {
@@ -181,7 +175,6 @@
         "fading": "A few words are drifting — re-test soon to lock them in.",
         "risk": "Forgetting curve is winning — schedule a focused session."
       },
-      "relearningBadge": "{count, plural, =1 {1 lapsed} other {# lapsed}}",
       "fadingBadge": "{count, plural, =1 {1 fading} other {# fading}}"
     }
   },

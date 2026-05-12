@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Eye, RotateCcw, Target } from 'lucide-react'
+import { CalendarDays, Eye, Target } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import {
@@ -34,10 +34,9 @@ export function ForecastDayDetailDialog({
       })
     : ''
 
-  const breakdown = day?.breakdown ?? { practicing: 0, relearning: 0 }
+  const breakdown = day?.breakdown ?? { practicing: 0 }
   const total = day?.count ?? 0
   const practicingPct = total > 0 ? (breakdown.practicing / total) * 100 : 0
-  const relearningPct = total > 0 ? (breakdown.relearning / total) * 100 : 0
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -63,12 +62,6 @@ export function ForecastDayDetailDialog({
                   style={{ width: `${practicingPct}%` }}
                 />
               )}
-              {breakdown.relearning > 0 && (
-                <div
-                  className="h-full bg-amber-500"
-                  style={{ width: `${relearningPct}%` }}
-                />
-              )}
             </div>
 
             <ul className="divide-border/40 divide-y">
@@ -89,26 +82,6 @@ export function ForecastDayDetailDialog({
                   </div>
                   <span className="text-foreground text-base font-[590]">
                     {breakdown.practicing}
-                  </span>
-                </li>
-              )}
-              {breakdown.relearning > 0 && (
-                <li className="flex items-center justify-between gap-3 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/15 text-amber-500">
-                      <RotateCcw size={14} strokeWidth={2} />
-                    </span>
-                    <div>
-                      <p className="text-foreground text-sm font-[510]">
-                        {t('forecastBreakdown.relearning')}
-                      </p>
-                      <p className="text-muted-foreground text-[11px]">
-                        {t('forecastBreakdown.relearningHint')}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-foreground text-base font-[590]">
-                    {breakdown.relearning}
                   </span>
                 </li>
               )}

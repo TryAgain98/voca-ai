@@ -111,8 +111,6 @@ export default function DashboardPage() {
         needsTestingWords={stats?.needsTestingWords ?? []}
         unlearnedCount={stats?.unlearnedCount ?? 0}
         unlearnedWords={stats?.unlearnedWords ?? []}
-        relearningCount={stats?.relearningCount ?? 0}
-        relearningWords={stats?.relearningWords ?? []}
         wrongTodayCount={stats?.wrongTodayCount ?? 0}
         wrongTodayWords={stats?.wrongTodayWords ?? []}
         masteredCount={stats?.masteredCount ?? 0}

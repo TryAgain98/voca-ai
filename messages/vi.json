@@ -113,26 +113,22 @@
     "notEnoughTestable": "Cần ít nhất {min} từ đến hạn kiểm tra",
     "hero": {
       "badge": {
-        "relearn": "Đang trượt nhanh",
         "test": "Cần hành động",
         "learn": "Khám phá",
         "celebrate": "Hoàn thành nhiệm vụ"
       },
       "title": {
-        "relearn": "Cứu {count} từ vừa quên",
         "test": "Kiểm tra {count} từ hôm nay",
         "learn": "Học {count} từ mới hôm nay",
         "celebrate": "Xuất sắc — hôm nay bạn đã hoàn thành"
       },
       "queueTail": "+{count} từ chờ lượt sau",
       "subtitle": {
-        "relearn": "Những từ này vừa trượt khỏi mức thuộc — kiểm tra lại ngay để chặn đứng việc quên.",
         "test": "Một bài kiểm tra ngắn xác nhận thật sự bạn còn nhớ gì — và chỉ ra những gì đang dần quên.",
         "learn": "Bắt đầu với vài từ mới hôm nay. Đều đặn quan trọng hơn nhồi nhét.",
         "celebrate": "Mọi từ đến hạn hôm nay đều đã được kiểm tra. Tận hưởng chiến thắng nhé — hẹn gặp lại ngày mai."
       },
       "cta": {
-        "relearn": "Kiểm tra lại {count} từ",
         "test": "Kiểm tra ngay {count} từ",
         "learn": "Bắt đầu với {count} từ",
         "celebrate": "Test ngẫu nhiên"
@@ -164,9 +160,7 @@
     "forecastDayDetailEmpty": "Không có từ nào ngày này",
     "forecastBreakdown": {
       "practicing": "Đang ôn",
-      "practicingHint": "Các từ đang trên hành trình thuộc",
-      "relearning": "Vừa quên",
-      "relearningHint": "Từ đã thuộc nhưng vừa trượt khỏi mức thuộc"
+      "practicingHint": "Các từ đang trên hành trình thuộc"
     },
     "forecastPrivacyHint": "Chúng tôi ẩn các từ cụ thể để bài kiểm tra trí nhớ được trung thực — bạn sẽ thấy chúng khi đến lúc ôn.",
     "memoryStrength": {
@@ -181,7 +175,6 @@
         "fading": "Vài từ đang trôi đi — nên kiểm tra sớm để khoá lại.",
         "risk": "Đường cong quên đang thắng — sắp xếp một buổi tập trung."
       },
-      "relearningBadge": "{count, plural, =1 {1 từ vừa trượt} other {# từ vừa trượt}}",
       "fadingBadge": "{count, plural, =1 {1 từ đang phai} other {# từ đang phai}}"
     }
   },
