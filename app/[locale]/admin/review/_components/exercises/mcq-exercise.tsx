@@ -9,6 +9,7 @@ import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
 
+import { useMCQKeyboard } from './_hooks/use-mcq-keyboard'
 import { ExerciseFeedback } from './exercise-feedback'
 
 import type { AnswerHandler, MCQExercise } from '../../_types/review.types'
@@ -82,9 +83,19 @@ export function MCQExerciseCard({
     }
   }
 
-  const getOptionStyle = (idx: number): string => {
-    if (selected === null)
+  const focusedIdx = useMCQKeyboard({
+    optionCount: exercise.options.length,
+    selected,
+    onSelect: handleSelect,
+    exerciseId: exercise.vocab.id,
+  })
+
+  const getOptionStyle = (idx: number, isFocused: boolean): string => {
+    if (selected === null) {
+      if (isFocused)
+        return 'border-indigo-400/60 bg-indigo-500/8 ring-1 ring-indigo-400/30'
       return 'border-gray-400/40 hover:border-indigo-400/60 hover:bg-indigo-500/5'
+    }
     if (isQuiz) {
       if (idx === selected)
         return 'border-indigo-400/70 bg-indigo-500/10 text-indigo-200'
@@ -159,10 +170,13 @@ export function MCQExerciseCard({
             onClick={() => handleSelect(idx)}
             disabled={selected !== null}
             className={cn(
-              'rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all',
-              getOptionStyle(idx),
+              'relative rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all',
+              getOptionStyle(idx, selected === null && focusedIdx === idx),
             )}
           >
+            <span className="absolute top-1.5 right-2 font-mono text-[10px] text-white/20">
+              {idx + 1}
+            </span>
             {opt}
           </motion.button>
         ))}
