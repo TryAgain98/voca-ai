@@ -12,7 +12,7 @@ For each word, return:
 
 Fill every field using your knowledge as an English dictionary. Never leave a field empty.
 
-Return a JSON array in this exact format, no markdown, no explanation:
+Return a JSON array in this exact format. Use ONLY double quotes for all strings. No single quotes, no markdown, no explanation:
 [
   {
     "word": "read",
@@ -61,5 +61,7 @@ export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```$/, '')
     .trim()
+    // Fix single-quoted JSON values (e.g. "phonetic": '/riːd/' → "phonetic": "/riːd/")
+    .replace(/: '([^']*)'/g, ': "$1"')
   return JSON.parse(cleaned) as ExtractedVocabulary[]
 }
