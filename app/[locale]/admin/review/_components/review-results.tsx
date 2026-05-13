@@ -1,10 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { RefreshCw, XCircle } from 'lucide-react'
+import { Loader2, RefreshCw, Volume2, VolumeX, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
+import { useTTS } from '~/hooks/use-tts'
+import { cn } from '~/lib/cn'
 
 import type { ExerciseResult } from '../_types/review.types'
 
@@ -13,6 +15,46 @@ interface ReviewResultsProps {
   elapsedSeconds: number
   onRestart: () => void
   onChangeSetup: () => void
+}
+
+interface MistakeItemProps {
+  word: string
+  meaning: string
+}
+
+function MistakeItem({ word, meaning }: MistakeItemProps) {
+  const t = useTranslations('Review')
+  const { speak, isSpeaking, isLoading } = useTTS(word)
+
+  return (
+    <div className="rounded-xl border px-4 py-3 text-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <XCircle size={14} className="shrink-0 text-red-500" />
+          <span className="font-semibold">{word}</span>
+        </div>
+        <button
+          onClick={speak}
+          className={cn(
+            'flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors',
+            isSpeaking
+              ? 'text-emerald-400'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+          aria-label={t('listenBtn')}
+        >
+          {isLoading ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : isSpeaking ? (
+            <VolumeX size={13} />
+          ) : (
+            <Volume2 size={13} />
+          )}
+        </button>
+      </div>
+      <p className="text-muted-foreground mt-1 pl-5 text-xs">{meaning}</p>
+    </div>
+  )
 }
 
 export function ReviewResults({
@@ -49,15 +91,11 @@ export function ReviewResults({
         <div className="flex flex-col gap-3">
           <p className="text-sm font-semibold">{t('mistakesTitle')}</p>
           {mistakes.map((r, i) => (
-            <div key={i} className="rounded-xl border px-4 py-3 text-sm">
-              <div className="flex items-center gap-2">
-                <XCircle size={14} className="shrink-0 text-red-500" />
-                <span className="font-semibold">{r.exercise.vocab.word}</span>
-              </div>
-              <p className="text-muted-foreground mt-1 pl-5 text-xs">
-                {r.exercise.vocab.meaning}
-              </p>
-            </div>
+            <MistakeItem
+              key={i}
+              word={r.exercise.vocab.word}
+              meaning={r.exercise.vocab.meaning}
+            />
           ))}
         </div>
       )}
