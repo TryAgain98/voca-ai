@@ -355,6 +355,8 @@
       "noMistakes": "Hoàn hảo — không sai câu nào ✨",
       "expected": "Đáp án",
       "yourAnswer": "Bạn gõ",
+      "synonymAccepted": "đồng nghĩa",
+      "alsoAccepted": "Cũng chấp nhận: {list}",
       "difficulty": {
         "easy": "Dễ",
         "good": "Ổn",
@@ -526,10 +528,19 @@
     "lastActive": "Hoạt động {date}",
     "rankLabel": "Hạng #{rank}",
     "quizSessions": "{count} lần kiểm tra",
+    "colStreak": "Chuỗi",
+    "colGapToFirst": "Cách #1",
+    "masteredWords": "{mastered} / {total} thuộc",
+    "doneTodayCelebration": "Xong hôm nay!",
+    "streakAtRisk": "Chuỗi nguy hiểm",
+    "streakDays": "{days} ngày",
+    "gapWords": "{count} từ",
+    "isLeading": "Dẫn đầu",
     "scoreTooltipTitle": "Phân tích điểm",
-    "scoreTooltipCompletion": "Học được",
-    "scoreTooltipDiscipline": "Đúng hạn",
-    "scoreTooltipStreak": "Chuỗi ngày"
+    "scoreTooltipMastered": "Đã thuộc",
+    "scoreTooltipStreak": "Chuỗi ngày",
+    "scoreTooltipWords": "từ",
+    "scoreTooltipDays": "ngày"
   },
   "Import": {
     "title": "Nhập từ vựng từ ảnh",

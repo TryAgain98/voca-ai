@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Search } from 'lucide-react'
+import { CheckCircle2, ChevronRight, Flame, Search, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -79,15 +79,15 @@ function UserCell({ user }: { user: AdminUser }) {
 }
 
 function ProgressCell({
-  learnedCount,
+  masteredCount,
   totalWords,
 }: {
-  learnedCount: number
+  masteredCount: number
   totalWords: number
 }) {
   const t = useTranslations('Users')
   const percent =
-    totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0
+    totalWords > 0 ? Math.round((masteredCount / totalWords) * 100) : 0
 
   if (totalWords === 0)
     return <span className="text-muted-foreground text-xs">—</span>
@@ -96,7 +96,7 @@ function ProgressCell({
     <div className="w-28 space-y-1.5">
       <div className="flex items-center justify-between">
         <span className="text-muted-foreground text-xs">
-          {t('words', { learned: learnedCount, total: totalWords })}
+          {t('masteredWords', { mastered: masteredCount, total: totalWords })}
         </span>
         <span className="text-muted-foreground text-xs tabular-nums">
           {percent}%
@@ -112,7 +112,26 @@ function ProgressCell({
   )
 }
 
-function DueTodayCell({ count }: { count: number }) {
+function DueTodayCell({
+  count,
+  practicedToday,
+}: {
+  count: number
+  practicedToday: boolean
+}) {
+  const t = useTranslations('Users')
+
+  if (practicedToday && count === 0) {
+    return (
+      <div className="flex flex-col items-center gap-0.5">
+        <CheckCircle2 size={16} className="text-emerald-400" />
+        <span className="text-[10px] font-[510] text-emerald-400">
+          {t('doneTodayCelebration')}
+        </span>
+      </div>
+    )
+  }
+
   const isUrgent = count > 10
   const isMedium = count > 5
 
@@ -129,6 +148,84 @@ function DueTodayCell({ count }: { count: number }) {
     >
       {count}
     </span>
+  )
+}
+
+function StreakCell({
+  streakDays,
+  practicedToday,
+}: {
+  streakDays: number
+  practicedToday: boolean
+}) {
+  const t = useTranslations('Users')
+  const isAtRisk = streakDays > 0 && !practicedToday
+
+  if (streakDays === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <div className="flex items-center gap-1">
+        <Flame
+          size={13}
+          className={cn(
+            isAtRisk ? 'text-amber-400' : 'text-orange-400',
+            'shrink-0',
+          )}
+        />
+        <span
+          className={cn(
+            'text-sm font-[590] tabular-nums',
+            isAtRisk ? 'text-amber-400' : 'text-orange-400',
+          )}
+        >
+          {streakDays}
+        </span>
+      </div>
+      {isAtRisk && (
+        <span className="text-[9px] font-[510] text-amber-400/70">
+          {t('streakAtRisk')}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function GapToFirstCell({
+  rank,
+  masteredCount,
+  firstMasteredCount,
+}: {
+  rank: number
+  masteredCount: number
+  firstMasteredCount: number
+}) {
+  const t = useTranslations('Users')
+
+  if (rank === 1) {
+    return (
+      <div className="flex items-center gap-1">
+        <Trophy size={12} className="shrink-0 text-amber-400" />
+        <span className="text-[11px] font-[510] text-amber-400">
+          {t('isLeading')}
+        </span>
+      </div>
+    )
+  }
+
+  const gap = Math.max(0, firstMasteredCount - masteredCount + 1)
+
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="text-sm font-[590] text-[#7170ff] tabular-nums">
+        +{gap}
+      </span>
+      <span className="text-muted-foreground text-[9px] font-[510]">
+        {t('gapWords', { count: gap })}
+      </span>
+    </div>
   )
 }
 
@@ -149,6 +246,8 @@ function TableSkeleton() {
           <Skeleton className="h-10 w-16" />
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-5 w-8" />
+          <Skeleton className="h-5 w-12" />
+          <Skeleton className="h-5 w-12" />
         </div>
       ))}
     </div>
@@ -177,6 +276,8 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
       )
     })
   }, [users, query])
+
+  const firstMasteredCount = users[0]?.masteredCount ?? 0
 
   return (
     <div className="space-y-4">
@@ -217,7 +318,13 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                   {t('colProgress')}
                 </th>
                 <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-[510] tracking-wider uppercase sm:table-cell">
+                  {t('colStreak')}
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-[510] tracking-wider uppercase sm:table-cell">
                   {t('colDueToday')}
+                </th>
+                <th className="text-muted-foreground hidden px-4 py-3 text-center text-xs font-[510] tracking-wider uppercase lg:table-cell">
+                  {t('colGapToFirst')}
                 </th>
                 <th className="w-8 px-4 py-3" />
               </tr>
@@ -245,12 +352,28 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
                   </td>
                   <td className="hidden px-4 py-4 md:table-cell">
                     <ProgressCell
-                      learnedCount={user.learnedCount}
+                      masteredCount={user.masteredCount}
                       totalWords={user.totalWords}
                     />
                   </td>
                   <td className="hidden px-4 py-4 text-center sm:table-cell">
-                    <DueTodayCell count={user.dueCount} />
+                    <StreakCell
+                      streakDays={user.streakDays}
+                      practicedToday={user.practicedToday}
+                    />
+                  </td>
+                  <td className="hidden px-4 py-4 text-center sm:table-cell">
+                    <DueTodayCell
+                      count={user.dueCount}
+                      practicedToday={user.practicedToday}
+                    />
+                  </td>
+                  <td className="hidden px-4 py-4 text-center lg:table-cell">
+                    <GapToFirstCell
+                      rank={user.rank}
+                      masteredCount={user.masteredCount}
+                      firstMasteredCount={firstMasteredCount}
+                    />
                   </td>
                   <td className="px-4 py-4 text-right">
                     <ChevronRight

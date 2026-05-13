@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from '~/components/ui/tooltip'
 import { cn } from '~/lib/cn'
-import { SCORE_MAX } from '~/lib/score-config'
+import { STREAK_FACTOR } from '~/lib/score-config'
 
 import type { ScoreBreakdown } from '~/lib/score-config'
 
@@ -26,9 +26,9 @@ interface ScoreTier {
 function getTier(
   score: number,
 ): 'elite' | 'advanced' | 'rising' | 'beginner' | 'new' {
-  if (score >= 80) return 'elite'
-  if (score >= 60) return 'advanced'
-  if (score >= 35) return 'rising'
+  if (score >= 400) return 'elite'
+  if (score >= 200) return 'advanced'
+  if (score >= 50) return 'rising'
   if (score > 0) return 'beginner'
   return 'new'
 }
@@ -143,78 +143,47 @@ export function UserScoreBadge({
 
   if (!breakdown) return badge
 
+  const multiplier = 1 + breakdown.streakDays * STREAK_FACTOR
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>{badge}</TooltipTrigger>
         <TooltipContent side="left" className="overflow-hidden p-0">
-          <div className="min-w-45">
+          <div className="min-w-52">
             <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-[590] tracking-widest uppercase opacity-60">
               {t('scoreTooltipTitle')}
             </p>
             <div className="divide-y divide-white/6">
-              <ScoreRow
-                label={t('scoreTooltipStreak')}
-                pts={breakdown.streak}
-                max={SCORE_MAX.streak}
-                color="text-orange-400"
-              />
-              <ScoreRow
-                label={t('scoreTooltipCompletion')}
-                pts={breakdown.completion}
-                max={SCORE_MAX.completion}
-                color="text-emerald-400"
-              />
-              <ScoreRow
-                label={t('scoreTooltipDiscipline')}
-                pts={breakdown.discipline}
-                max={SCORE_MAX.discipline}
-                color="text-sky-400"
-              />
+              <div className="flex items-center justify-between gap-4 px-3 py-2">
+                <span className="text-[11px] font-[510]">
+                  {t('scoreTooltipMastered')}
+                </span>
+                <span className="text-[11px] font-[590] text-emerald-400 tabular-nums">
+                  {breakdown.masteredCount} {t('scoreTooltipWords')}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-4 px-3 py-2">
+                <span className="text-[11px] font-[510]">
+                  {t('scoreTooltipStreak')}
+                </span>
+                <span className="text-[11px] font-[590] text-orange-400 tabular-nums">
+                  {breakdown.streakDays} {t('scoreTooltipDays')} → ×
+                  {multiplier.toFixed(2)}
+                </span>
+              </div>
             </div>
             <div className="flex items-center justify-between border-t border-white/6 px-3 py-2">
-              <span className="text-[10px] font-[510] opacity-50">Total</span>
+              <span className="text-[10px] font-[510] opacity-50">
+                {breakdown.masteredCount} × {multiplier.toFixed(2)}
+              </span>
               <span className="text-[11px] font-[590] tabular-nums">
-                {score} / 100
+                {score}
               </span>
             </div>
           </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
-}
-
-function ScoreRow({
-  label,
-  pts,
-  max,
-  color,
-}: {
-  label: string
-  pts: number
-  max: number
-  color: string
-}) {
-  const ratio = max > 0 ? pts / max : 0
-  return (
-    <div className="space-y-1.5 px-3 py-2">
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-[11px] font-[510]">{label}</span>
-        <span className={cn('text-[11px] font-[590] tabular-nums', color)}>
-          {pts}
-          <span className="text-white/30">/{max}</span>
-        </span>
-      </div>
-      <div className="h-0.5 overflow-hidden rounded-full bg-white/8">
-        <div
-          className={cn(
-            'h-full rounded-full transition-all',
-            color.replace('text-', 'bg-'),
-          )}
-          style={{ width: `${ratio * 100}%` }}
-        />
-      </div>
-    </div>
   )
 }

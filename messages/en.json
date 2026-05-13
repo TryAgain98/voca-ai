@@ -355,6 +355,8 @@
       "noMistakes": "Clean run — no mistakes ✨",
       "expected": "Expected",
       "yourAnswer": "You typed",
+      "synonymAccepted": "synonym",
+      "alsoAccepted": "Also accepted: {list}",
       "difficulty": {
         "easy": "Easy",
         "good": "Good",
@@ -526,10 +528,19 @@
     "lastActive": "Last active {date}",
     "rankLabel": "Rank #{rank}",
     "quizSessions": "{count} quizzes taken",
+    "colStreak": "Streak",
+    "colGapToFirst": "Gap to #1",
+    "masteredWords": "{mastered} / {total} mastered",
+    "doneTodayCelebration": "Done today!",
+    "streakAtRisk": "Streak at risk",
+    "streakDays": "{days} days",
+    "gapWords": "{count} words",
+    "isLeading": "Leading",
     "scoreTooltipTitle": "Score breakdown",
-    "scoreTooltipCompletion": "Completion",
-    "scoreTooltipDiscipline": "On-time",
-    "scoreTooltipStreak": "Streak"
+    "scoreTooltipMastered": "Mastered",
+    "scoreTooltipStreak": "Streak",
+    "scoreTooltipWords": "words",
+    "scoreTooltipDays": "days"
   },
   "Import": {
     "title": "Import vocabulary from image",

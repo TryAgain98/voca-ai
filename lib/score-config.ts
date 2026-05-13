@@ -1,8 +1,6 @@
-export const SCORE_MAX = { completion: 35, discipline: 25, streak: 40 } as const
-export const STREAK_CAP = 30
+export const STREAK_FACTOR = 0.05
 
 export type ScoreBreakdown = {
-  completion: number
-  discipline: number
-  streak: number
+  masteredCount: number
+  streakDays: number
 }
