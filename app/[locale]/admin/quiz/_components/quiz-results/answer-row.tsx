@@ -176,6 +176,25 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
             )}
           </div>
         )}
+        {isCorrect &&
+          result.userAnswer &&
+          result.userAnswer.trim().toLowerCase() !==
+            expected.trim().toLowerCase() && (
+            <p className="text-muted-foreground/70 mt-1 text-xs">
+              {t('yourAnswer')}:{' '}
+              <span className="font-[510] text-sky-400">
+                {result.userAnswer}
+              </span>
+              <span className="ml-1 opacity-50">— {t('synonymAccepted')}</span>
+            </p>
+          )}
+        {isCorrect && result.exercise.vocab.synonyms.length > 0 && (
+          <p className="text-muted-foreground/45 mt-0.5 text-[11px]">
+            {t('alsoAccepted', {
+              list: result.exercise.vocab.synonyms.join(', '),
+            })}
+          </p>
+        )}
       </div>
     </motion.div>
   )
