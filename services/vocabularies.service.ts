@@ -80,20 +80,6 @@ class VocabulariesService extends BaseService<
     if (error) throw error
     return data as Vocabulary[]
   }
-
-  async updateByWord(
-    word: string,
-    payload: VocabularyUpdate,
-  ): Promise<Vocabulary> {
-    const { data, error } = await supabase
-      .from('vocabularies')
-      .update(payload)
-      .eq('word', word)
-      .select()
-      .single()
-    if (error) throw error
-    return data as Vocabulary
-  }
 }
 
 export const vocabulariesService = new VocabulariesService()

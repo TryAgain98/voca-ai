@@ -12,6 +12,7 @@ export type DraftStatus = 'new' | 'duplicate' | 'modified'
 
 export interface DraftVocabulary {
   _id: string
+  _dbId?: string
   word: string
   word_type: string
   phonetic: string
@@ -21,7 +22,10 @@ export interface DraftVocabulary {
   // status is set after duplicate-check; undefined means not yet checked
   status?: DraftStatus
   // snapshot of original DB values (word_type/phonetic/meaning/example/description)
-  _dbSnapshot?: Omit<DraftVocabulary, '_id' | 'status' | '_dbSnapshot'>
+  _dbSnapshot?: Omit<
+    DraftVocabulary,
+    '_id' | '_dbId' | 'status' | '_dbSnapshot'
+  >
 }
 
 export type ImportStep = 'setup' | 'extracting' | 'editing'
@@ -155,14 +159,18 @@ export function useImportFlow(): UseImportFlowReturn {
         const existing = await vocabulariesService.findByWords(words)
 
         if (existing.length > 0) {
-          const existingMap = new Map(existing.map((e) => [e.word, e]))
+          const dbKey = (word: string, wordType: string | null) =>
+            `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}`
+          const existingMap = new Map(
+            existing.map((e) => [dbKey(e.word, e.word_type ?? null), e]),
+          )
           setVocabularies((prev) =>
             prev.map((draft) => {
-              const match = existingMap.get(draft.word.trim())
+              const match = existingMap.get(dbKey(draft.word, draft.word_type))
               if (!match) return draft
               const snapshot: Omit<
                 DraftVocabulary,
-                '_id' | 'status' | '_dbSnapshot'
+                '_id' | '_dbId' | 'status' | '_dbSnapshot'
               > = {
                 word: match.word,
                 word_type: match.word_type ?? '',
@@ -171,8 +179,6 @@ export function useImportFlow(): UseImportFlowReturn {
                 example: match.example ?? '',
                 description: match.description ?? '',
               }
-              // Auto-detect: if AI content differs from DB → mark modified immediately
-              // so it gets saved without user needing to manually edit
               const draftWithSnapshot = { ...draft, _dbSnapshot: snapshot }
               const autoStatus: DraftStatus = isDifferentFromDb(
                 draftWithSnapshot,
@@ -181,6 +187,7 @@ export function useImportFlow(): UseImportFlowReturn {
                 : 'duplicate'
               return {
                 ...draft,
+                _dbId: match.id,
                 status: autoStatus,
                 _dbSnapshot: snapshot,
               }
@@ -229,7 +236,8 @@ export function useImportFlow(): UseImportFlowReturn {
       }
 
       for (const v of modifiedWords) {
-        await vocabulariesService.updateByWord(v.word.trim(), {
+        if (!v._dbId) continue
+        await vocabulariesService.update(v._dbId, {
           meaning: v.meaning.trim(),
           word_type: v.word_type.trim() || undefined,
           phonetic: v.phonetic.trim() || undefined,
