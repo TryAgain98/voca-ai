@@ -53,24 +53,27 @@ const MODE_CONFIG = [
   { mode: 'mixed' as const, icon: Shuffle, labelKey: 'modeMixed' as const },
 ]
 
+const LESSON_SKELETON_ROWS = 7
+
 interface ReviewSetupProps {
   onStart: (setup: ReviewSetup) => void
 }
 
 export function ReviewSetup({ onStart }: ReviewSetupProps) {
   const t = useTranslations('Review')
-  const { user } = useUser()
-  const { data: lessons = [] } = useLessons()
+  const { user, isLoaded: isUserLoaded } = useUser()
+  const { data: lessons = [], isLoading: isLessonsLoading } = useLessons()
   const [selectedLessons, setSelectedLessons] = useState<string[]>([])
   const [selectedMode, setSelectedMode] = useState<ReviewMode>('mixed')
 
+  const isSetupLoading = !isUserLoaded || isLessonsLoading
   const effectiveLessonIds =
     selectedLessons.length > 0 ? selectedLessons : lessons.map((l) => l.id)
 
   const { data: reviewWords = [], isLoading: isVocabLoading } = useReviewWords({
     userId: user?.id ?? '',
     lessonIds: effectiveLessonIds,
-    enabled: !!user?.id && effectiveLessonIds.length > 0,
+    enabled: !isSetupLoading && !!user?.id && effectiveLessonIds.length > 0,
   })
 
   const vocab: ReviewVocab[] = reviewWords.map((v) => ({
@@ -88,15 +91,19 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
       prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id],
     )
 
-  const canStart = !isVocabLoading && vocab.length >= 4
+  const isLoading = isSetupLoading || isVocabLoading
+  const canStart = !isLoading && vocab.length >= 4
 
-  const handleStart = () =>
+  const handleStart = () => {
+    if (!canStart || !user?.id) return
+
     onStart({
-      userId: user?.id ?? '',
+      userId: user.id,
       lessonIds: selectedLessons,
       exerciseTypes: EXERCISE_TYPES_BY_MODE[selectedMode],
       vocab,
     })
+  }
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6 pt-4">
@@ -135,38 +142,57 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
       <div className="space-y-2">
         <Label>{t('selectLessons')}</Label>
 
-        <div className="bg-card overflow-hidden rounded-lg border">
-          <label className="bg-muted/20 hover:bg-muted/40 flex cursor-pointer items-center gap-3 border-b px-4 py-3 transition-colors">
-            <Checkbox
-              checked={selectedLessons.length === 0}
-              onCheckedChange={() => setSelectedLessons([])}
-            />
-            <span className="text-sm font-medium">{t('allLessons')}</span>
-          </label>
-
-          <div className="max-h-[min(40vh,360px)] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb:hover]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent">
-            {lessons.map((l) => (
-              <label
-                key={l.id}
-                className={cn(
-                  'bg-card flex cursor-pointer items-center gap-3 border-b px-4 py-2.5 text-sm transition-colors last:border-0',
-                  selectedLessons.includes(l.id)
-                    ? 'bg-primary/10 text-foreground'
-                    : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
-                )}
+        {isLessonsLoading ? (
+          <div className="bg-card overflow-hidden rounded-lg border">
+            {Array.from({ length: LESSON_SKELETON_ROWS }).map((_, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 border-b px-4 py-3 last:border-0"
               >
-                <Checkbox
-                  checked={selectedLessons.includes(l.id)}
-                  onCheckedChange={() => toggleLesson(l.id)}
+                <Skeleton className="size-4 rounded-sm" />
+                <Skeleton
+                  className={cn(
+                    'h-4',
+                    index === 0 ? 'w-36' : index % 3 === 0 ? 'w-56' : 'w-44',
+                  )}
                 />
-                <span className="truncate">{l.name}</span>
-              </label>
+              </div>
             ))}
           </div>
-        </div>
+        ) : (
+          <div className="bg-card overflow-hidden rounded-lg border">
+            <label className="bg-muted/20 hover:bg-muted/40 flex cursor-pointer items-center gap-3 border-b px-4 py-3 transition-colors">
+              <Checkbox
+                checked={selectedLessons.length === 0}
+                onCheckedChange={() => setSelectedLessons([])}
+              />
+              <span className="text-sm font-medium">{t('allLessons')}</span>
+            </label>
+
+            <div className="max-h-[min(40vh,360px)] overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb:hover]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent">
+              {lessons.map((l) => (
+                <label
+                  key={l.id}
+                  className={cn(
+                    'bg-card flex cursor-pointer items-center gap-3 border-b px-4 py-2.5 text-sm transition-colors last:border-0',
+                    selectedLessons.includes(l.id)
+                      ? 'bg-primary/10 text-foreground'
+                      : 'text-muted-foreground hover:bg-muted/30 hover:text-foreground',
+                  )}
+                >
+                  <Checkbox
+                    checked={selectedLessons.includes(l.id)}
+                    onCheckedChange={() => toggleLesson(l.id)}
+                  />
+                  <span className="truncate">{l.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="text-muted-foreground text-xs">
-          {isVocabLoading ? (
+          {isLoading ? (
             <Skeleton className="h-3 w-24" />
           ) : (
             <>
@@ -184,7 +210,7 @@ export function ReviewSetup({ onStart }: ReviewSetupProps) {
       <Button
         size="lg"
         onClick={handleStart}
-        disabled={isVocabLoading || !canStart}
+        disabled={!canStart}
         className="w-full"
       >
         {t('startButton')}

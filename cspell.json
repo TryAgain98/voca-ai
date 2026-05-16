@@ -52,6 +52,7 @@
     "out/**",
     "build/**",
     "*.lock",
+    "**/*.md",
     "*.min.js",
     "*.min.css"
   ]

@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ClipboardList, RefreshCw } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { ClipboardList } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 
@@ -26,8 +27,7 @@ interface QuizResultsProps {
   results: QuizExerciseResult[]
   startTime: Date
   elapsedSeconds: number
-  onPlayAgain: () => void
-  onChangeSetup: () => void
+  onViewHistory: () => void
 }
 
 function getExpectedAnswer(exercise: Exercise): string {
@@ -41,10 +41,11 @@ export function QuizResults({
   results,
   startTime,
   elapsedSeconds,
-  onPlayAgain,
-  onChangeSetup,
+  onViewHistory,
 }: QuizResultsProps) {
   const t = useTranslations('Quiz')
+  const locale = useLocale()
+  const router = useRouter()
   const { mutate: saveSession } = useSaveQuizSession()
   const { mutate: applyMastery, isPending: isSaving } = useApplyQuizMastery()
   const { mutate: recordStreak } = useRecordStreakActivity()
@@ -54,6 +55,11 @@ export function QuizResults({
   const total = results.length
   const score = total > 0 ? correctCount / total : 0
   const tier = getScoreTier(score)
+
+  const handleViewHistory = () => {
+    onViewHistory()
+    router.push(`/${locale}/admin/quiz/history`)
+  }
 
   useEffect(() => {
     if (savedRef.current) return
@@ -120,24 +126,16 @@ export function QuizResults({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="flex gap-3"
+          className="flex"
         >
           <Button
             variant="outline"
-            className="flex-1 gap-2"
-            onClick={onChangeSetup}
+            className="w-full gap-2"
+            onClick={handleViewHistory}
             disabled={isSaving}
           >
             <ClipboardList size={14} />
             {t('viewHistory')}
-          </Button>
-          <Button
-            className="flex-1 gap-2"
-            onClick={onPlayAgain}
-            disabled={isSaving}
-          >
-            <RefreshCw size={14} />
-            {t('playAgain')}
           </Button>
         </motion.div>
       </motion.div>

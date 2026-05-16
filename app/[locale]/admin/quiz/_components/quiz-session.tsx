@@ -95,8 +95,7 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
         results={results}
         startTime={startTime}
         elapsedSeconds={elapsedSeconds}
-        onPlayAgain={onExit}
-        onChangeSetup={onExit}
+        onViewHistory={onExit}
       />
     )
   }
