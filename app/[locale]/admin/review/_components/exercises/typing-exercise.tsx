@@ -6,18 +6,6 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { SpeakButton } from '~/components/layout/speak-button'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '~/components/ui/alert-dialog'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useTTS } from '~/hooks/use-tts'
@@ -255,16 +243,6 @@ export function TypingExerciseCard({
           />
         )}
 
-        {isQuiz && usedHint && (
-          <motion.p
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-amber-300/90"
-          >
-            {t('quizHintPenaltyActive')}
-          </motion.p>
-        )}
-
         {!isQuiz && canShowHint && (
           <Button
             variant="ghost"
@@ -277,38 +255,26 @@ export function TypingExerciseCard({
           </Button>
         )}
 
-        {isQuiz && canShowHint && (
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-fit text-amber-300 hover:text-amber-200"
-                />
-              }
-            >
-              <Lightbulb size={14} className="mr-1.5" />
-              {manualHintCount === 0 ? t('showHint') : t('showMoreHint')}
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-amber-500/10 text-amber-400">
-                  <TriangleAlert size={20} />
-                </AlertDialogMedia>
-                <AlertDialogTitle>{t('quizHintPenaltyTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('quizHintPenaltyDesc')}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('quizHintCancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleRevealHint}>
-                  {t('quizHintConfirm')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        {isQuiz && (canShowHint || usedHint) && (
+          <div className="flex items-center gap-2">
+            {canShowHint && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-fit shrink-0 text-amber-300 hover:text-amber-200"
+                onClick={handleRevealHint}
+              >
+                <Lightbulb size={14} className="mr-1.5" />
+                {manualHintCount === 0 ? t('showHint') : t('showMoreHint')}
+              </Button>
+            )}
+            <p className="flex items-center gap-1 text-xs text-amber-500/70">
+              <TriangleAlert size={11} />
+              {usedHint
+                ? t('quizHintPenaltyActive')
+                : t('quizHintPenaltyTitle')}
+            </p>
+          </div>
         )}
       </div>
     </div>
