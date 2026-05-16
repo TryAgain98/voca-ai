@@ -266,6 +266,11 @@
     "check": "Kiểm tra",
     "showHint": "Gợi ý",
     "showMoreHint": "Gợi ý thêm",
+    "quizHintPenaltyTitle": "Dùng gợi ý sẽ mất điểm",
+    "quizHintPenaltyDesc": "Nếu mở gợi ý, câu này sẽ không được cộng điểm dù bạn trả lời đúng. Số gợi ý được giới hạn theo độ dài của từ.",
+    "quizHintCancel": "Không dùng",
+    "quizHintConfirm": "Mở gợi ý",
+    "quizHintPenaltyActive": "Đã dùng gợi ý — câu này sẽ không được cộng điểm.",
     "synonymAccepted": "Chấp nhận đồng nghĩa. Đáp án card: {expected}",
     "correctAnswer": "Đáp án đúng",
     "alsoAccepted": "Cũng chấp nhận",
@@ -299,7 +304,7 @@
   },
   "Quiz": {
     "setupTitle": "Chế độ Kiểm tra",
-    "setupSubtitle": "Không gợi ý. Có giờ. Một lần duy nhất.",
+    "setupSubtitle": "Có giờ. Một lần duy nhất. Gợi ý sẽ mất điểm câu đó.",
     "selectLessons": "Bài học",
     "allLessons": "Tất cả bài học",
     "vocabAvailable": "{count} từ",
@@ -316,7 +321,7 @@
       "duration": "Thời gian"
     },
     "challenge": {
-      "noHints": "Không gợi ý",
+      "noHints": "Gợi ý mất điểm",
       "timed": "20s / câu",
       "oneShot": "Một lần"
     },
@@ -357,6 +362,7 @@
       "noMistakes": "Hoàn hảo — không sai câu nào ✨",
       "expected": "Đáp án",
       "yourAnswer": "Bạn gõ",
+      "hintNoScore": "Dùng gợi ý, không tính điểm",
       "synonymAccepted": "đồng nghĩa",
       "alsoAccepted": "Cũng chấp nhận: {list}",
       "difficulty": {

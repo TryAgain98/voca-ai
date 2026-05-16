@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, Clock, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Lightbulb, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { SpeakButton } from '~/components/layout/speak-button'
@@ -108,8 +108,10 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
   const t = useTranslations('Quiz.results')
   const expected = getExpectedAnswer(result.exercise)
   const { isCorrect, responseMs, usedHint } = result
+  const answerCorrect = result.answerCorrect ?? isCorrect
+  const isHintCorrect = answerCorrect && usedHint && !isCorrect
   const gradeLevel = getGradeLevel(
-    isCorrect,
+    answerCorrect,
     result.exercise.vocab.word,
     responseMs,
     usedHint,
@@ -124,15 +126,21 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
       transition={{ delay: index * 0.03, duration: 0.25 }}
       className={cn(
         'flex items-start gap-2.5 rounded-lg border px-3 py-2',
-        isCorrect
-          ? 'border-emerald-500/15 bg-emerald-500/[0.04]'
-          : 'border-rose-500/20 bg-rose-500/[0.05]',
+        isCorrect && 'border-emerald-500/15 bg-emerald-500/[0.04]',
+        isHintCorrect && 'border-amber-500/20 bg-amber-500/[0.05]',
+        !answerCorrect && 'border-rose-500/20 bg-rose-500/[0.05]',
       )}
     >
       {isCorrect ? (
         <CheckCircle2
           size={16}
           className="mt-0.5 shrink-0 text-emerald-500"
+          strokeWidth={2}
+        />
+      ) : isHintCorrect ? (
+        <Lightbulb
+          size={16}
+          className="mt-0.5 shrink-0 text-amber-400"
           strokeWidth={2}
         />
       ) : (
@@ -155,6 +163,11 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
             — {result.exercise.vocab.meaning}
           </span>
           <GradeBadge level={gradeLevel} />
+          {isHintCorrect && (
+            <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] leading-none font-[510] text-amber-400">
+              {t('hintNoScore')}
+            </span>
+          )}
           {responseMs != null && (
             <span className="text-muted-foreground/60 flex items-center gap-0.5 text-[10px]">
               <Clock size={10} />
@@ -162,7 +175,7 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
             </span>
           )}
         </div>
-        {!isCorrect && (
+        {!answerCorrect && (
           <div className="mt-1 flex flex-wrap items-baseline gap-x-4 text-xs">
             <span className="text-muted-foreground/70">
               {t('expected')}:{' '}
@@ -176,7 +189,7 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
             )}
           </div>
         )}
-        {isCorrect &&
+        {answerCorrect &&
           result.userAnswer &&
           result.userAnswer.trim().toLowerCase() !==
             expected.trim().toLowerCase() && (
@@ -188,7 +201,7 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
               <span className="ml-1 opacity-50">— {t('synonymAccepted')}</span>
             </p>
           )}
-        {isCorrect && result.exercise.vocab.synonyms.length > 0 && (
+        {answerCorrect && result.exercise.vocab.synonyms.length > 0 && (
           <p className="text-muted-foreground/45 mt-0.5 text-[11px]">
             {t('alsoAccepted', {
               list: result.exercise.vocab.synonyms.join(', '),

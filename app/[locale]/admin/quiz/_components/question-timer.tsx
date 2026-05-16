@@ -17,22 +17,51 @@ const DANGER_RATIO = 0.25
 interface QuestionTimerProps {
   durationMs: number
   onExpire: () => void
+  onTick?: (intensity: 'low' | 'medium' | 'high') => void
+  onUrgencyChange?: (urgency: 'normal' | 'warn' | 'danger') => void
 }
 
-export function QuestionTimer({ durationMs, onExpire }: QuestionTimerProps) {
+export function QuestionTimer({
+  durationMs,
+  onExpire,
+  onTick,
+  onUrgencyChange,
+}: QuestionTimerProps) {
   const [remaining, setRemaining] = useState(durationMs)
   const expiredRef = useRef(false)
   const onExpireRef = useRef(onExpire)
+  const onTickRef = useRef(onTick)
+  const onUrgencyChangeRef = useRef(onUrgencyChange)
+  const lastSecondRef = useRef(Math.ceil(durationMs / 1000))
+  const lastUrgencyRef = useRef<'normal' | 'warn' | 'danger'>('normal')
 
   useEffect(() => {
     onExpireRef.current = onExpire
+    onTickRef.current = onTick
+    onUrgencyChangeRef.current = onUrgencyChange
   })
 
   useEffect(() => {
     const startedAt = Date.now()
     const id = setInterval(() => {
       const left = Math.max(0, durationMs - (Date.now() - startedAt))
+      const seconds = Math.ceil(left / 1000)
+      const ratio = left / durationMs
+      const urgency =
+        ratio < DANGER_RATIO ? 'danger' : ratio < WARN_RATIO ? 'warn' : 'normal'
       setRemaining(left)
+      if (urgency !== lastUrgencyRef.current) {
+        lastUrgencyRef.current = urgency
+        onUrgencyChangeRef.current?.(urgency)
+      }
+      if (seconds !== lastSecondRef.current && seconds > 0) {
+        lastSecondRef.current = seconds
+        const intensity =
+          seconds <= 5 ? 'high' : seconds <= 10 ? 'medium' : 'low'
+        if (seconds <= 10 || seconds % 3 === 0) {
+          onTickRef.current?.(intensity)
+        }
+      }
       if (left <= 0 && !expiredRef.current) {
         expiredRef.current = true
         clearInterval(id)

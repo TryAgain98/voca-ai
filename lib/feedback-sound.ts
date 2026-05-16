@@ -4,6 +4,7 @@ function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null
   try {
     sharedCtx ??= new AudioContext()
+    if (sharedCtx.state === 'suspended') void sharedCtx.resume()
     return sharedCtx
   } catch {
     return null
@@ -57,4 +58,49 @@ export function playWrongSound() {
   gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35)
   osc.start(t)
   osc.stop(t + 0.35)
+}
+
+export function playSubmitSound() {
+  const ctx = getCtx()
+  if (!ctx) return
+  const t = ctx.currentTime
+  note(ctx, 440, t, 0.08, 0.16)
+  note(ctx, 660, t + 0.055, 0.11, 0.12)
+}
+
+export function playNextQuestionSound() {
+  const ctx = getCtx()
+  if (!ctx) return
+  const t = ctx.currentTime
+  note(ctx, 392, t, 0.11, 0.12)
+  note(ctx, 523, t + 0.08, 0.16, 0.14)
+}
+
+export function playHintSound() {
+  const ctx = getCtx()
+  if (!ctx) return
+  const t = ctx.currentTime
+  note(ctx, 740, t, 0.12, 0.11)
+  note(ctx, 587, t + 0.08, 0.18, 0.1)
+}
+
+export function playMilestoneSound() {
+  const ctx = getCtx()
+  if (!ctx) return
+  const t = ctx.currentTime
+  note(ctx, 523, t, 0.12, 0.12)
+  note(ctx, 659, t + 0.08, 0.14, 0.12)
+  note(ctx, 880, t + 0.16, 0.2, 0.14)
+}
+
+export function playCountdownTick(intensity: 'low' | 'medium' | 'high') {
+  const ctx = getCtx()
+  if (!ctx) return
+  const t = ctx.currentTime
+  const freq = intensity === 'high' ? 960 : intensity === 'medium' ? 720 : 520
+  const duration =
+    intensity === 'high' ? 0.07 : intensity === 'medium' ? 0.06 : 0.045
+  const volume =
+    intensity === 'high' ? 0.18 : intensity === 'medium' ? 0.12 : 0.07
+  note(ctx, freq, t, duration, volume)
 }

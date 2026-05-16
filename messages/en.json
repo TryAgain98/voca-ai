@@ -266,6 +266,11 @@
     "check": "Check",
     "showHint": "Show hint",
     "showMoreHint": "More hint",
+    "quizHintPenaltyTitle": "Hints cost the point",
+    "quizHintPenaltyDesc": "If you reveal a hint, this question will not score even when your answer is correct. Hint count is limited by word length.",
+    "quizHintCancel": "Skip hint",
+    "quizHintConfirm": "Reveal hint",
+    "quizHintPenaltyActive": "Hint used. This question will not add to your score.",
     "synonymAccepted": "Accepted as a synonym. Card answer: {expected}",
     "correctAnswer": "Correct answer",
     "alsoAccepted": "Also accepted",
@@ -299,7 +304,7 @@
   },
   "Quiz": {
     "setupTitle": "Test Mode",
-    "setupSubtitle": "No hints. Timed. One shot.",
+    "setupSubtitle": "Timed. One shot. Hints cost the point for that question.",
     "selectLessons": "Lessons",
     "allLessons": "All Lessons",
     "vocabAvailable": "{count} words available",
@@ -316,7 +321,7 @@
       "duration": "Duration"
     },
     "challenge": {
-      "noHints": "No hints",
+      "noHints": "Hints cost points",
       "timed": "20s / question",
       "oneShot": "One shot"
     },
@@ -357,6 +362,7 @@
       "noMistakes": "Clean run — no mistakes ✨",
       "expected": "Expected",
       "yourAnswer": "You typed",
+      "hintNoScore": "Hint used, no score",
       "synonymAccepted": "synonym",
       "alsoAccepted": "Also accepted: {list}",
       "difficulty": {

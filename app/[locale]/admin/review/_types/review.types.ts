@@ -41,6 +41,7 @@ export interface AnswerMeta {
   userAnswer?: string
   responseMs?: number
   usedHint?: boolean
+  answerCorrect?: boolean
   acceptedSiblingId?: string
 }
 
@@ -51,6 +52,7 @@ export interface ExerciseResult {
   isCorrect: boolean
   responseMs?: number
   usedHint?: boolean
+  answerCorrect?: boolean
 }
 
 export interface ReviewSetup {

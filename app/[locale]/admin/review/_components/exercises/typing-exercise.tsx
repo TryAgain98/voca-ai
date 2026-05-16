@@ -1,11 +1,23 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { SpeakButton } from '~/components/layout/speak-button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { useTTS } from '~/hooks/use-tts'
@@ -35,12 +47,16 @@ interface TypingExerciseCardProps {
   exercise: TypingExercise
   onAnswer: AnswerHandler
   mode?: ExerciseMode
+  onQuizSubmit?: () => void
+  onQuizHint?: () => void
 }
 
 export function TypingExerciseCard({
   exercise,
   onAnswer,
   mode = 'review',
+  onQuizSubmit,
+  onQuizHint,
 }: TypingExerciseCardProps) {
   const t = useTranslations('Review')
   const [value, setValue] = useState('')
@@ -60,18 +76,20 @@ export function TypingExerciseCard({
   const word = exercise.vocab.word
   const revealOrder = useMemo(() => shuffledLetterPositions(word), [word])
   const letterCount = revealOrder.length
-  const maxManualHints = isQuiz ? 0 : getMaxManualHints(letterCount)
+  const maxManualHints = isQuiz
+    ? Math.max(0, Math.min(letterCount - 1, getMaxManualHints(letterCount) + 1))
+    : getMaxManualHints(letterCount)
   const usedHint = manualHintCount > 0
 
   const revealedSet = useMemo(() => {
     const set = new Set<number>()
-    if (revealOrder.length > 0) set.add(revealOrder[0])
-    for (let i = 0; i < manualHintCount; i++) {
-      const pos = revealOrder[i + 1]
+    const freeHints = isQuiz ? 0 : 1
+    for (let i = 0; i < freeHints + manualHintCount; i++) {
+      const pos = revealOrder[i]
       if (pos != null) set.add(pos)
     }
     return set
-  }, [revealOrder, manualHintCount])
+  }, [isQuiz, revealOrder, manualHintCount])
 
   const slots = useMemo(
     () => buildFillSlots(word, value, revealedSet),
@@ -103,8 +121,10 @@ export function TypingExerciseCard({
 
   const handleSubmit = () => {
     if (submitted || !value.trim()) return
+    if (isQuiz) onQuizSubmit?.()
     const verdict = checkAnswer(exercise.vocab, value, exercise.siblings)
     const correct = verdict.kind !== 'wrong'
+    const scoredCorrect = correct && !usedHint
     const matchedSiblingId =
       verdict.kind === 'collision' ? verdict.matched.id : null
     setIsCorrect(correct)
@@ -116,10 +136,11 @@ export function TypingExerciseCard({
       userAnswer: value.trim(),
       responseMs,
       usedHint,
+      answerCorrect: correct,
       acceptedSiblingId: matchedSiblingId ?? undefined,
     }
     if (isQuiz) {
-      setTimeout(() => onAnswer(correct, meta), QUIZ_ADVANCE_DELAY_MS)
+      setTimeout(() => onAnswer(scoredCorrect, meta), QUIZ_ADVANCE_DELAY_MS)
       return
     }
     if (correct) {
@@ -128,6 +149,12 @@ export function TypingExerciseCard({
     } else {
       playWrongSound()
     }
+  }
+
+  const handleRevealHint = () => {
+    if (!canShowHint) return
+    setManualHintCount((c) => c + 1)
+    if (isQuiz) onQuizHint?.()
   }
 
   return (
@@ -228,16 +255,60 @@ export function TypingExerciseCard({
           />
         )}
 
+        {isQuiz && usedHint && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs text-amber-300/90"
+          >
+            {t('quizHintPenaltyActive')}
+          </motion.p>
+        )}
+
         {!isQuiz && canShowHint && (
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground w-fit"
-            onClick={() => setManualHintCount((c) => c + 1)}
+            onClick={handleRevealHint}
           >
             <Lightbulb size={14} className="mr-1.5" />
             {manualHintCount === 0 ? t('showHint') : t('showMoreHint')}
           </Button>
+        )}
+
+        {isQuiz && canShowHint && (
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-fit text-amber-300 hover:text-amber-200"
+                />
+              }
+            >
+              <Lightbulb size={14} className="mr-1.5" />
+              {manualHintCount === 0 ? t('showHint') : t('showMoreHint')}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-amber-500/10 text-amber-400">
+                  <TriangleAlert size={20} />
+                </AlertDialogMedia>
+                <AlertDialogTitle>{t('quizHintPenaltyTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('quizHintPenaltyDesc')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('quizHintCancel')}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRevealHint}>
+                  {t('quizHintConfirm')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>

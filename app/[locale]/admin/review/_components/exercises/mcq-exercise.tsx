@@ -27,12 +27,14 @@ interface MCQExerciseCardProps {
   exercise: MCQExercise
   onAnswer: AnswerHandler
   mode?: ExerciseMode
+  onQuizSubmit?: () => void
 }
 
 export function MCQExerciseCard({
   exercise,
   onAnswer,
   mode = 'review',
+  onQuizSubmit,
 }: MCQExerciseCardProps) {
   const t = useTranslations('Review')
   const [selected, setSelected] = useState<number | null>(null)
@@ -65,11 +67,13 @@ export function MCQExerciseCard({
     const correct = idx === exercise.correctIndex
     const responseMs = elapsedSince(startedAtRef.current)
     if (isQuiz) {
+      onQuizSubmit?.()
       setTimeout(
         () =>
           onAnswer(correct, {
             userAnswer: exercise.options[idx],
             responseMs,
+            answerCorrect: correct,
           }),
         QUIZ_ADVANCE_DELAY_MS,
       )
