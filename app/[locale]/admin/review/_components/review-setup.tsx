@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { Eye, Headphones, PenLine, Shuffle } from 'lucide-react'
+import { Eye, Headphones, Mic, PenLine, Shuffle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -44,6 +44,11 @@ const MODE_CONFIG = [
     mode: 'listen-to-word' as const,
     icon: Headphones,
     labelKey: 'modeListenToWord' as const,
+  },
+  {
+    mode: 'speak-word' as const,
+    icon: Mic,
+    labelKey: 'modeSpeakWord' as const,
   },
   { mode: 'mixed' as const, icon: Shuffle, labelKey: 'modeMixed' as const },
 ]

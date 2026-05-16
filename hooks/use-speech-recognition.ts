@@ -3,7 +3,12 @@ import { useCallback, useRef, useState } from 'react'
 export type SpeechStatus = 'idle' | 'listening' | 'done' | 'error'
 
 interface SpeechRecognitionEvent extends Event {
-  results: { [index: number]: { [index: number]: { transcript: string } } }
+  results: {
+    [index: number]: {
+      length: number
+      [index: number]: { transcript: string }
+    }
+  }
 }
 
 interface SpeechRecognitionInstance extends EventTarget {
@@ -32,6 +37,7 @@ function getCtor(): SpeechRecognitionCtor | null {
 interface UseSpeechRecognitionReturn {
   status: SpeechStatus
   transcript: string
+  alternatives: string[]
   start: () => void
   reset: () => void
   isSupported: boolean
@@ -40,6 +46,7 @@ interface UseSpeechRecognitionReturn {
 export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [status, setStatus] = useState<SpeechStatus>('idle')
   const [transcript, setTranscript] = useState('')
+  const [alternatives, setAlternatives] = useState<string[]>([])
   const instanceRef = useRef<SpeechRecognitionInstance | null>(null)
 
   const isSupported = getCtor() !== null
@@ -53,14 +60,17 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     const recognition = new Ctor()
     recognition.lang = 'en-US'
     recognition.interimResults = false
-    recognition.maxAlternatives = 1
+    recognition.maxAlternatives = 5
     instanceRef.current = recognition
 
     recognition.onstart = () => setStatus('listening')
     recognition.onresult = (event) => {
-      const result =
-        event.results[0]?.[0]?.transcript.trim().toLowerCase() ?? ''
-      setTranscript(result)
+      const result = event.results[0]
+      const matches = Array.from({ length: result?.length ?? 0 }, (_, index) =>
+        result[index]?.transcript.trim().toLowerCase(),
+      ).filter((value): value is string => !!value)
+      setAlternatives(matches)
+      setTranscript(matches[0] ?? '')
       setStatus('done')
     }
     recognition.onerror = () => setStatus('error')
@@ -76,7 +86,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     instanceRef.current = null
     setStatus('idle')
     setTranscript('')
+    setAlternatives([])
   }, [])
 
-  return { status, transcript, start, reset, isSupported }
+  return { status, transcript, alternatives, start, reset, isSupported }
 }
