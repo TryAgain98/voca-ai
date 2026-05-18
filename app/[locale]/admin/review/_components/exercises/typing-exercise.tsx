@@ -12,6 +12,7 @@ import { useTTS } from '~/hooks/use-tts'
 import { checkAnswer } from '~/lib/answer-pattern'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
+import { MASTERED_THRESHOLD } from '~/lib/mastery-scheduler'
 
 import {
   buildFillSlots,
@@ -20,6 +21,7 @@ import {
 } from './_utils/answer-fill'
 import { ExerciseFeedback } from './exercise-feedback'
 import { FillPatternDisplay } from './fill-pattern-display'
+import { PronunciationGate } from './pronunciation-gate'
 
 import type { ExerciseMode } from './mcq-exercise'
 import type { AnswerHandler, TypingExercise } from '../../_types/review.types'
@@ -37,6 +39,8 @@ interface TypingExerciseCardProps {
   mode?: ExerciseMode
   onQuizSubmit?: () => void
   onQuizHint?: () => void
+  wordLevel?: number
+  onTypingCorrect?: () => void
 }
 
 export function TypingExerciseCard({
@@ -45,6 +49,8 @@ export function TypingExerciseCard({
   mode = 'review',
   onQuizSubmit,
   onQuizHint,
+  wordLevel,
+  onTypingCorrect,
 }: TypingExerciseCardProps) {
   const t = useTranslations('Review')
   const [value, setValue] = useState('')
@@ -53,6 +59,14 @@ export function TypingExerciseCard({
   const [manualHintCount, setManualHintCount] = useState(0)
   const [collisionMatched, setCollisionMatched] = useState<string | null>(null)
   const [isSynonymMatch, setIsSynonymMatch] = useState(false)
+  const [pendingMeta, setPendingMeta] = useState<{
+    scoredCorrect: boolean
+    userAnswer: string
+    responseMs: number
+    usedHint: boolean
+    answerCorrect: boolean
+    acceptedSiblingId?: string
+  } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const startedAtRef = useRef<number>(0)
   const speechStartedRef = useRef(false)
@@ -60,6 +74,8 @@ export function TypingExerciseCard({
   const isListenMode = exercise.type === 'listen-to-word'
   const accentColor = isListenMode ? 'amber' : 'sky'
   const isQuiz = mode === 'quiz'
+  const shouldGatePronunciation =
+    isQuiz && (wordLevel ?? 0) < MASTERED_THRESHOLD
 
   const word = exercise.vocab.word
   const revealOrder = useMemo(() => shuffledLetterPositions(word), [word])
@@ -128,6 +144,11 @@ export function TypingExerciseCard({
       acceptedSiblingId: matchedSiblingId ?? undefined,
     }
     if (isQuiz) {
+      if (correct && shouldGatePronunciation) {
+        onTypingCorrect?.()
+        setPendingMeta({ scoredCorrect, ...meta })
+        return
+      }
       setTimeout(() => onAnswer(scoredCorrect, meta), QUIZ_ADVANCE_DELAY_MS)
       return
     }
@@ -137,6 +158,12 @@ export function TypingExerciseCard({
     } else {
       playWrongSound()
     }
+  }
+
+  const handlePronunciationResult = (passed: boolean) => {
+    if (!pendingMeta) return
+    const { scoredCorrect, ...meta } = pendingMeta
+    onAnswer(scoredCorrect, { ...meta, pronunciationFailed: !passed })
   }
 
   const handleRevealHint = () => {
@@ -259,7 +286,7 @@ export function TypingExerciseCard({
           </Button>
         )}
 
-        {isQuiz && (canShowHint || usedHint) && (
+        {isQuiz && !pendingMeta && (canShowHint || usedHint) && (
           <div className="flex items-center gap-2">
             {canShowHint && (
               <Button
@@ -279,6 +306,14 @@ export function TypingExerciseCard({
                 : t('quizHintPenaltyTitle')}
             </p>
           </div>
+        )}
+
+        {pendingMeta && (
+          <PronunciationGate
+            word={exercise.vocab.word}
+            phonetic={exercise.vocab.phonetic}
+            onResult={handlePronunciationResult}
+          />
         )}
       </div>
     </div>

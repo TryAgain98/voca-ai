@@ -59,6 +59,9 @@ export function ScoringGuide() {
       <p className="text-muted-foreground/50 mt-2.5 border-t border-white/[0.05] pt-2 text-[11px]">
         ★ {t('masteredAt')}
       </p>
+      <p className="text-muted-foreground/50 mt-1.5 text-[11px]">
+        🎤 {t('pronRule')}
+      </p>
     </div>
   )
 }

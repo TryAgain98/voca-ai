@@ -44,6 +44,7 @@ export interface AnswerMeta {
   usedHint?: boolean
   answerCorrect?: boolean
   acceptedSiblingId?: string
+  pronunciationFailed?: boolean
 }
 
 export type AnswerHandler = (isCorrect: boolean, meta?: AnswerMeta) => void

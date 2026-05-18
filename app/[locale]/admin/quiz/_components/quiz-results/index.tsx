@@ -99,6 +99,7 @@ export function QuizResults({
         isCorrect: r.answerCorrect ?? r.isCorrect,
         responseMs: r.responseMs,
         usedHint: r.usedHint,
+        pronunciationFailed: r.pronunciationFailed,
       })),
     })
 

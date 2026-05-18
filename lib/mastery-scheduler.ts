@@ -204,6 +204,22 @@ export function nextSchedule(input: SchedulerInput): SchedulerOutput {
   }
 }
 
+export function pronunciationFailedSchedule(
+  input: SchedulerInput,
+): SchedulerOutput {
+  const now = input.now ?? dayjs().toDate()
+  return {
+    mastery: input.prevMastery,
+    ease: input.prevEase,
+    stability: input.prevStability,
+    difficulty: input.prevDifficulty,
+    isRelearning: false,
+    relearningStep: 0,
+    dueAt: startOfDayAfter(now, 1),
+    isLapse: false,
+  }
+}
+
 export function retrievability(
   stability: number,
   daysSinceReview: number,

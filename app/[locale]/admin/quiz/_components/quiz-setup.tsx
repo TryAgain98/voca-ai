@@ -2,7 +2,7 @@
 
 import { useUser } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
-import { Play, Target } from 'lucide-react'
+import { Mic, Play, Target } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
@@ -46,6 +46,9 @@ export function QuizSetup({ onStart }: QuizSetupProps) {
     description: v.description,
     synonyms: v.synonyms,
   }))
+  const wordLevels: Record<string, number> = Object.fromEntries(
+    (candidates?.words ?? []).map((v) => [v.id, v.progress?.level ?? 0]),
+  )
   const totalCandidates = candidates?.totalCandidates ?? 0
 
   const canStart = !isVocabLoading && vocab.length >= MIN_VOCAB
@@ -58,6 +61,7 @@ export function QuizSetup({ onStart }: QuizSetupProps) {
       lessonIds: [],
       exerciseTypes: QUIZ_EXERCISE_TYPES,
       vocab,
+      wordLevels,
     })
   }
 
@@ -89,6 +93,22 @@ export function QuizSetup({ onStart }: QuizSetupProps) {
       ) : (
         <>
           <QuizChallengeBadges />
+
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-start gap-2 rounded-xl border border-purple-500/20 bg-purple-500/4 px-3 py-2.5"
+          >
+            <Mic
+              size={14}
+              className="mt-0.5 shrink-0 text-purple-400"
+              strokeWidth={2}
+            />
+            <p className="text-muted-foreground/90 text-xs leading-snug">
+              {t('pronGateHint')}
+            </p>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}

@@ -34,13 +34,25 @@ import type {
 
 const QUIZ_PER_QUESTION_MS = 20000
 
-function renderExercise(
-  exercise: Exercise,
-  index: number,
-  onAnswer: AnswerHandler,
-  onQuizSubmit: () => void,
-  onQuizHint: () => void,
-) {
+interface RenderExerciseOptions {
+  exercise: Exercise
+  index: number
+  onAnswer: AnswerHandler
+  onQuizSubmit: () => void
+  onQuizHint: () => void
+  wordLevel?: number
+  onTypingCorrect: () => void
+}
+
+function renderExercise({
+  exercise,
+  index,
+  onAnswer,
+  onQuizSubmit,
+  onQuizHint,
+  wordLevel,
+  onTypingCorrect,
+}: RenderExerciseOptions) {
   switch (exercise.type) {
     case 'word-to-meaning':
       return (
@@ -70,6 +82,8 @@ function renderExercise(
           mode="quiz"
           onQuizSubmit={onQuizSubmit}
           onQuizHint={onQuizHint}
+          wordLevel={wordLevel}
+          onTypingCorrect={onTypingCorrect}
         />
       )
   }
@@ -87,6 +101,7 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
     urgency: TimerUrgency
   }>({ index: 0, urgency: 'normal' })
   const [mascotMood, setMascotMood] = useState<MascotMood>('focus')
+  const [timerPausedIndex, setTimerPausedIndex] = useState<number | null>(null)
 
   const {
     currentExercise,
@@ -145,6 +160,10 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
     playHintSound()
   }, [])
 
+  const handleTypingCorrect = useCallback(() => {
+    setTimerPausedIndex(currentIndex)
+  }, [currentIndex])
+
   const handleCountdownTick = useCallback(
     (intensity: 'low' | 'medium' | 'high') => {
       playCountdownTick(intensity)
@@ -195,6 +214,7 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
               onExpire={handleTimeout}
               onTick={handleCountdownTick}
               onUrgencyChange={handleTimerUrgencyChange}
+              paused={timerPausedIndex === currentIndex}
             />
             <ExitConfirmDialog onConfirm={onExit} />
           </div>
@@ -207,13 +227,15 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
         />
       </div>
 
-      {renderExercise(
-        currentExercise,
-        currentIndex,
-        handleAnswer,
-        handleQuizSubmit,
-        handleQuizHint,
-      )}
+      {renderExercise({
+        exercise: currentExercise,
+        index: currentIndex,
+        onAnswer: handleAnswer,
+        onQuizSubmit: handleQuizSubmit,
+        onQuizHint: handleQuizHint,
+        wordLevel: setup.wordLevels?.[currentExercise.vocab.id],
+        onTypingCorrect: handleTypingCorrect,
+      })}
     </div>
   )
 }

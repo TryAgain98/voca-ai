@@ -30,6 +30,9 @@ export function ScoringGuidePopup() {
       <p className="text-muted-foreground/50 mt-2 border-t border-white/[0.05] pt-2 text-[10px]">
         ★ {t('masteredAt')}
       </p>
+      <p className="text-muted-foreground/50 mt-1 text-[10px]">
+        🎤 {t('pronRule')}
+      </p>
     </div>
   )
 }

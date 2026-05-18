@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-const MAX_ATTEMPTS = 2
+const MAX_ATTEMPTS = 3
 
 interface UseSpeechAttemptsReturn {
   attempts: number

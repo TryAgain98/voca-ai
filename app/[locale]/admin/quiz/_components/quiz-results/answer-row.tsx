@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, Clock, Lightbulb, XCircle } from 'lucide-react'
+import { CheckCircle2, Clock, Lightbulb, Mic, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { SpeakButton } from '~/components/layout/speak-button'
@@ -26,8 +26,10 @@ function getGradeLevel(
   word: string,
   responseMs?: number,
   usedHint?: boolean,
+  pronunciationFailed?: boolean,
 ): GradeLevel {
   if (!isCorrect) return 'again'
+  if (pronunciationFailed) return 'hard'
   const grade = deriveGrade({ isCorrect, responseMs, usedHint, word })
   if (grade >= GRADE_EASY) return 'easy'
   if (grade >= GRADE_GOOD) return 'good'
@@ -107,7 +109,7 @@ export interface AnswerRowProps {
 export function AnswerRow({ result, index }: AnswerRowProps) {
   const t = useTranslations('Quiz.results')
   const expected = getExpectedAnswer(result.exercise)
-  const { isCorrect, responseMs, usedHint } = result
+  const { isCorrect, responseMs, usedHint, pronunciationFailed } = result
   const answerCorrect = result.answerCorrect ?? isCorrect
   const isHintCorrect = answerCorrect && usedHint && !isCorrect
   const gradeLevel = getGradeLevel(
@@ -115,6 +117,7 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
     result.exercise.vocab.word,
     responseMs,
     usedHint,
+    pronunciationFailed,
   )
 
   return (
@@ -168,6 +171,12 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
               {t('hintNoScore')}
             </span>
           )}
+          {pronunciationFailed && (
+            <span className="flex items-center gap-1 rounded border border-purple-500/25 bg-purple-500/10 px-1.5 py-0.5 text-[10px] leading-none font-[510] text-purple-300">
+              <Mic size={10} />
+              {t('pronMissed')}
+            </span>
+          )}
           {responseMs != null && (
             <span className="text-muted-foreground/60 flex items-center gap-0.5 text-[10px]">
               <Clock size={10} />
@@ -206,6 +215,11 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
             {t('alsoAccepted', {
               list: result.exercise.vocab.synonyms.join(', '),
             })}
+          </p>
+        )}
+        {pronunciationFailed && (
+          <p className="mt-1 text-[11px] text-purple-300/80">
+            {t('pronMissedHint')}
           </p>
         )}
       </div>

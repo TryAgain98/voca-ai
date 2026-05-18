@@ -110,6 +110,7 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
           responseMs: meta?.responseMs,
           usedHint: meta?.usedHint,
           answerCorrect: meta?.answerCorrect ?? isCorrect,
+          pronunciationFailed: meta?.pronunciationFailed,
         },
       ])
       const nextIndex = currentIndex + 1

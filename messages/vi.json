@@ -300,7 +300,11 @@
     "listenBtn": "Nghe",
     "skipBtn": "Tiếp tục",
     "maxAttemptsHint": "Đã thử 2 lần — bạn có thể tiếp tục",
-    "answerRecorded": "Đã ghi nhận"
+    "answerRecorded": "Đã ghi nhận",
+    "pronGateInstruction": "Đọc to từ này để hoàn tất",
+    "pronGatePass": "Phát âm chuẩn!",
+    "pronGateRetry": "Sai phát âm — còn {remaining} lần thử",
+    "pronGateFinalFail": "Sẽ ôn lại từ này vào mai"
   },
   "Quiz": {
     "setupTitle": "Chế độ Kiểm tra",
@@ -325,6 +329,7 @@
       "timed": "20s / câu",
       "oneShot": "Một lần"
     },
+    "pronGateHint": "Sau khi gõ đúng, từ chưa thuộc cần đọc to mới được tính điểm. Từ đã thuộc thì bỏ qua bước này.",
     "progress": "{current} / {total}",
     "resultsTitle": "Hoàn thành!",
     "resultsTime": "{seconds}s",
@@ -363,6 +368,8 @@
       "expected": "Đáp án",
       "yourAnswer": "Bạn gõ",
       "hintNoScore": "Dùng gợi ý, không tính điểm",
+      "pronMissed": "Phát âm sai",
+      "pronMissedHint": "Đã ghi nhận chính tả, sẽ ôn lại phát âm vào mai",
       "synonymAccepted": "đồng nghĩa",
       "alsoAccepted": "Cũng chấp nhận: {list}",
       "difficulty": {
@@ -378,7 +385,8 @@
       "normal": "Tốc độ bình thường",
       "hintOrSlow": "Dùng gợi ý hoặc chậm",
       "wrong": "Sai",
-      "masteredAt": "Thuộc từ khi đạt level 3 / 5"
+      "masteredAt": "Thuộc từ khi đạt level 3 / 5",
+      "pronRule": "Từ chưa thuộc cần đọc to để tính điểm — từ đã thuộc thì bỏ qua"
     }
   },
   "Settings": {
@@ -554,7 +562,12 @@
     "title": "Nhập từ vựng từ ảnh",
     "description": "Chụp ảnh bài học — AI sẽ đọc và tạo danh sách từ vựng tự động",
     "extracting": "Đang đọc ảnh...",
-    "dropzone": "Kéo thả hoặc click để chọn ảnh bài học",
+    "dropzoneTitle": "Tải ảnh bài học lên",
+    "dropzone": "Kéo thả hoặc click để chọn một hoặc nhiều ảnh bài học",
+    "selectedImagesTitle": "Ảnh đã chọn",
+    "dropzoneSelectedHint": "Kéo thả thêm ảnh hoặc click để chọn thêm",
+    "addMoreImages": "Thêm ảnh",
+    "selectedImages": "Đã chọn {count} ảnh",
     "lessonLabel": "Bài học",
     "lessonPlaceholder": "Chọn bài học...",
     "newLessonPlaceholder": "Tên bài học mới...",

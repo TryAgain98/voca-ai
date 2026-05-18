@@ -15,10 +15,12 @@ export interface QuizSetup {
   lessonIds: string[]
   exerciseTypes: ExerciseType[]
   vocab: ReviewVocab[]
+  wordLevels?: Record<string, number>
 }
 
 export interface QuizExerciseResult extends ExerciseResult {
   userAnswer?: string
+  pronunciationFailed?: boolean
 }
 
 export type QuizScreen = 'setup' | 'playing' | 'results'

@@ -19,6 +19,7 @@ interface QuestionTimerProps {
   onExpire: () => void
   onTick?: (intensity: 'low' | 'medium' | 'high') => void
   onUrgencyChange?: (urgency: 'normal' | 'warn' | 'danger') => void
+  paused?: boolean
 }
 
 export function QuestionTimer({
@@ -26,6 +27,7 @@ export function QuestionTimer({
   onExpire,
   onTick,
   onUrgencyChange,
+  paused = false,
 }: QuestionTimerProps) {
   const [remaining, setRemaining] = useState(durationMs)
   const expiredRef = useRef(false)
@@ -42,6 +44,7 @@ export function QuestionTimer({
   })
 
   useEffect(() => {
+    if (paused) return
     const startedAt = Date.now()
     const id = setInterval(() => {
       const left = Math.max(0, durationMs - (Date.now() - startedAt))
@@ -69,7 +72,7 @@ export function QuestionTimer({
       }
     }, TICK_MS)
     return () => clearInterval(id)
-  }, [durationMs])
+  }, [durationMs, paused])
 
   const ratio = remaining / durationMs
   const isWarn = ratio < WARN_RATIO && ratio >= DANGER_RATIO

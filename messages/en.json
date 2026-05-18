@@ -300,7 +300,11 @@
     "listenBtn": "Listen",
     "skipBtn": "Continue",
     "maxAttemptsHint": "Tried twice — you can continue",
-    "answerRecorded": "Answer recorded"
+    "answerRecorded": "Answer recorded",
+    "pronGateInstruction": "Read the word aloud to finish",
+    "pronGatePass": "Nice pronunciation!",
+    "pronGateRetry": "Wrong — {remaining} attempt(s) left",
+    "pronGateFinalFail": "We'll review this word again tomorrow"
   },
   "Quiz": {
     "setupTitle": "Test Mode",
@@ -325,6 +329,7 @@
       "timed": "20s / question",
       "oneShot": "One shot"
     },
+    "pronGateHint": "After typing correctly, unmastered words need a spoken read-aloud to score. Mastered words skip this step.",
     "progress": "{current} / {total}",
     "resultsTitle": "Quiz complete!",
     "resultsTime": "{seconds}s",
@@ -363,6 +368,8 @@
       "expected": "Expected",
       "yourAnswer": "You typed",
       "hintNoScore": "Hint used, no score",
+      "pronMissed": "Pronunciation failed",
+      "pronMissedHint": "Typing counted, but we'll review pronunciation tomorrow",
       "synonymAccepted": "synonym",
       "alsoAccepted": "Also accepted: {list}",
       "difficulty": {
@@ -378,7 +385,8 @@
       "normal": "Normal speed",
       "hintOrSlow": "Hint used or slow",
       "wrong": "Wrong answer",
-      "masteredAt": "Memorized at level 3 out of 5"
+      "masteredAt": "Memorized at level 3 out of 5",
+      "pronRule": "Unmastered words need pronunciation to score — mastered words skip it"
     }
   },
   "Settings": {
@@ -554,7 +562,12 @@
     "title": "Import vocabulary from image",
     "description": "Take a photo of the lesson — AI will read and create vocabulary list automatically",
     "extracting": "Reading image...",
-    "dropzone": "Drag and drop or click to select lesson image",
+    "dropzoneTitle": "Upload lesson images",
+    "dropzone": "Drag and drop or click to select one or more lesson images",
+    "selectedImagesTitle": "Selected images",
+    "dropzoneSelectedHint": "Drop more images or click to add more",
+    "addMoreImages": "Add images",
+    "selectedImages": "{count} images selected",
     "lessonLabel": "Lesson",
     "lessonPlaceholder": "Choose lesson...",
     "newLessonPlaceholder": "New lesson name...",

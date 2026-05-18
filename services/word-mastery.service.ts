@@ -3,9 +3,11 @@ import {
   DEFAULTS,
   deriveGrade,
   GRADE_AGAIN,
+  GRADE_HARD,
   isMastered,
   MASTERED_THRESHOLD,
   nextSchedule,
+  pronunciationFailedSchedule,
   retrievability,
 } from '~/lib/mastery-scheduler'
 import { supabase } from '~/lib/supabase'
@@ -44,6 +46,7 @@ export interface QuizWordResult {
   isCorrect: boolean
   responseMs?: number
   usedHint?: boolean
+  pronunciationFailed?: boolean
 }
 
 export interface QuizCandidatesResult {
@@ -465,6 +468,41 @@ class WordMasteryService {
 
     const payload = results.map((r) => {
       const prev = existingMap.get(r.wordId)
+      const schedulerInput = {
+        prevMastery: prev?.level ?? 0,
+        prevEase: prev?.ease_factor ?? DEFAULTS.ease,
+        prevStability: prev?.stability ?? DEFAULTS.stability,
+        prevDifficulty: prev?.difficulty ?? DEFAULTS.difficulty,
+        prevIsRelearning: prev?.is_relearning ?? false,
+        prevRelearningStep: prev?.relearning_step ?? 0,
+        now,
+      }
+
+      if (r.pronunciationFailed) {
+        const schedule = pronunciationFailedSchedule({
+          ...schedulerInput,
+          grade: GRADE_HARD,
+        })
+        return {
+          user_id: userId,
+          word_id: r.wordId,
+          level: schedule.mastery,
+          correct_count: (prev?.correct_count ?? 0) + 1,
+          wrong_count: prev?.wrong_count ?? 0,
+          tested_at: now.toISOString(),
+          due_at: schedule.dueAt.toISOString(),
+          ease_factor: schedule.ease,
+          stability: schedule.stability,
+          difficulty: schedule.difficulty,
+          lapse_count: prev?.lapse_count ?? 0,
+          is_relearning: schedule.isRelearning,
+          relearning_step: schedule.relearningStep,
+          last_grade: GRADE_HARD,
+          last_response_ms: r.responseMs ?? null,
+          updated_at: now.toISOString(),
+        }
+      }
+
       const grade: Grade = deriveGrade({
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
@@ -472,16 +510,7 @@ class WordMasteryService {
         word: r.word,
       })
 
-      const schedule = nextSchedule({
-        prevMastery: prev?.level ?? 0,
-        prevEase: prev?.ease_factor ?? DEFAULTS.ease,
-        prevStability: prev?.stability ?? DEFAULTS.stability,
-        prevDifficulty: prev?.difficulty ?? DEFAULTS.difficulty,
-        prevIsRelearning: prev?.is_relearning ?? false,
-        prevRelearningStep: prev?.relearning_step ?? 0,
-        grade,
-        now,
-      })
+      const schedule = nextSchedule({ ...schedulerInput, grade })
 
       return {
         user_id: userId,
