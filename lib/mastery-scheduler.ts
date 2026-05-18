@@ -25,7 +25,6 @@ const DEFAULT_DIFFICULTY = 5
 const TARGET_RETENTION = 0.9
 const RETRIEVABILITY_DECAY = -Math.log(TARGET_RETENTION)
 
-const MS_PER_DAY = 1000 * 60 * 60 * 24
 const LAPSE_GRACE_MS = 5 * 60 * 60 * 1000
 
 const FAST_GOOD_THRESHOLD_MS = 5000
@@ -147,13 +146,13 @@ function nextMasteryLevel(prevMastery: number, grade: Grade): number {
   return Math.min(prevMastery + inc, MAX_MASTERY_LEVEL)
 }
 
-function startOfNextDay(now: Date): Date {
-  return dayjs(now).tz(APP_TIMEZONE).add(1, 'day').startOf('day').toDate()
+function startOfDayAfter(now: Date, days: number): Date {
+  return dayjs(now).tz(APP_TIMEZONE).add(days, 'day').startOf('day').toDate()
 }
 
 function lapseDueAt(now: Date): Date {
   const graceEnd = addMs(now, LAPSE_GRACE_MS)
-  const tomorrow = startOfNextDay(now)
+  const tomorrow = startOfDayAfter(now, 1)
   return graceEnd < tomorrow ? tomorrow : graceEnd
 }
 
@@ -197,7 +196,7 @@ export function nextSchedule(input: SchedulerInput): SchedulerOutput {
     difficulty: nextDifficulty,
     isRelearning: false,
     relearningStep: 0,
-    dueAt: addMs(now, intervalDaysFromStability(stability) * MS_PER_DAY),
+    dueAt: startOfDayAfter(now, intervalDaysFromStability(stability)),
     isLapse: false,
   }
 }
