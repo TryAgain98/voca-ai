@@ -25,6 +25,8 @@ const DEFAULT_DIFFICULTY = 5
 const TARGET_RETENTION = 0.9
 const RETRIEVABILITY_DECAY = -Math.log(TARGET_RETENTION)
 
+const MAX_STABILITY_DAYS = 180
+
 const LAPSE_GRACE_MS = 5 * 60 * 60 * 1000
 
 const FAST_GOOD_THRESHOLD_MS = 5000
@@ -48,9 +50,9 @@ const DIFFICULTY_DELTA: Record<Grade, number> = {
 
 const INTERVAL_MULTIPLIER: Record<Grade, number> = {
   [GRADE_AGAIN]: 0,
-  [GRADE_HARD]: 1.2,
-  [GRADE_GOOD]: 2.5,
-  [GRADE_EASY]: 4.0,
+  [GRADE_HARD]: 1.1,
+  [GRADE_GOOD]: 2.0,
+  [GRADE_EASY]: 2.8,
 }
 
 export interface SchedulerInput {
@@ -126,7 +128,8 @@ function nextStability(
   const base = Math.max(prevStability, 1)
   const easeBoost = ease / DEFAULT_EASE
   const difficultyPenalty = 1 - (difficulty - DEFAULT_DIFFICULTY) * 0.05
-  return base * INTERVAL_MULTIPLIER[grade] * easeBoost * difficultyPenalty
+  const raw = base * INTERVAL_MULTIPLIER[grade] * easeBoost * difficultyPenalty
+  return Math.min(raw, MAX_STABILITY_DAYS)
 }
 
 function intervalDaysFromStability(stability: number): number {
