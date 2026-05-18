@@ -154,7 +154,7 @@ export function TypingExerciseCard({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
           className={cn(
-            'relative overflow-hidden rounded-2xl px-6 py-5',
+            'relative overflow-hidden rounded-2xl px-5 py-4',
             accentColor === 'amber'
               ? 'border border-amber-500/20 bg-amber-500/5'
               : 'border border-sky-500/20 bg-sky-500/5',
@@ -175,13 +175,17 @@ export function TypingExerciseCard({
             </div>
           ) : (
             <>
-              <p className="text-xl font-medium">{exercise.vocab.meaning}</p>
-              <p className="text-muted-foreground mt-3 text-xs">
-                {t('typeTheWord')}
+              <p className="text-lg leading-tight font-medium">
+                {exercise.vocab.meaning}
               </p>
+              {exercise.vocab.description && (
+                <p className="text-muted-foreground/80 mt-1 text-xs leading-snug">
+                  {exercise.vocab.description}
+                </p>
+              )}
             </>
           )}
-          <FillPatternDisplay slots={slots} className="mt-3" />
+          <FillPatternDisplay slots={slots} className="mt-2.5" />
         </motion.div>
       </AnimatePresence>
 

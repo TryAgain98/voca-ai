@@ -19,6 +19,7 @@ export interface TrickyWord {
   word_type: string | null
   phonetic: string | null
   example: string | null
+  description: string | null
   synonyms: string[]
   wrongCount: number
 }
@@ -130,6 +131,7 @@ class QuizSessionService {
         word_type: vocab?.word_type ?? null,
         phonetic: vocab?.phonetic ?? null,
         example: vocab?.example ?? null,
+        description: vocab?.description ?? null,
         synonyms: vocab?.synonyms ?? [],
         wrongCount: entry.count,
       }

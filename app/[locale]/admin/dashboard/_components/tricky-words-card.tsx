@@ -29,6 +29,7 @@ function toReviewVocab(word: TrickyWord): ReviewVocab {
     word_type: word.word_type,
     phonetic: word.phonetic,
     example: word.example,
+    description: word.description,
     synonyms: word.synonyms,
   }
 }

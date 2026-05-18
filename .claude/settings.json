@@ -1,10 +1,13 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "deny": [
       "Bash(git push --force *)",
       "Bash(git reset --hard *)",
       "Bash(rm -rf *)"
+    ],
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(grep -nA 9 \"toReviewVocab\" /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/needs-testing-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/smart-hero-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/tricky-words-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/unlearned-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/words/_components/words-review-view.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/quiz/_components/quiz-setup.tsx)"
     ]
   }
 }
