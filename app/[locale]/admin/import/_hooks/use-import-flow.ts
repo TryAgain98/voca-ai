@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useBulkCreateVocabularies } from '~/hooks/use-vocabularies'
@@ -32,15 +32,16 @@ export type ImportStep = 'setup' | 'extracting' | 'editing'
 
 interface UseImportFlowReturn {
   step: ImportStep
-  imageFile: File | null
-  imagePreview: string | null
+  imageFiles: File[]
+  imagePreviews: string[]
   lessonId: string
   isNewLesson: boolean
   newLessonName: string
   vocabularies: DraftVocabulary[]
   isSaving: boolean
   isCheckingDuplicates: boolean
-  setImage: (file: File) => void
+  addImages: (files: File[]) => void
+  removeImage: (index: number) => void
   setLessonId: (id: string) => void
   setIsNewLesson: (v: boolean) => void
   setNewLessonName: (name: string) => void
@@ -74,8 +75,9 @@ function isDifferentFromDb(draft: DraftVocabulary): boolean {
 
 export function useImportFlow(): UseImportFlowReturn {
   const [step, setStep] = useState<ImportStep>('setup')
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const imagePreviewsRef = useRef<string[]>([])
   const [lessonId, setLessonId] = useState('')
   const [isNewLesson, setIsNewLesson] = useState(false)
   const [newLessonName, setNewLessonName] = useState('')
@@ -85,9 +87,35 @@ export function useImportFlow(): UseImportFlowReturn {
 
   const bulkCreate = useBulkCreateVocabularies()
 
-  function setImage(file: File) {
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+  useEffect(() => {
+    return () => {
+      imagePreviewsRef.current.forEach((preview) =>
+        URL.revokeObjectURL(preview),
+      )
+    }
+  }, [])
+
+  function addImages(files: File[]) {
+    const images = files.filter((file) => file.type.startsWith('image/'))
+    if (images.length === 0) return
+
+    setImageFiles((prev) => [...prev, ...images])
+    setImagePreviews((prev) => {
+      const next = [...prev, ...images.map((file) => URL.createObjectURL(file))]
+      imagePreviewsRef.current = next
+      return next
+    })
+  }
+
+  function removeImage(index: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => {
+      const removed = prev[index]
+      if (removed) URL.revokeObjectURL(removed)
+      const next = prev.filter((_, i) => i !== index)
+      imagePreviewsRef.current = next
+      return next
+    })
   }
 
   function updateVocabulary(
@@ -129,11 +157,11 @@ export function useImportFlow(): UseImportFlowReturn {
   }
 
   async function extract() {
-    if (!imageFile) return
+    if (imageFiles.length === 0) return
     setStep('extracting')
     try {
       const form = new FormData()
-      form.append('image', imageFile)
+      imageFiles.forEach((file) => form.append('images', file))
       const res = await fetch('/api/extract-vocabulary', {
         method: 'POST',
         body: form,
@@ -264,8 +292,12 @@ export function useImportFlow(): UseImportFlowReturn {
 
   function reset() {
     setStep('setup')
-    setImageFile(null)
-    setImagePreview(null)
+    setImageFiles([])
+    setImagePreviews((prev) => {
+      prev.forEach((preview) => URL.revokeObjectURL(preview))
+      imagePreviewsRef.current = []
+      return []
+    })
     setLessonId('')
     setIsNewLesson(false)
     setNewLessonName('')
@@ -274,15 +306,16 @@ export function useImportFlow(): UseImportFlowReturn {
 
   return {
     step,
-    imageFile,
-    imagePreview,
+    imageFiles,
+    imagePreviews,
     lessonId,
     isNewLesson,
     newLessonName,
     vocabularies,
     isSaving: isSavingLesson || bulkCreate.isPending,
     isCheckingDuplicates,
-    setImage,
+    addImages,
+    removeImage,
     setLessonId,
     setIsNewLesson,
     setNewLessonName,

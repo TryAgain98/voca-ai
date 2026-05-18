@@ -27,11 +27,13 @@ export default function ImportPage() {
 
       {flow.step === 'setup' && (
         <SetupStep
-          imagePreview={flow.imagePreview}
+          imageFiles={flow.imageFiles}
+          imagePreviews={flow.imagePreviews}
           lessonId={flow.lessonId}
           isNewLesson={flow.isNewLesson}
           newLessonName={flow.newLessonName}
-          onImageChange={flow.setImage}
+          onImagesAdd={flow.addImages}
+          onImageRemove={flow.removeImage}
           onLessonChange={flow.setLessonId}
           onToggleNewLesson={flow.setIsNewLesson}
           onNewLessonNameChange={flow.setNewLessonName}
