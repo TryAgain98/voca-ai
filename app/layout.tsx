@@ -15,7 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://voca.ai'
+const siteUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? 'https://voca-ai-rust.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
