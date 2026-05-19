@@ -420,8 +420,11 @@ export default async function LandingPage({
         <section className="landing-hero relative isolate min-h-[96vh] overflow-hidden">
           <MultiverseScene />
 
-          <header className="landing-header relative z-10 mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-5 sm:px-8 lg:px-10">
-            <Link href={`/${locale}`} className="flex items-center gap-2.5">
+          <header className="landing-header relative z-10 mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-3 gap-y-3 px-4 py-4 sm:flex-nowrap sm:px-8 lg:px-10">
+            <Link
+              href={`/${locale}`}
+              className="flex min-w-0 shrink-0 items-center gap-2.5"
+            >
               <AppLogo />
             </Link>
 
@@ -440,7 +443,7 @@ export default async function LandingPage({
               </a>
             </nav>
 
-            <div className="landing-header-actions flex items-center gap-2">
+            <div className="landing-header-actions flex min-w-0 flex-1 items-center justify-end gap-2 sm:flex-none">
               <div
                 className="landing-segment hidden items-center gap-1 rounded-lg border border-white/70 bg-white/72 p-1 shadow-sm backdrop-blur lg:flex"
                 aria-label={
@@ -505,21 +508,21 @@ export default async function LandingPage({
             </div>
           </header>
 
-          <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-5 pt-10 pb-16 sm:px-8 sm:pt-16 lg:px-10 lg:pt-20 lg:pb-20">
+          <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-4 pt-8 pb-14 sm:px-8 sm:pt-16 sm:pb-16 lg:px-10 lg:pt-20 lg:pb-20">
             <div className="hero-copy max-w-3xl">
-              <div className="hero-badge inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/75 px-3 py-1.5 text-sm font-medium text-indigo-700 shadow-sm backdrop-blur">
+              <div className="hero-badge inline-flex max-w-full items-center gap-2 rounded-full border border-indigo-200 bg-white/75 px-3 py-1.5 text-sm font-medium text-indigo-700 shadow-sm backdrop-blur">
                 <Sparkles size={15} />
                 {t.hero.badge}
               </div>
 
-              <h1 className="hero-title mt-6 max-w-4xl text-4xl leading-[1.02] font-[720] tracking-normal text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[0.98]">
+              <h1 className="hero-title mt-6 max-w-4xl text-[2rem] leading-[1.06] font-[720] tracking-normal text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl lg:leading-[0.98]">
                 {t.hero.title}
                 <span className="block text-indigo-600">
                   {t.hero.highlight}
                 </span>
               </h1>
 
-              <p className="hero-description mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
+              <p className="hero-description mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-xl sm:leading-8">
                 {t.hero.description}
               </p>
 
@@ -603,7 +606,7 @@ export default async function LandingPage({
           </div>
         </section>
 
-        <section id="features" className="bg-[#f7f9fc] py-20">
+        <section id="features" className="bg-[#f7f9fc] py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div className="max-w-2xl">
               <p className="text-sm font-semibold tracking-[0.14em] text-indigo-600 uppercase">
@@ -638,7 +641,7 @@ export default async function LandingPage({
           </div>
         </section>
 
-        <section id="how-it-works" className="bg-white py-20">
+        <section id="how-it-works" className="bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
               <div>
@@ -669,7 +672,7 @@ export default async function LandingPage({
                   />
                 ))}
 
-                <div className="grid gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {t.flow.steps.map((step, index) => (
                     <label
                       key={`flow-label-${step.title}`}
@@ -690,7 +693,7 @@ export default async function LandingPage({
                   {t.flow.steps.map((step, index) => (
                     <div
                       key={`flow-panel-${step.title}`}
-                      className={`flow-panel flow-panel-${index} grid gap-6 p-5 sm:grid-cols-[0.9fr_1.1fr] sm:p-6`}
+                      className={`flow-panel flow-panel-${index} grid gap-6 p-5 sm:p-6 md:grid-cols-[0.9fr_1.1fr]`}
                     >
                       <div>
                         <p className="text-sm font-semibold text-indigo-600">
@@ -742,7 +745,7 @@ export default async function LandingPage({
                 className={buttonVariants({
                   size: 'lg',
                   className:
-                    'h-12 rounded-lg bg-white px-5 text-base text-slate-950 hover:bg-slate-100 [a]:hover:bg-slate-100',
+                    'h-12 w-full rounded-lg bg-white px-5 text-base text-slate-950 hover:bg-slate-100 sm:w-auto [a]:hover:bg-slate-100',
                 })}
               >
                 {signedIn ? t.hero.signedInPrimary : t.cta.primary}
@@ -754,7 +757,7 @@ export default async function LandingPage({
                     variant: 'outline',
                     size: 'lg',
                     className:
-                      'h-12 rounded-lg border-white/20 bg-white/5 px-5 text-base text-white hover:bg-white/10 hover:text-white',
+                      'h-12 w-full rounded-lg border-white/20 bg-white/5 px-5 text-base text-white hover:bg-white/10 hover:text-white sm:w-auto',
                   })}
                 >
                   {t.cta.secondary}
@@ -915,13 +918,13 @@ function FlowVisual({ index, locale }: { index: number; locale: string }) {
   const activeLabels = labels[index]
 
   return (
-    <div className="flow-visual relative min-h-64 overflow-hidden rounded-lg bg-slate-950 p-4 text-white">
+    <div className="flow-visual relative min-h-56 overflow-hidden rounded-lg bg-slate-950 p-4 text-white sm:min-h-64">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.28),transparent_30%),radial-gradient(circle_at_80%_30%,rgba(99,102,241,0.34),transparent_34%),linear-gradient(135deg,#0f172a,#111827)]" />
       <div className="flow-line absolute top-1/2 right-6 left-6 h-px bg-cyan-300/45" />
       {activeLabels.map((label, labelIndex) => (
         <div
           key={label}
-          className={`flow-node flow-node-${labelIndex} absolute rounded-lg border border-white/16 bg-white/12 px-3 py-2 text-sm font-semibold shadow-lg backdrop-blur`}
+          className={`flow-node flow-node-${labelIndex} absolute max-w-[44%] rounded-lg border border-white/16 bg-white/12 px-3 py-2 text-sm leading-tight font-semibold shadow-lg backdrop-blur`}
         >
           {label}
         </div>
@@ -950,7 +953,7 @@ function FlowVisual({ index, locale }: { index: number; locale: string }) {
 function ProductPreview({ copy }: { copy: LandingCopy['preview'] }) {
   return (
     <div className="preview-panel rounded-lg border border-white/70 bg-white/90 p-4 shadow-2xl shadow-indigo-950/10 backdrop-blur">
-      <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
+      <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4 sm:items-center">
         <div>
           <p className="text-xs font-semibold tracking-[0.14em] text-indigo-600 uppercase">
             {copy.today}
@@ -966,14 +969,19 @@ function ProductPreview({ copy }: { copy: LandingCopy['preview'] }) {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="preview-stats mt-4 grid gap-2 sm:gap-3">
         {copy.stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-slate-200 bg-slate-50 p-3"
+            className="rounded-lg border border-slate-200 bg-slate-50 p-2.5 sm:p-3"
           >
             <p className="text-xs text-slate-500">{stat.label}</p>
-            <p className={cn('mt-1 text-2xl font-semibold', stat.tone)}>
+            <p
+              className={cn(
+                'mt-1 text-xl font-semibold sm:text-2xl',
+                stat.tone,
+              )}
+            >
               {stat.value}
             </p>
           </div>
@@ -1023,6 +1031,7 @@ function LandingStyles() {
         --card-glow: rgba(79, 70, 229, 0.14);
         --hero-wash-a: rgba(255,255,255,0.76);
         --hero-wash-b: rgba(247,249,252,0.9);
+        overflow-x: hidden;
         transition: background 240ms ease, color 240ms ease;
       }
 
@@ -1194,6 +1203,27 @@ function LandingStyles() {
         background: #0f172a;
         color: white;
         box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+      }
+
+      .landing-header,
+      .landing-header-actions,
+      .hero-copy,
+      .preview-panel,
+      .flow-experience,
+      .flow-stage {
+        min-width: 0;
+      }
+
+      .landing-primary-action {
+        min-width: 0;
+      }
+
+      .hero-title {
+        text-wrap: balance;
+      }
+
+      .preview-stats {
+        grid-template-columns: minmax(0, 1fr);
       }
 
       #theme-dark:checked ~ .landing-page .landing-segment {
@@ -1508,11 +1538,56 @@ function LandingStyles() {
         50% { filter: saturate(1.5) brightness(1.16); }
       }
 
+      @media (max-width: 1024px) {
+        .landing-hero {
+          min-height: auto;
+        }
+
+        .portal-left {
+          left: -170px;
+          opacity: 0.46;
+        }
+
+        .portal-right {
+          right: -190px;
+          opacity: 0.5;
+        }
+
+        .mascot-owl {
+          right: 3%;
+          top: 38%;
+          width: 118px;
+          height: 118px;
+          opacity: 0.46;
+        }
+
+        .mascot-cat {
+          right: 9%;
+          top: 13%;
+          width: 90px;
+          height: 90px;
+          opacity: 0.52;
+        }
+
+        .mascot-bear {
+          left: auto;
+          right: 1%;
+          top: 58%;
+          width: 96px;
+          height: 96px;
+          opacity: 0.3;
+        }
+
+        .floating-book,
+        .floating-pencil {
+          display: none;
+        }
+      }
+
       @media (max-width: 768px) {
         .portal-left,
-        .portal-right,
-        .mascot-bear {
-          opacity: 0.45;
+        .portal-right {
+          opacity: 0.3;
         }
 
         .mascot-owl,
@@ -1521,9 +1596,91 @@ function LandingStyles() {
           display: none;
         }
 
+        .mascot-bear {
+          right: -26px;
+          top: 350px;
+          width: 84px;
+          height: 84px;
+          opacity: 0.18;
+        }
+
+        .flow-pulse {
+          width: 52px;
+          height: 52px;
+        }
+
         .flow-node-0 { left: 6%; top: 24%; }
         .flow-node-1 { left: 25%; top: 43%; }
         .flow-node-2 { right: 6%; top: 28%; }
+      }
+
+      @media (max-width: 640px) {
+        .landing-header {
+          align-items: flex-start;
+        }
+
+        .landing-header-actions {
+          flex: 0 0 100%;
+          justify-content: space-between;
+          width: 100%;
+        }
+
+        .landing-nav-action {
+          display: none !important;
+        }
+
+        .landing-primary-action {
+          flex: 1 1 auto;
+          max-width: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .hero-badge {
+          align-items: flex-start;
+          white-space: normal;
+        }
+
+        .hero-actions a {
+          min-height: 48px;
+          height: auto;
+          white-space: normal;
+          text-align: center;
+        }
+
+        .hero-trust {
+          gap: 8px 14px;
+        }
+
+        .flow-tab {
+          min-height: 82px;
+        }
+
+        .flow-node {
+          max-width: 46%;
+          padding: 7px 8px;
+          font-size: 12px;
+        }
+      }
+
+      @media (min-width: 420px) {
+        .preview-stats {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 380px) {
+        .landing-header-actions {
+          justify-content: space-between;
+        }
+
+        .landing-primary-action {
+          max-width: none;
+        }
+
+        .landing-segment-item {
+          min-width: 34px;
+        }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1568,7 +1725,7 @@ function OutcomePanel({ locale }: { locale: string }) {
       </div>
 
       <div className="rounded-lg border border-white/70 bg-white/80 p-5 shadow-xl shadow-sky-950/10 backdrop-blur">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
               <BookOpen size={22} />
@@ -1588,7 +1745,7 @@ function OutcomePanel({ locale }: { locale: string }) {
           {[70, 88, 56, 92, 78, 64, 86].map((height, index) => (
             <div
               key={index}
-              className="flex h-20 items-end rounded bg-slate-100 px-1"
+              className="flex h-16 items-end rounded bg-slate-100 px-1 sm:h-20"
             >
               <div
                 className="w-full rounded bg-indigo-500"
