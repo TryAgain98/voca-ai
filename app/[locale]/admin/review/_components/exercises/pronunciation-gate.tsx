@@ -12,8 +12,7 @@ import { cn } from '~/lib/cn'
 
 import { buildSpeechDiff } from './_utils/phoneme-diff'
 
-const MAX_ATTEMPTS = 3
-const TTS_AUTO_DELAY_MS = 350
+const MAX_ATTEMPTS = 2
 const AUTO_RECORD_DELAY_MS = 250
 const PASS_ADVANCE_DELAY_MS = 450
 const FAIL_ADVANCE_DELAY_MS = 600
@@ -53,7 +52,8 @@ export function PronunciationGate({
 
   useEffect(() => {
     if (!isSupported) return
-    const timer = setTimeout(speak, TTS_AUTO_DELAY_MS)
+    autoRecordRef.current = false
+    const timer = setTimeout(start, AUTO_RECORD_DELAY_MS)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -158,18 +158,20 @@ export function PronunciationGate({
             </p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={handleManualListen}
-          disabled={isTTSActive}
-          className="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 transition-colors hover:border-white/20 disabled:opacity-50"
-          aria-label={t('listenBtn')}
-        >
-          <Volume2
-            size={16}
-            className={cn(isTTSActive && 'animate-pulse text-emerald-400')}
-          />
-        </button>
+        {attempts > 0 && (
+          <button
+            type="button"
+            onClick={handleManualListen}
+            disabled={isTTSActive}
+            className="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 transition-colors hover:border-white/20 disabled:opacity-50"
+            aria-label={t('listenBtn')}
+          >
+            <Volume2
+              size={16}
+              className={cn(isTTSActive && 'animate-pulse text-emerald-400')}
+            />
+          </button>
+        )}
       </div>
 
       <div className="flex min-h-9 items-center justify-center gap-2 text-sm">
