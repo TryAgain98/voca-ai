@@ -187,14 +187,23 @@ export function useImportFlow(): UseImportFlowReturn {
         const existing = await vocabulariesService.findByWords(words)
 
         if (existing.length > 0) {
-          const dbKey = (word: string, wordType: string | null) =>
-            `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}`
+          const dbKey = (
+            word: string,
+            wordType: string | null,
+            meaning: string | null,
+          ) =>
+            `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}|${(meaning ?? '').trim().toLowerCase()}`
           const existingMap = new Map(
-            existing.map((e) => [dbKey(e.word, e.word_type ?? null), e]),
+            existing.map((e) => [
+              dbKey(e.word, e.word_type ?? null, e.meaning ?? null),
+              e,
+            ]),
           )
           setVocabularies((prev) =>
             prev.map((draft) => {
-              const match = existingMap.get(dbKey(draft.word, draft.word_type))
+              const match = existingMap.get(
+                dbKey(draft.word, draft.word_type, draft.meaning),
+              )
               if (!match) return draft
               const snapshot: Omit<
                 DraftVocabulary,
