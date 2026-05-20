@@ -1,5 +1,6 @@
 import { dictionary } from 'cmu-pronouncing-dictionary'
 import { doubleMetaphone } from 'double-metaphone'
+import { toWords } from 'number-to-words'
 
 export type TokenStatus = 'match' | 'wrong' | 'missing' | 'extra'
 
@@ -402,6 +403,22 @@ function pickBestCandidate(
   })
 }
 
+function expandNumberTokens(value: string): string | null {
+  if (!/\d/.test(value)) return null
+
+  const tokens = value.split(' ').filter(Boolean)
+  let didExpand = false
+  const expanded = tokens.map((token) => {
+    if (!/^\d+$/.test(token)) return token
+    const num = Number(token)
+    if (!Number.isSafeInteger(num) || num < 0) return token
+    didExpand = true
+    return toWords(num).replace(/[-,]/g, ' ').replace(/\s+/g, ' ').trim()
+  })
+
+  return didExpand ? expanded.join(' ').replace(/\s+/g, ' ').trim() : null
+}
+
 function buildCandidates(
   expected: string,
   spoken: string | string[],
@@ -410,14 +427,21 @@ function buildCandidates(
   const values = Array.isArray(spoken) ? spoken : [spoken]
   const candidates = new Set<string>()
 
+  const addCandidate = (value: string) => {
+    if (!value) return
+    candidates.add(value)
+    const expanded = expandNumberTokens(value)
+    if (expanded) candidates.add(expanded)
+  }
+
   for (const value of values) {
     const normalized = normalizeSpeechText(value)
     if (!normalized) continue
-    candidates.add(normalized)
+    addCandidate(normalized)
 
     if (expectedWords.length === 1) {
       for (const token of normalized.split(' ').filter(Boolean)) {
-        candidates.add(token)
+        addCandidate(token)
       }
     }
   }
