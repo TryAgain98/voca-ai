@@ -38,17 +38,82 @@ function tokenizeWords(text: string): string[] {
   return text.match(/\b[\w']+\b/g) ?? []
 }
 
+function alignWords(expected: string[], transcript: string[]): WordResult[] {
+  const m = expected.length
+  const n = transcript.length
+
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  const choice = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(''))
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const matchScore =
+        dp[i - 1][j - 1] + scoreWord(expected[i - 1], transcript[j - 1])
+      const missScore = dp[i - 1][j]
+      const skipScore = dp[i][j - 1]
+
+      if (matchScore >= missScore && matchScore >= skipScore) {
+        dp[i][j] = matchScore
+        choice[i][j] = 'match'
+      } else if (missScore >= skipScore) {
+        dp[i][j] = missScore
+        choice[i][j] = 'miss'
+      } else {
+        dp[i][j] = skipScore
+        choice[i][j] = 'skip'
+      }
+    }
+  }
+
+  const results: WordResult[] = new Array(m)
+  let i = m
+  let j = n
+
+  while (i > 0 || j > 0) {
+    if (i === 0) {
+      j--
+      continue
+    }
+    if (j === 0) {
+      results[i - 1] = {
+        word: expected[i - 1],
+        expected: expected[i - 1],
+        got: '',
+        score: 0,
+      }
+      i--
+      continue
+    }
+    const op = choice[i][j]
+    if (op === 'match') {
+      const w = expected[i - 1]
+      const g = transcript[j - 1]
+      results[i - 1] = { word: w, expected: w, got: g, score: scoreWord(w, g) }
+      i--
+      j--
+    } else if (op === 'miss') {
+      results[i - 1] = {
+        word: expected[i - 1],
+        expected: expected[i - 1],
+        got: '',
+        score: 0,
+      }
+      i--
+    } else {
+      j--
+    }
+  }
+
+  return results
+}
+
 export function scorePassage(
   transcript: string,
   expected: string,
 ): WordResult[] {
   const expectedWords = tokenizeWords(expected)
   const transcriptWords = tokenizeWords(transcript)
-
-  return expectedWords.map((word, i) => {
-    const got = transcriptWords[i] ?? ''
-    return { word, expected: word, got, score: scoreWord(word, got) }
-  })
+  return alignWords(expectedWords, transcriptWords)
 }
 
 export function overallScore(results: WordResult[]): number {

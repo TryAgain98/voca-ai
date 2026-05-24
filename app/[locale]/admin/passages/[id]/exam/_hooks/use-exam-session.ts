@@ -16,6 +16,7 @@ interface UseExamSessionReturn {
   wordResults: WordResult[] | null
   score: number
   elapsed: number
+  isSaved: boolean
   selectedBenchmark: BenchmarkKey
   setSelectedBenchmark: (b: BenchmarkKey) => void
   startRecording: () => void
@@ -34,6 +35,7 @@ export function useExamSession(
   const [wordResults, setWordResults] = useState<WordResult[] | null>(null)
   const [score, setScore] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [isSaved, setIsSaved] = useState(false)
   const [selectedBenchmark, setSelectedBenchmark] = useState<BenchmarkKey>('ok')
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -124,6 +126,7 @@ export function useExamSession(
     setWordResults(null)
     setScore(0)
     setElapsed(0)
+    setIsSaved(false)
   }
 
   function saveResult(passageId: string, userId: string) {
@@ -143,17 +146,20 @@ export function useExamSession(
           )
         : null
 
-    createSession.mutate({
-      passage_id: passageId,
-      user_id: userId,
-      mode: 'exam',
-      transcript: null,
-      overall_score: Math.round((score + (fluency ?? score)) / 2),
-      pronunciation_score: score,
-      fluency_score: fluency,
-      word_results: wordResults,
-      duration_seconds: elapsed,
-    })
+    createSession.mutate(
+      {
+        passage_id: passageId,
+        user_id: userId,
+        mode: 'exam',
+        transcript: null,
+        overall_score: Math.round((score + (fluency ?? score)) / 2),
+        pronunciation_score: score,
+        fluency_score: fluency,
+        word_results: wordResults,
+        duration_seconds: elapsed,
+      },
+      { onSuccess: () => setIsSaved(true) },
+    )
   }
 
   return {
@@ -161,6 +167,7 @@ export function useExamSession(
     wordResults,
     score,
     elapsed,
+    isSaved,
     selectedBenchmark,
     setSelectedBenchmark,
     startRecording,

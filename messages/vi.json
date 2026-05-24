@@ -628,6 +628,11 @@
     "timeOk": "Ổn",
     "timeAcceptable": "Chấp nhận",
     "wordsCount": "{count} từ",
-    "addVocabFromPassage": "Thêm từ vựng từ đoạn văn"
+    "addVocabFromPassage": "Thêm từ vựng từ đoạn văn",
+    "notExamined": "Chưa thi",
+    "tableColTitle": "Tiêu đề",
+    "tableColScore": "Điểm thi",
+    "tableColLastExam": "Lần cuối thi",
+    "tableColAction": "Thao tác"
   }
 }

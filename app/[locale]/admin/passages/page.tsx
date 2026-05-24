@@ -6,9 +6,10 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
+import { useLatestExamsByUser } from '~/hooks/use-passage-sessions'
 import { useDeletePassage, usePassages } from '~/hooks/use-passages'
 
-import { PassageCard } from './_components/passage-card'
+import { PassageRow } from './_components/passage-row'
 
 export default function PassagesPage() {
   const t = useTranslations('Passages')
@@ -16,8 +17,16 @@ export default function PassagesPage() {
   const { user } = useUser()
   const userId = user?.id ?? ''
 
-  const { data: passages = [], isLoading } = usePassages(userId)
+  const { data: passages = [], isLoading: passagesLoading } =
+    usePassages(userId)
+  const { data: latestExams = [] } = useLatestExamsByUser(userId)
   const deletePassage = useDeletePassage()
+
+  const examByPassageId = Object.fromEntries(
+    latestExams.map((s) => [s.passage_id, s]),
+  )
+
+  const isLoading = passagesLoading
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,21 +48,17 @@ export default function PassagesPage() {
       </div>
 
       {isLoading && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-44 animate-pulse rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
-            />
+            <div key={i} className="bg-muted h-14 animate-pulse rounded-lg" />
           ))}
         </div>
       )}
 
       {!isLoading && passages.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-24 text-center">
-          <p className="text-[#d0d6e0]">{t('empty')}</p>
-          <p className="text-sm text-[#8a8f98]">{t('emptyHint')}</p>
+          <p className="text-foreground">{t('empty')}</p>
+          <p className="text-muted-foreground text-sm">{t('emptyHint')}</p>
           <Link href={`/${locale}/admin/passages/new`}>
             <Button variant="outline" className="mt-2 gap-2">
               <Plus size={16} />
@@ -64,14 +69,35 @@ export default function PassagesPage() {
       )}
 
       {!isLoading && passages.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {passages.map((p) => (
-            <PassageCard
-              key={p.id}
-              passage={p}
-              onDelete={(id) => deletePassage.mutate(id)}
-            />
-          ))}
+        <div className="border-border overflow-hidden rounded-xl border">
+          <table className="w-full">
+            <thead>
+              <tr className="border-border bg-muted/40 text-muted-foreground border-b text-xs">
+                <th className="py-2.5 pr-3 pl-4 text-left font-medium">
+                  {t('tableColTitle')}
+                </th>
+                <th className="px-3 py-2.5 text-left font-medium">
+                  {t('tableColScore')}
+                </th>
+                <th className="px-3 py-2.5 text-left font-medium">
+                  {t('tableColLastExam')}
+                </th>
+                <th className="py-2.5 pr-4 pl-3 text-right font-medium">
+                  {t('tableColAction')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {passages.map((p) => (
+                <PassageRow
+                  key={p.id}
+                  passage={p}
+                  lastExam={examByPassageId[p.id]}
+                  onDelete={(id) => deletePassage.mutate(id)}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -15,13 +15,26 @@ export function usePassageSessions(passageId: string) {
   })
 }
 
+export function useLatestExamsByUser(userId: string) {
+  return useQuery({
+    queryKey: ['passage-sessions', 'exam-summary', userId],
+    queryFn: () => passageSessionsService.findLatestExamByUser(userId),
+    enabled: !!userId,
+  })
+}
+
 export function useCreatePassageSession() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: PassageSessionInsert) =>
       passageSessionsService.create(payload),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ['passage-sessions', vars.passage_id] })
+      void qc.invalidateQueries({
+        queryKey: ['passage-sessions', vars.passage_id],
+      })
+      void qc.invalidateQueries({
+        queryKey: ['passage-sessions', 'exam-summary', vars.user_id],
+      })
     },
     onError: () => toast.error('Không thể lưu kết quả'),
   })

@@ -194,18 +194,30 @@ export default function ExamPage() {
               <RefreshCw size={16} />
               Thi lại
             </Button>
-            <Button
-              className="flex-1 gap-2"
-              onClick={() => exam.saveResult(passageId, user?.id ?? '')}
-            >
-              <Save size={16} />
-              Lưu kết quả
-              {exam.score > 0 && (
-                <span className={cn('ml-1 font-bold', scoreColor(exam.score))}>
-                  ({exam.score})
-                </span>
-              )}
-            </Button>
+            {exam.isSaved ? (
+              <div className="flex flex-1 items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
+                <Save size={16} />
+                Đã lưu kết quả
+                {exam.score > 0 && (
+                  <span className="font-bold">({exam.score})</span>
+                )}
+              </div>
+            ) : (
+              <Button
+                className="flex-1 gap-2"
+                onClick={() => exam.saveResult(passageId, user?.id ?? '')}
+              >
+                <Save size={16} />
+                Lưu kết quả
+                {exam.score > 0 && (
+                  <span
+                    className={cn('ml-1 font-bold', scoreColor(exam.score))}
+                  >
+                    ({exam.score})
+                  </span>
+                )}
+              </Button>
+            )}
           </div>
         </>
       )}

@@ -628,6 +628,11 @@
     "timeOk": "OK",
     "timeAcceptable": "Acceptable",
     "wordsCount": "{count} words",
-    "addVocabFromPassage": "Add vocabulary from passage"
+    "addVocabFromPassage": "Add vocabulary from passage",
+    "notExamined": "Not examined",
+    "tableColTitle": "Title",
+    "tableColScore": "Score",
+    "tableColLastExam": "Last exam",
+    "tableColAction": "Action"
   }
 }
