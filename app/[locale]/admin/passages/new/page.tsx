@@ -14,8 +14,8 @@ export default function NewPassagePage() {
   const flow = usePassageCreateFlow(user?.id ?? '')
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <div className="mx-auto w-full max-w-4xl">
         <h1 className="text-2xl font-semibold tracking-tight">
           {t('setupTitle')}
         </h1>

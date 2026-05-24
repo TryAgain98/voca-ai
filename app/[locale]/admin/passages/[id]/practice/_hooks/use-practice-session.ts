@@ -1,20 +1,22 @@
 'use client'
 
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useAudioRecorder } from '~/hooks/use-audio-recorder'
 import { useCreatePassageSession } from '~/hooks/use-passage-sessions'
-import { useSpeechRecognition } from '~/hooks/use-speech-recognition'
-import { overallScore, scorePassage } from '~/lib/passage-score'
+import { overallScore } from '~/lib/passage-score'
+import { scorePassageAudio } from '~/lib/passage-speech-scoring'
 
 import type { WordResult } from '~/types'
 
-export type PracticeState = 'idle' | 'listening' | 'scored'
+export type PracticeState = 'idle' | 'listening' | 'scoring' | 'scored'
 
 interface UsePracticeSessionReturn {
   state: PracticeState
   wordResults: WordResult[] | null
   score: number
+  transcript: string
   elapsedSeconds: number
   audioUrl: string | null
   showTranslation: boolean
@@ -34,34 +36,30 @@ export function usePracticeSession(
   passageContent: string,
 ): UsePracticeSessionReturn {
   const [showTranslation, setShowTranslation] = useState(false)
+  const [state, setState] = useState<PracticeState>('idle')
+  const [transcript, setTranscript] = useState('')
+  const [wordResults, setWordResults] = useState<WordResult[] | null>(null)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startTimeRef = useRef<number>(0)
 
-  const speech = useSpeechRecognition({ continuous: true })
   const audioRecorder = useAudioRecorder()
   const createSession = useCreatePassageSession()
-
-  const wordResults = useMemo(() => {
-    if (speech.status !== 'done' || !speech.transcript) return null
-    return scorePassage(speech.transcript, passageContent)
-  }, [speech.status, speech.transcript, passageContent])
 
   const score = useMemo(
     () => (wordResults ? overallScore(wordResults) : 0),
     [wordResults],
   )
 
-  const state: PracticeState = wordResults
-    ? 'scored'
-    : speech.status === 'listening'
-      ? 'listening'
-      : 'idle'
+  const isSupported =
+    typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
 
   const startTimer = useCallback(() => {
+    startTimeRef.current = Date.now()
     setElapsedSeconds(0)
     timerRef.current = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1)
-    }, 1000)
+      setElapsedSeconds(Math.round((Date.now() - startTimeRef.current) / 1000))
+    }, 500)
   }, [])
 
   const stopTimer = useCallback(() => {
@@ -72,22 +70,50 @@ export function usePracticeSession(
   }, [])
 
   async function startListening() {
-    startTimer()
-    await audioRecorder.startRecording()
-    speech.start()
+    try {
+      setTranscript('')
+      setWordResults(null)
+      audioRecorder.clearRecording()
+      await audioRecorder.startRecording()
+      startTimer()
+      setState('listening')
+    } catch {
+      stopTimer()
+      setState('idle')
+      toast.error('Không truy cập được microphone')
+    }
   }
 
-  function stopListening() {
+  async function stopListening() {
     stopTimer()
-    audioRecorder.stopRecording()
-    speech.stop()
+    setState('scoring')
+
+    const audioBlob = await audioRecorder.stopRecording()
+    if (!audioBlob) {
+      toast.error('Không có bản ghi âm để chấm')
+      setState('idle')
+      return
+    }
+
+    try {
+      const result = await scorePassageAudio(audioBlob, passageContent)
+
+      setTranscript(result.transcript)
+      setWordResults(result.wordResults)
+      setState('scored')
+    } catch {
+      toast.error('Chấm điểm thất bại, thử lại')
+      setState('idle')
+    }
   }
 
   function reset() {
     stopTimer()
     setElapsedSeconds(0)
     audioRecorder.clearRecording()
-    speech.reset()
+    setTranscript('')
+    setWordResults(null)
+    setState('idle')
   }
 
   function toggleTranslation() {
@@ -104,7 +130,7 @@ export function usePracticeSession(
       passage_id: passageId,
       user_id: userId,
       mode: 'practice',
-      transcript: speech.transcript,
+      transcript,
       overall_score: score,
       pronunciation_score: score,
       fluency_score: null,
@@ -117,10 +143,11 @@ export function usePracticeSession(
     state,
     wordResults,
     score,
+    transcript,
     elapsedSeconds,
     audioUrl: audioRecorder.audioUrl,
     showTranslation,
-    isSupported: speech.isSupported,
+    isSupported,
     toggleTranslation,
     startListening,
     stopListening,

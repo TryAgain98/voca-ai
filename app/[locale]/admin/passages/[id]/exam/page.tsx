@@ -1,7 +1,15 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { ArrowLeft, Loader2, Mic, RefreshCw, Save, Square } from 'lucide-react'
+import {
+  ArrowLeft,
+  Loader2,
+  Mic,
+  Play,
+  RefreshCw,
+  Save,
+  Square,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -165,9 +173,29 @@ export default function ExamPage() {
             content={passage.content}
             wordResults={exam.wordResults}
             score={exam.score}
+            pronunciationScore={exam.pronunciationScore}
             elapsed={exam.elapsed}
             benchmarkTime={benchmarkTime ?? null}
           />
+
+          {exam.audioUrl && (
+            <div
+              className="flex items-center gap-2 rounded-xl border p-3"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <Play size={14} className="shrink-0 text-[#7170ff]" />
+              <span className="sr-only">{t('playback')}</span>
+              <audio
+                src={exam.audioUrl}
+                controls
+                className="h-8 w-full"
+                style={{ colorScheme: 'dark' }}
+              />
+            </div>
+          )}
 
           <div className="flex gap-3">
             <Button variant="outline" onClick={exam.reset} className="gap-2">

@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useAudioRecorder } from '~/hooks/use-audio-recorder'
 import { useCreatePassageSession } from '~/hooks/use-passage-sessions'
-import { overallScore, scorePassage } from '~/lib/passage-score'
+import { calculatePassageExamScore } from '~/lib/passage-score'
+import { scorePassageAudio } from '~/lib/passage-speech-scoring'
 
 import type { WordResult } from '~/types'
 
@@ -15,7 +17,9 @@ interface UseExamSessionReturn {
   state: ExamState
   wordResults: WordResult[] | null
   score: number
+  pronunciationScore: number
   elapsed: number
+  audioUrl: string | null
   isSaved: boolean
   selectedBenchmark: BenchmarkKey
   setSelectedBenchmark: (b: BenchmarkKey) => void
@@ -33,16 +37,23 @@ export function useExamSession(
 ): UseExamSessionReturn {
   const [state, setState] = useState<ExamState>('idle')
   const [wordResults, setWordResults] = useState<WordResult[] | null>(null)
+  const [transcript, setTranscript] = useState('')
   const [score, setScore] = useState(0)
+  const [pronunciationScore, setPronunciationScore] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [isSaved, setIsSaved] = useState(false)
   const [selectedBenchmark, setSelectedBenchmark] = useState<BenchmarkKey>('ok')
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef = useRef<number>(0)
+  const audioRecorder = useAudioRecorder()
   const createSession = useCreatePassageSession()
+
+  const getBenchmarkTime = useCallback(() => {
+    if (selectedBenchmark === 'good') return timeGood
+    if (selectedBenchmark === 'ok') return timeOk
+    return timeAcceptable
+  }, [selectedBenchmark, timeGood, timeOk, timeAcceptable])
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -55,17 +66,11 @@ export function useExamSession(
 
   async function startRecording() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
-      chunksRef.current = []
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
-      }
-
-      mediaRecorderRef.current = recorder
+      audioRecorder.clearRecording()
+      await audioRecorder.startRecording()
       startTimeRef.current = Date.now()
-      recorder.start(100)
+      setTranscript('')
+      setElapsed(0)
       setState('recording')
 
       timerRef.current = setInterval(() => {
@@ -77,39 +82,31 @@ export function useExamSession(
   }
 
   async function stopAndScore() {
+    const finalElapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
     clearTimer()
-    const recorder = mediaRecorderRef.current
-    if (!recorder) return
+    setElapsed(finalElapsed)
 
     setState('scoring')
 
-    await new Promise<void>((resolve) => {
-      recorder.onstop = () => resolve()
-      recorder.stop()
-      recorder.stream.getTracks().forEach((t) => t.stop())
-    })
+    const audioBlob = await audioRecorder.stopRecording()
+    if (!audioBlob) {
+      toast.error('Không có bản ghi âm để chấm')
+      setState('idle')
+      return
+    }
 
     try {
-      const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-      const form = new FormData()
-      form.append('audio', audioBlob, 'recording.webm')
-      form.append('expected', passageContent)
+      const result = await scorePassageAudio(audioBlob, passageContent)
+      const examScore = calculatePassageExamScore(
+        result.pronunciationScore,
+        finalElapsed,
+        getBenchmarkTime(),
+      )
 
-      const res = await fetch('/api/speech-score', {
-        method: 'POST',
-        body: form,
-      })
-      if (!res.ok) throw new Error('Scoring failed')
-
-      const { transcript } = (await res.json()) as {
-        transcript: string
-        score: number
-      }
-      const results = scorePassage(transcript, passageContent)
-      const overall = overallScore(results)
-
-      setWordResults(results)
-      setScore(overall)
+      setTranscript(result.transcript)
+      setWordResults(result.wordResults)
+      setPronunciationScore(result.pronunciationScore)
+      setScore(examScore.overallScore)
       setState('done')
     } catch {
       toast.error('Chấm điểm thất bại, thử lại')
@@ -119,42 +116,33 @@ export function useExamSession(
 
   function reset() {
     clearTimer()
-    mediaRecorderRef.current?.stream.getTracks().forEach((t) => t.stop())
-    mediaRecorderRef.current = null
-    chunksRef.current = []
+    audioRecorder.clearRecording()
     setState('idle')
     setWordResults(null)
+    setTranscript('')
     setScore(0)
+    setPronunciationScore(0)
     setElapsed(0)
     setIsSaved(false)
   }
 
   function saveResult(passageId: string, userId: string) {
     if (!wordResults) return
-    const benchmarkTime =
-      selectedBenchmark === 'good'
-        ? timeGood
-        : selectedBenchmark === 'ok'
-          ? timeOk
-          : timeAcceptable
-
-    const fluency =
-      benchmarkTime && elapsed > 0
-        ? Math.max(
-            0,
-            Math.min(100, Math.round((benchmarkTime / elapsed) * 100)),
-          )
-        : null
+    const examScore = calculatePassageExamScore(
+      pronunciationScore,
+      elapsed,
+      getBenchmarkTime(),
+    )
 
     createSession.mutate(
       {
         passage_id: passageId,
         user_id: userId,
         mode: 'exam',
-        transcript: null,
-        overall_score: Math.round((score + (fluency ?? score)) / 2),
-        pronunciation_score: score,
-        fluency_score: fluency,
+        transcript,
+        overall_score: examScore.overallScore,
+        pronunciation_score: examScore.pronunciationScore,
+        fluency_score: examScore.fluencyScore,
         word_results: wordResults,
         duration_seconds: elapsed,
       },
@@ -166,7 +154,9 @@ export function useExamSession(
     state,
     wordResults,
     score,
+    pronunciationScore,
     elapsed,
+    audioUrl: audioRecorder.audioUrl,
     isSaved,
     selectedBenchmark,
     setSelectedBenchmark,

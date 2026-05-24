@@ -127,6 +127,47 @@ export function overallScore(results: WordResult[]): number {
   return Math.round(sum / results.length)
 }
 
+export interface PassageExamScore {
+  overallScore: number
+  pronunciationScore: number
+  fluencyScore: number | null
+  timePenalty: number
+}
+
+export function calculatePassageExamScore(
+  pronunciationScore: number,
+  elapsedSeconds: number,
+  benchmarkSeconds: number | null,
+): PassageExamScore {
+  if (!benchmarkSeconds || elapsedSeconds <= 0) {
+    return {
+      overallScore: pronunciationScore,
+      pronunciationScore,
+      fluencyScore: null,
+      timePenalty: 0,
+    }
+  }
+
+  if (elapsedSeconds <= benchmarkSeconds) {
+    return {
+      overallScore: pronunciationScore,
+      pronunciationScore,
+      fluencyScore: 100,
+      timePenalty: 0,
+    }
+  }
+
+  const overRatio = (elapsedSeconds - benchmarkSeconds) / benchmarkSeconds
+  const timePenalty = Math.min(40, Math.ceil(overRatio * 100))
+
+  return {
+    overallScore: Math.max(0, pronunciationScore - timePenalty),
+    pronunciationScore,
+    fluencyScore: Math.max(0, 100 - timePenalty),
+    timePenalty,
+  }
+}
+
 export type ScoreLevel = 'good' | 'ok' | 'poor'
 
 export function scoreLevel(score: number): ScoreLevel {

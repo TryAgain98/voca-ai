@@ -72,8 +72,14 @@ export default function PassagesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-border bg-muted/40 text-muted-foreground border-b text-xs">
+                <th className="w-14 py-2.5 pr-3 pl-4 text-center font-medium">
+                  {t('tableColNo')}
+                </th>
                 <th className="py-2.5 pr-3 pl-4 text-left font-medium">
                   {t('tableColTitle')}
+                </th>
+                <th className="px-3 py-2.5 text-left font-medium whitespace-nowrap">
+                  {t('tableColCreatedAt')}
                 </th>
                 <th className="px-3 py-2.5 text-left font-medium">
                   {t('tableColScore')}
@@ -87,9 +93,10 @@ export default function PassagesPage() {
               </tr>
             </thead>
             <tbody>
-              {passages.map((p) => (
+              {passages.map((p, index) => (
                 <PassageRow
                   key={p.id}
+                  index={index + 1}
                   passage={p}
                   lastExam={examByPassageId[p.id]}
                   onDelete={(id) => deletePassage.mutate(id)}

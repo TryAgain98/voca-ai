@@ -1,10 +1,9 @@
 'use client'
 
-import { Mic, Play, RefreshCw, Square } from 'lucide-react'
+import { Loader2, Mic, RefreshCw, Square } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
-import { scoreColor, scoreLevel } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
 import type { PracticeState } from '../_hooks/use-practice-session'
@@ -17,9 +16,7 @@ function formatTime(s: number): string {
 
 interface PracticeRecorderProps {
   state: PracticeState
-  score: number
   elapsedSeconds: number
-  audioUrl: string | null
   isSupported: boolean
   onStart: () => void
   onStop: () => void
@@ -28,30 +25,24 @@ interface PracticeRecorderProps {
 
 export function PracticeRecorder({
   state,
-  score,
   elapsedSeconds,
-  audioUrl,
   isSupported,
   onStart,
   onStop,
   onReset,
 }: PracticeRecorderProps) {
   const t = useTranslations('Passages')
-  const level = scoreLevel(score)
 
-  const motivationTitle =
-    level === 'good'
-      ? t('motivationGoodTitle')
-      : level === 'ok'
-        ? t('motivationOkTitle')
-        : t('motivationPoorTitle')
-
-  const motivationHint =
-    level === 'good'
-      ? t('motivationGoodHint')
-      : level === 'ok'
-        ? t('motivationOkHint')
-        : t('motivationPoorHint')
+  if (state === 'scored') {
+    return (
+      <div className="flex gap-3">
+        <Button variant="outline" onClick={onReset} className="flex-1 gap-2">
+          <RefreshCw size={16} />
+          {t('retry')}
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -61,38 +52,6 @@ export function PracticeRecorder({
         borderColor: 'rgba(255,255,255,0.08)',
       }}
     >
-      {state === 'scored' && (
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-center gap-1">
-            <span className={cn('text-4xl font-bold', scoreColor(score))}>
-              {score}
-            </span>
-            <span className="text-xs text-[#8a8f98]">/ 100</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-[#f7f8f8]">
-              {motivationTitle}
-            </p>
-            <p className="text-xs text-[#8a8f98]">{motivationHint}</p>
-            <p className="text-xs text-[#8a8f98]">
-              {t('speakingTime')}: {formatTime(elapsedSeconds)}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {audioUrl && state === 'scored' && (
-        <div className="flex items-center gap-2">
-          <Play size={14} className="shrink-0 text-[#7170ff]" />
-          <audio
-            src={audioUrl}
-            controls
-            className="h-8 w-full"
-            style={{ colorScheme: 'dark' }}
-          />
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         {state === 'idle' && (
           <Button
@@ -127,10 +86,10 @@ export function PracticeRecorder({
           </>
         )}
 
-        {state === 'scored' && (
-          <Button variant="outline" onClick={onReset} className="flex-1 gap-2">
-            <RefreshCw size={16} />
-            {t('retry')}
+        {state === 'scoring' && (
+          <Button disabled className="flex-1 gap-2">
+            <Loader2 size={16} className="animate-spin" />
+            {t('scoring')}
           </Button>
         )}
       </div>

@@ -11,6 +11,7 @@ import { cn } from '~/lib/utils'
 import type { Passage, PassageSession } from '~/types'
 
 interface PassageRowProps {
+  index: number
   passage: Passage
   lastExam: PassageSession | undefined
   onDelete: (id: string) => void
@@ -28,6 +29,14 @@ function relativeDate(dateStr: string, locale: string): string {
   return rtf.format(Math.round(diffMs / 2592000000), 'month')
 }
 
+function formatDate(dateStr: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(dateStr))
+}
+
 function formatBenchmarks(
   good: number | null,
   ok: number | null,
@@ -40,7 +49,12 @@ function formatBenchmarks(
     .join(' — ')
 }
 
-export function PassageRow({ passage, lastExam, onDelete }: PassageRowProps) {
+export function PassageRow({
+  index,
+  passage,
+  lastExam,
+  onDelete,
+}: PassageRowProps) {
   const t = useTranslations('Passages')
   const locale = useLocale()
   const wordCount = passage.content.trim().split(/\s+/).length
@@ -53,6 +67,10 @@ export function PassageRow({ passage, lastExam, onDelete }: PassageRowProps) {
 
   return (
     <tr className="group border-border hover:bg-muted/30 border-b transition-colors">
+      <td className="text-muted-foreground py-3 pr-3 pl-4 text-center text-xs tabular-nums">
+        {index}
+      </td>
+
       <td className="py-3 pr-3 pl-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-foreground text-sm font-medium">
@@ -71,6 +89,10 @@ export function PassageRow({ passage, lastExam, onDelete }: PassageRowProps) {
             )}
           </div>
         </div>
+      </td>
+
+      <td className="text-muted-foreground px-3 py-3 text-xs whitespace-nowrap">
+        {formatDate(passage.created_at, locale)}
       </td>
 
       <td className="px-3 py-3">

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Globe } from 'lucide-react'
+import { ArrowLeft, Globe, Play } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -11,6 +11,8 @@ import { usePassageSessions } from '~/hooks/use-passage-sessions'
 import { usePassage } from '~/hooks/use-passages'
 import { scoreColor } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
+
+import { ExamResults } from '../exam/_components/exam-results'
 
 import { PassageText } from './_components/passage-text'
 import { PracticeRecorder } from './_components/practice-recorder'
@@ -25,6 +27,8 @@ export default function PracticePage() {
   const { data: passage, isLoading } = usePassage(passageId)
   const { data: sessions = [] } = usePassageSessions(passageId)
   const session = usePracticeSession(passage?.content ?? '')
+  const benchmarkTime =
+    passage?.time_ok ?? passage?.time_good ?? passage?.time_acceptable ?? null
 
   const bestScore = useMemo(() => {
     const practiceSessions = sessions.filter((s) => s.mode === 'practice')
@@ -109,19 +113,29 @@ export default function PracticePage() {
         </div>
       </div>
 
-      <div
-        className="rounded-xl border p-4"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          borderColor: 'rgba(255,255,255,0.08)',
-        }}
-      >
-        <PassageText
+      {session.state === 'scored' && session.wordResults ? (
+        <ExamResults
           content={passage.content}
-          passageId={passageId}
           wordResults={session.wordResults}
+          score={session.score}
+          elapsed={session.elapsedSeconds}
+          benchmarkTime={benchmarkTime}
         />
-      </div>
+      ) : (
+        <div
+          className="rounded-xl border p-4"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          }}
+        >
+          <PassageText
+            content={passage.content}
+            passageId={passageId}
+            wordResults={null}
+          />
+        </div>
+      )}
 
       {session.showTranslation && passage.translation && (
         <div
@@ -135,11 +149,28 @@ export default function PracticePage() {
         </div>
       )}
 
+      {session.state === 'scored' && session.audioUrl && (
+        <div
+          className="flex items-center gap-2 rounded-xl border p-3"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          }}
+        >
+          <Play size={14} className="shrink-0 text-[#7170ff]" />
+          <span className="sr-only">{t('playback')}</span>
+          <audio
+            src={session.audioUrl}
+            controls
+            className="h-8 w-full"
+            style={{ colorScheme: 'dark' }}
+          />
+        </div>
+      )}
+
       <PracticeRecorder
         state={session.state}
-        score={session.score}
         elapsedSeconds={session.elapsedSeconds}
-        audioUrl={session.audioUrl}
         isSupported={session.isSupported}
         onStart={session.startListening}
         onStop={session.stopListening}
