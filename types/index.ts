@@ -104,3 +104,66 @@ export interface StreakReminderPrefs {
   timezone: string
   reminder_hour: number
 }
+
+export type WordPos =
+  | 'n'
+  | 'v'
+  | 'adj'
+  | 'adv'
+  | 'prep'
+  | 'conj'
+  | 'pron'
+  | 'det'
+  | 'other'
+
+export interface PassageSegment {
+  id: string
+  text: string
+}
+
+export interface WordTag {
+  word: string
+  pos: WordPos
+  token_index: number
+}
+
+export interface Passage {
+  id: string
+  user_id: string
+  title: string
+  content: string
+  translation: string | null
+  summary: string | null
+  time_good: number | null
+  time_ok: number | null
+  time_acceptable: number | null
+  segments: PassageSegment[]
+  word_tags: WordTag[]
+  created_at: string
+  updated_at: string
+}
+
+export type PassageInsert = Omit<Passage, 'id' | 'created_at' | 'updated_at'>
+
+export interface WordResult {
+  word: string
+  expected: string
+  got: string
+  score: number
+}
+
+export interface PassageSession {
+  id: string
+  passage_id: string
+  user_id: string
+  mode: 'practice' | 'exam'
+  transcript: string | null
+  overall_score: number | null
+  pronunciation_score: number | null
+  fluency_score: number | null
+  word_results: WordResult[]
+  duration_seconds: number | null
+  created_at: string
+}
+
+export type PassageSessionInsert = Omit<PassageSession, 'id' | 'created_at'>

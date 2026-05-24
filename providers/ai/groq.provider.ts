@@ -2,15 +2,18 @@ import Groq from 'groq-sdk'
 
 import { BaseAIProvider } from './base.provider'
 import {
+  ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
   buildSynonymCheckPrompt,
   buildTranslationPrompt,
   buildVocabularyFillPrompt,
+  parsePassageAnalysis,
   parseVocabularyJson,
 } from './utils'
 
 import type {
   ExtractedVocabulary,
+  PassageAnalysis,
   TranslationDirection,
   VocabularyFill,
 } from './types'
@@ -90,6 +93,33 @@ export class GroqProvider extends BaseAIProvider {
       language: 'en',
     })
     return transcription.text
+  }
+
+  async analyzePassage(
+    input: { text: string } | { base64: string; mimeType: string },
+  ): Promise<PassageAnalysis> {
+    const res = await this.client.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      max_tokens: 8192,
+      messages: [
+        {
+          role: 'user',
+          content:
+            'text' in input
+              ? `${ANALYZE_PASSAGE_PROMPT}\n\nPassage:\n${input.text}`
+              : [
+                  { type: 'text' as const, text: ANALYZE_PASSAGE_PROMPT },
+                  {
+                    type: 'image_url' as const,
+                    image_url: {
+                      url: `data:${input.mimeType};base64,${input.base64}`,
+                    },
+                  },
+                ],
+        },
+      ],
+    })
+    return parsePassageAnalysis(res.choices[0]?.message?.content ?? '{}')
   }
 
   async checkSynonyms(

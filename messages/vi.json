@@ -43,7 +43,8 @@
     "review": "Ôn tập",
     "quiz": "Kiểm tra",
     "users": "Học viên",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "passages": "Đoạn văn"
   },
   "Dashboard": {
     "greeting": {
@@ -589,5 +590,44 @@
     "duplicateTitle": "Nội dung giống hệt DB — sẽ bỏ qua, không lưu lại",
     "modifiedBadge": "AI cập nhật",
     "modifiedTitle": "AI phát hiện nội dung khác DB — sẽ tự động cập nhật. Bạn có thể sửa thêm trước khi lưu"
+  },
+  "Passages": {
+    "title": "Đoạn văn luyện nói",
+    "description": "Luyện tập và thi nói đoạn văn tiếng Anh với chấm điểm AI",
+    "new": "Tạo đoạn văn",
+    "empty": "Chưa có đoạn văn nào",
+    "emptyHint": "Tạo đoạn văn đầu tiên để bắt đầu luyện tập",
+    "setupTitle": "Tạo đoạn văn mới",
+    "setupDescription": "Nhập đoạn văn tiếng Anh hoặc upload ảnh",
+    "tabText": "Nhập văn bản",
+    "tabImage": "Upload ảnh",
+    "textPlaceholder": "Dán hoặc nhập đoạn văn tiếng Anh tại đây...",
+    "imageHint": "Upload ảnh chứa đoạn văn tiếng Anh",
+    "analyzeButton": "Phân tích với AI",
+    "analyzing": "Đang phân tích đoạn văn...",
+    "editTitle": "Xem lại đoạn văn",
+    "fieldTitle": "Tiêu đề",
+    "fieldSummary": "Tóm tắt",
+    "fieldTranslation": "Dịch nghĩa",
+    "fieldTimeGood": "Tốt (giây)",
+    "fieldTimeOk": "Ổn (giây)",
+    "fieldTimeAcceptable": "Chấp nhận (giây)",
+    "timeBenchmarksLabel": "Mốc thời gian",
+    "timeBenchmarksHint": "Thời gian nói ước tính (giây) cho mỗi trình độ",
+    "vocabSectionTitle": "Từ vựng gợi ý",
+    "vocabSectionHint": "Click vào từ để thêm vào danh sách từ vựng",
+    "vocabLessonLabel": "Lưu vào bài học",
+    "vocabLessonPlaceholder": "Chọn bài học...",
+    "saveButton": "Lưu đoạn văn",
+    "backButton": "Quay lại",
+    "practiceButton": "Luyện tập",
+    "examButton": "Thi",
+    "deleteButton": "Xóa",
+    "timeLabel": "Mốc thời gian",
+    "timeGood": "Tốt",
+    "timeOk": "Ổn",
+    "timeAcceptable": "Chấp nhận",
+    "wordsCount": "{count} từ",
+    "addVocabFromPassage": "Thêm từ vựng từ đoạn văn"
   }
 }

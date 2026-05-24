@@ -1,5 +1,6 @@
 import type {
   ExtractedVocabulary,
+  PassageAnalysis,
   TranslationDirection,
   VocabularyFill,
 } from './types'
@@ -37,6 +38,14 @@ export abstract class BaseAIProvider {
   ): Promise<boolean> {
     return Promise.reject(
       new Error(`${this.name} does not support checkSynonyms`),
+    )
+  }
+
+  analyzePassage(
+    _input: { text: string } | { base64: string; mimeType: string },
+  ): Promise<PassageAnalysis> {
+    return Promise.reject(
+      new Error(`${this.name} does not support analyzePassage`),
     )
   }
 }

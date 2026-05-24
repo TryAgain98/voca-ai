@@ -2,12 +2,14 @@ import Anthropic from '@anthropic-ai/sdk'
 
 import { BaseAIProvider } from './base.provider'
 import {
+  ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
   buildSynonymCheckPrompt,
+  parsePassageAnalysis,
   parseVocabularyJson,
 } from './utils'
 
-import type { ExtractedVocabulary } from './types'
+import type { ExtractedVocabulary, PassageAnalysis } from './types'
 
 const SUPPORTED_MIME_TYPES = [
   'image/jpeg',
@@ -55,6 +57,39 @@ export class AnthropicProvider extends BaseAIProvider {
     })
     const text = res.content[0].type === 'text' ? res.content[0].text : '[]'
     return parseVocabularyJson(text)
+  }
+
+  async analyzePassage(
+    input: { text: string } | { base64: string; mimeType: string },
+  ): Promise<PassageAnalysis> {
+    const mediaType = SUPPORTED_MIME_TYPES.includes(
+      ('mimeType' in input ? input.mimeType : '') as SupportedMimeType,
+    )
+      ? (('mimeType' in input ? input.mimeType : '') as SupportedMimeType)
+      : 'image/jpeg'
+
+    const content: Anthropic.MessageParam['content'] =
+      'text' in input
+        ? `${ANALYZE_PASSAGE_PROMPT}\n\nPassage:\n${input.text}`
+        : [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: input.base64,
+              },
+            },
+            { type: 'text', text: ANALYZE_PASSAGE_PROMPT },
+          ]
+
+    const res = await this.client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content }],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : '{}'
+    return parsePassageAnalysis(text)
   }
 
   async checkSynonyms(

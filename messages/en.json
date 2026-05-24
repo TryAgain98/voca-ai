@@ -43,7 +43,8 @@
     "review": "Review",
     "quiz": "Quiz",
     "users": "Learners",
-    "settings": "Settings"
+    "settings": "Settings",
+    "passages": "Passages"
   },
   "Dashboard": {
     "greeting": {
@@ -589,5 +590,44 @@
     "duplicateTitle": "Content identical to DB — will be skipped, not saved",
     "modifiedBadge": "AI updated",
     "modifiedTitle": "AI detected different content from DB — will auto update. You can edit before saving"
+  },
+  "Passages": {
+    "title": "Speaking passages",
+    "description": "Practice and exam English passages with AI scoring",
+    "new": "New passage",
+    "empty": "No passages yet",
+    "emptyHint": "Create your first passage to start practicing",
+    "setupTitle": "Create new passage",
+    "setupDescription": "Type or paste an English paragraph, or upload an image",
+    "tabText": "Enter text",
+    "tabImage": "Upload image",
+    "textPlaceholder": "Paste or type an English paragraph here...",
+    "imageHint": "Upload an image containing an English paragraph",
+    "analyzeButton": "Analyze with AI",
+    "analyzing": "Analyzing passage...",
+    "editTitle": "Review passage",
+    "fieldTitle": "Title",
+    "fieldSummary": "Summary",
+    "fieldTranslation": "Translation",
+    "fieldTimeGood": "Good (s)",
+    "fieldTimeOk": "OK (s)",
+    "fieldTimeAcceptable": "Acceptable (s)",
+    "timeBenchmarksLabel": "Time benchmarks",
+    "timeBenchmarksHint": "Estimated speaking time in seconds for each level",
+    "vocabSectionTitle": "Suggested vocabulary",
+    "vocabSectionHint": "Click words to add to your vocabulary list",
+    "vocabLessonLabel": "Save to lesson",
+    "vocabLessonPlaceholder": "Choose lesson...",
+    "saveButton": "Save passage",
+    "backButton": "Back",
+    "practiceButton": "Practice",
+    "examButton": "Exam",
+    "deleteButton": "Delete",
+    "timeLabel": "Benchmarks",
+    "timeGood": "Good",
+    "timeOk": "OK",
+    "timeAcceptable": "Acceptable",
+    "wordsCount": "{count} words",
+    "addVocabFromPassage": "Add vocabulary from passage"
   }
 }
