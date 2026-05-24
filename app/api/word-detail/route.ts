@@ -84,6 +84,7 @@ export async function GET(req: Request): Promise<NextResponse> {
       dictEntry?.phonetic ??
       null
     const firstMeaning = dictEntry?.meanings[0]
+    const firstDef = firstMeaning?.definitions[0]
     return NextResponse.json({
       source: 'dictionary',
       meaning,
