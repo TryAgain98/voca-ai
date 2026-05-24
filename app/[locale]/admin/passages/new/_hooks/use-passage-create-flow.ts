@@ -138,7 +138,6 @@ export function usePassageCreateFlow(
         time_ok: editableTimeOk || null,
         time_acceptable: editableTimeAcceptable || null,
         segments: analysis.segments,
-        word_tags: analysis.word_tags,
       })
 
       toast.success('Đã lưu đoạn văn')

@@ -4,8 +4,6 @@ import type {
   PassageSegment,
   SuggestedPassageVocab,
   TranslationDirection,
-  WordPos,
-  WordTag,
 } from './types'
 
 export const EXTRACT_VOCABULARY_PROMPT = `You are an English dictionary. Extract all vocabulary words from this image.
@@ -102,7 +100,6 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 - time_ok: estimated seconds for an intermediate learner (~100 wpm)
 - time_acceptable: estimated seconds for a slow learner (~70 wpm)
 - segments: split the passage into natural spoken chunks (by sentence or clause at commas/semicolons). Each chunk: {"id": "s1", "text": "..."}
-- word_tags: tag every token in the passage with its part of speech. Each token: {"word": "...", "pos": "<n|v|adj|adv|prep|conj|pron|det|other>", "token_index": <0-based int>}. Include punctuation tokens with pos "other".
 - suggested_vocabulary: 8-12 interesting or challenging words from the passage. Each: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning","example":"natural English sentence","description":"short Vietnamese usage note"}
 
 Return ONLY valid JSON, no markdown fences, no explanation.`
@@ -120,30 +117,6 @@ export function parsePassageAnalysis(raw: string): PassageAnalysis {
   const parsed = JSON.parse(cleaned) as Partial<PassageAnalysis>
 
   const segments = (parsed.segments ?? []) as PassageSegment[]
-  const word_tags = (parsed.word_tags ?? []) as Array<{
-    word: string
-    pos: string
-    token_index: number
-  }>
-
-  const validPos = new Set<WordPos>([
-    'n',
-    'v',
-    'adj',
-    'adv',
-    'prep',
-    'conj',
-    'pron',
-    'det',
-    'other',
-  ])
-
-  const typedTags: WordTag[] = word_tags.map((t) => ({
-    word: t.word,
-    pos: validPos.has(t.pos as WordPos) ? (t.pos as WordPos) : 'other',
-    token_index: t.token_index,
-  }))
-
   const suggested = (parsed.suggested_vocabulary ??
     []) as SuggestedPassageVocab[]
 
@@ -156,7 +129,6 @@ export function parsePassageAnalysis(raw: string): PassageAnalysis {
     time_ok: Number(parsed.time_ok ?? 0),
     time_acceptable: Number(parsed.time_acceptable ?? 0),
     segments,
-    word_tags: typedTags,
     suggested_vocabulary: suggested,
   }
 }

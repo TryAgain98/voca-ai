@@ -123,7 +123,6 @@ export default function PracticePage() {
       >
         <PassageText
           segments={passage.segments}
-          wordTags={passage.word_tags}
           vocabMap={vocabMap}
           wordResults={session.wordResults}
           showTranslation={session.showTranslation}

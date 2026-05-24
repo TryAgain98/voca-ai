@@ -7,10 +7,50 @@ import { useTTS } from '~/hooks/use-tts'
 import { scoreBg, scoreColor, scoreLevel } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
-import type { PassageSegment, WordResult, WordTag } from '~/types'
+import type { PassageSegment, WordResult } from '~/types'
 
-function isPunctuation(word: string): boolean {
-  return /^[.,!?;:'"()\-–—…]$/.test(word)
+interface SegmentToken {
+  text: string
+  isWord: boolean
+  wordIdx: number
+  key: string
+}
+
+function tokenizeSegment(text: string): SegmentToken[] {
+  const tokens: SegmentToken[] = []
+  const regex = /\b[\w']+\b/g
+  let lastIdx = 0
+  let wordIdx = 0
+  let m: RegExpExecArray | null
+
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > lastIdx) {
+      tokens.push({
+        text: text.slice(lastIdx, m.index),
+        isWord: false,
+        wordIdx: -1,
+        key: `g${lastIdx}`,
+      })
+    }
+    tokens.push({
+      text: m[0],
+      isWord: true,
+      wordIdx: wordIdx++,
+      key: `w${m.index}`,
+    })
+    lastIdx = m.index + m[0].length
+  }
+
+  if (lastIdx < text.length) {
+    tokens.push({
+      text: text.slice(lastIdx),
+      isWord: false,
+      wordIdx: -1,
+      key: `g${lastIdx}`,
+    })
+  }
+
+  return tokens
 }
 
 const VERDICT: Record<string, { title: string; hint: string }> = {
@@ -24,30 +64,32 @@ const VERDICT: Record<string, { title: string; hint: string }> = {
 
 interface SegmentResultProps {
   segment: PassageSegment
-  tags: WordTag[]
   wordResults: WordResult[]
   resultOffset: number
 }
 
 function SegmentResult({
   segment,
-  tags,
   wordResults,
   resultOffset,
 }: SegmentResultProps) {
   const tts = useTTS(segment.text)
-  let wordIdx = 0
+  const tokens = useMemo(() => tokenizeSegment(segment.text), [segment.text])
+  const wordCount = useMemo(
+    () => tokens.filter((t) => t.isWord).length,
+    [tokens],
+  )
 
   const segmentScore =
-    tags.filter((t) => !isPunctuation(t.word) && t.word.trim()).length > 0
+    wordCount > 0
       ? Math.round(
-          tags
-            .filter((t) => !isPunctuation(t.word) && t.word.trim())
-            .reduce((acc, _, i) => {
-              const r = wordResults[resultOffset + i]
-              return acc + (r?.score ?? 100)
-            }, 0) /
-            tags.filter((t) => !isPunctuation(t.word) && t.word.trim()).length,
+          tokens
+            .filter((t) => t.isWord)
+            .reduce(
+              (acc, t) =>
+                acc + (wordResults[resultOffset + t.wordIdx]?.score ?? 100),
+              0,
+            ) / wordCount,
         )
       : 100
 
@@ -76,33 +118,35 @@ function SegmentResult({
 
       <div className="flex-1">
         <p className="text-base leading-relaxed">
-          {tags.map((tag, i) => {
-            const isWord = !isPunctuation(tag.word) && tag.word.trim() !== ''
-            const result = isWord ? wordResults[resultOffset + wordIdx] : null
-            if (isWord) wordIdx++
-            const needsSpace = i > 0 && !isPunctuation(tag.word)
-
-            if (!result) {
+          {tokens.map((tok) => {
+            if (!tok.isWord) {
               return (
-                <span key={i} className="text-[#8a8f98]">
-                  {needsSpace ? ' ' : ''}
-                  {tag.word}
+                <span key={tok.key} className="text-[#8a8f98]">
+                  {tok.text}
+                </span>
+              )
+            }
+
+            const wr = wordResults[resultOffset + tok.wordIdx]
+            if (!wr) {
+              return (
+                <span key={tok.key} className="text-[#8a8f98]">
+                  {tok.text}
                 </span>
               )
             }
 
             return (
               <span
-                key={i}
-                title={result.got ? `Bạn nói: "${result.got}"` : 'Bỏ qua'}
+                key={tok.key}
+                title={wr.got ? `Bạn nói: "${wr.got}"` : 'Bỏ qua'}
                 className={cn(
                   'cursor-help rounded px-0.5 transition-colors',
-                  scoreColor(result.score),
-                  scoreBg(result.score),
+                  scoreColor(wr.score),
+                  scoreBg(wr.score),
                 )}
               >
-                {needsSpace ? ' ' : ''}
-                {tag.word}
+                {tok.text}
               </span>
             )
           })}
@@ -110,13 +154,13 @@ function SegmentResult({
 
         {segmentScore < 85 && (
           <div className="mt-2 text-xs text-[#8a8f98]">
-            {tags
-              .filter((t) => !isPunctuation(t.word) && t.word.trim())
-              .map((_t, i) => {
-                const r = wordResults[resultOffset + i]
+            {tokens
+              .filter((t) => t.isWord)
+              .map((t) => {
+                const r = wordResults[resultOffset + t.wordIdx]
                 if (!r || r.score >= 85) return null
                 return (
-                  <span key={i} className="mr-2">
+                  <span key={t.key} className="mr-2">
                     <span className={scoreColor(r.score)}>{r.word}</span>
                     {r.got && r.got !== r.word && (
                       <span className="text-[#8a8f98]">
@@ -145,7 +189,6 @@ function SegmentResult({
 
 interface ExamResultsProps {
   segments: PassageSegment[]
-  wordTags: WordTag[]
   wordResults: WordResult[]
   score: number
   elapsed: number
@@ -154,7 +197,6 @@ interface ExamResultsProps {
 
 export function ExamResults({
   segments,
-  wordTags,
   wordResults,
   score,
   elapsed,
@@ -167,18 +209,12 @@ export function ExamResults({
       ? Math.max(0, Math.min(100, Math.round((benchmarkTime / elapsed) * 100)))
       : null
 
-  const assignedTags = useMemo(
-    () => assignTagsToSegments(segments, wordTags),
-    [segments, wordTags],
-  )
-
   const segmentOffsets = useMemo(() => {
-    const counts = assignedTags.map(
-      (tags) =>
-        tags.filter((t) => !isPunctuation(t.word) && t.word.trim()).length,
+    const counts = segments.map(
+      (seg) => (seg.text.match(/\b[\w']+\b/g) ?? []).length,
     )
     return counts.map((_, i) => counts.slice(0, i).reduce((s, c) => s + c, 0))
-  }, [assignedTags])
+  }, [segments])
 
   return (
     <div className="flex flex-col gap-4">
@@ -220,7 +256,6 @@ export function ExamResults({
           <SegmentResult
             key={segment.id}
             segment={segment}
-            tags={assignedTags[i] ?? []}
             wordResults={wordResults}
             resultOffset={segmentOffsets[i] ?? 0}
           />
@@ -228,32 +263,4 @@ export function ExamResults({
       </div>
     </div>
   )
-}
-
-function assignTagsToSegments(
-  segments: PassageSegment[],
-  wordTags: WordTag[],
-): WordTag[][] {
-  let tagIdx = 0
-  return segments.map((seg) => {
-    const result: WordTag[] = []
-    let reconstructed = ''
-    const target = seg.text.trim()
-
-    while (tagIdx < wordTags.length) {
-      const tag = wordTags[tagIdx]!
-      const sep = reconstructed && !isPunctuation(tag.word) ? ' ' : ''
-      reconstructed += sep + tag.word
-      result.push(tag)
-      tagIdx++
-      if (
-        reconstructed.replace(/\s+/g, ' ').trim() ===
-        target.replace(/\s+/g, ' ').trim()
-      )
-        break
-      if (reconstructed.length > target.length + 5) break
-    }
-
-    return result
-  })
 }

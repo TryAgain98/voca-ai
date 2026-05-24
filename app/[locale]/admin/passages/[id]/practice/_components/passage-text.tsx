@@ -1,34 +1,61 @@
 'use client'
 
 import { Volume2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/utils'
 
 import { WordInfoPopup } from './word-info-popup'
 
-import type { PassageSegment, Vocabulary, WordResult, WordTag } from '~/types'
+import type { PassageSegment, Vocabulary, WordResult } from '~/types'
 
-const POS_COLORS: Record<string, string> = {
-  n: 'text-blue-300/80',
-  v: 'text-emerald-300/80',
-  adj: 'text-amber-300/80',
-  adv: 'text-violet-300/80',
-  prep: 'text-rose-300/70',
-  conj: 'text-teal-300/70',
-  pron: 'text-sky-300/70',
-  det: 'text-[#d0d6e0]',
-  other: 'text-[#8a8f98]',
+interface SegmentToken {
+  text: string
+  isWord: boolean
+  wordIdx: number
+  key: string
 }
 
-function isPunctuation(word: string): boolean {
-  return /^[.,!?;:'"()\-–—…]$/.test(word)
+function tokenizeSegment(text: string): SegmentToken[] {
+  const tokens: SegmentToken[] = []
+  const regex = /\b[\w']+\b/g
+  let lastIdx = 0
+  let wordIdx = 0
+  let m: RegExpExecArray | null
+
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > lastIdx) {
+      tokens.push({
+        text: text.slice(lastIdx, m.index),
+        isWord: false,
+        wordIdx: -1,
+        key: `g${lastIdx}`,
+      })
+    }
+    tokens.push({
+      text: m[0],
+      isWord: true,
+      wordIdx: wordIdx++,
+      key: `w${m.index}`,
+    })
+    lastIdx = m.index + m[0].length
+  }
+
+  if (lastIdx < text.length) {
+    tokens.push({
+      text: text.slice(lastIdx),
+      isWord: false,
+      wordIdx: -1,
+      key: `g${lastIdx}`,
+    })
+  }
+
+  return tokens
 }
 
 interface SegmentBlockProps {
   segment: PassageSegment
-  tags: WordTag[]
   vocabMap: Map<string, Vocabulary>
   wordResults: WordResult[] | null
   resultOffset: number
@@ -38,7 +65,6 @@ interface SegmentBlockProps {
 
 function SegmentBlock({
   segment,
-  tags,
   vocabMap,
   wordResults,
   resultOffset,
@@ -46,7 +72,7 @@ function SegmentBlock({
   segmentTranslation,
 }: SegmentBlockProps) {
   const tts = useTTS(segment.text)
-  let wordIdx = 0
+  const tokens = useMemo(() => tokenizeSegment(segment.text), [segment.text])
 
   return (
     <div className="group relative flex items-start gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-white/2">
@@ -64,47 +90,44 @@ function SegmentBlock({
 
       <div className="flex-1">
         <p className="text-base leading-relaxed">
-          {tags.map((tag, i) => {
-            const isWord = !isPunctuation(tag.word) && tag.word.trim() !== ''
-            const result =
-              isWord && wordResults ? wordResults[resultOffset + wordIdx] : null
-            if (isWord) wordIdx++
+          {tokens.map((tok) => {
+            if (!tok.isWord) {
+              return (
+                <span key={tok.key} className="text-[#d0d6e0]">
+                  {tok.text}
+                </span>
+              )
+            }
 
-            const needsSpace = i > 0 && !isPunctuation(tag.word)
-            const color = result
-              ? result.score >= 85
+            const wr = wordResults?.[resultOffset + tok.wordIdx] ?? null
+            const color = wr
+              ? wr.score >= 85
                 ? 'text-emerald-400'
-                : result.score >= 65
+                : wr.score >= 65
                   ? 'text-amber-400'
                   : 'text-red-400'
-              : (POS_COLORS[tag.pos] ?? 'text-[#d0d6e0]')
+              : 'text-[#d0d6e0]'
 
-            const span = (
+            const wordSpan = (
               <span
-                key={i}
+                key={tok.key}
                 className={cn(
                   color,
-                  isWord && 'cursor-pointer underline-offset-2 hover:underline',
-                  result && result.score < 85 && 'font-medium',
+                  'cursor-pointer underline-offset-2 hover:underline',
+                  wr && wr.score < 85 && 'font-medium',
                 )}
               >
-                {needsSpace ? ' ' : ''}
-                {tag.word}
+                {tok.text}
               </span>
             )
 
-            if (!isWord) return span
-
-            const vocab = vocabMap.get(tag.word.toLowerCase())
-            return (
-              <WordInfoPopup
-                key={i}
-                word={tag.word}
-                pos={tag.pos}
-                vocab={vocab ?? null}
-              >
-                {span}
+            const vocab = vocabMap.get(tok.text.toLowerCase())
+            return vocab ? (
+              <WordInfoPopup key={tok.key} word={tok.text} vocab={vocab}>
+                {wordSpan}
               </WordInfoPopup>
+            ) : (
+              wordSpan
             )
           })}
         </p>
@@ -120,7 +143,6 @@ function SegmentBlock({
 
 interface PassageTextProps {
   segments: PassageSegment[]
-  wordTags: WordTag[]
   vocabMap: Map<string, Vocabulary>
   wordResults: WordResult[] | null
   showTranslation: boolean
@@ -129,23 +151,17 @@ interface PassageTextProps {
 
 export function PassageText({
   segments,
-  wordTags,
   vocabMap,
   wordResults,
   showTranslation,
   segmentTranslations,
 }: PassageTextProps) {
-  const [assignedTags] = useState(() =>
-    assignTagsToSegments(segments, wordTags),
-  )
-
   const segmentOffsets = useMemo(() => {
-    const counts = assignedTags.map(
-      (tags) =>
-        tags.filter((t) => !isPunctuation(t.word) && t.word.trim()).length,
+    const counts = segments.map(
+      (seg) => (seg.text.match(/\b[\w']+\b/g) ?? []).length,
     )
     return counts.map((_, i) => counts.slice(0, i).reduce((s, c) => s + c, 0))
-  }, [assignedTags])
+  }, [segments])
 
   return (
     <div className="flex flex-col gap-1">
@@ -153,7 +169,6 @@ export function PassageText({
         <SegmentBlock
           key={segment.id}
           segment={segment}
-          tags={assignedTags[i] ?? []}
           vocabMap={vocabMap}
           wordResults={wordResults}
           resultOffset={segmentOffsets[i] ?? 0}
@@ -163,34 +178,4 @@ export function PassageText({
       ))}
     </div>
   )
-}
-
-function assignTagsToSegments(
-  segments: PassageSegment[],
-  wordTags: WordTag[],
-): WordTag[][] {
-  let tagIdx = 0
-  return segments.map((seg) => {
-    const result: WordTag[] = []
-    let reconstructed = ''
-    const target = seg.text.trim()
-
-    while (tagIdx < wordTags.length) {
-      const tag = wordTags[tagIdx]!
-      const sep = reconstructed && !isPunctuation(tag.word) ? ' ' : ''
-      reconstructed += sep + tag.word
-      result.push(tag)
-      tagIdx++
-
-      if (
-        reconstructed.replace(/\s+/g, ' ').trim() ===
-        target.replace(/\s+/g, ' ').trim()
-      ) {
-        break
-      }
-      if (reconstructed.length > target.length + 5) break
-    }
-
-    return result
-  })
 }

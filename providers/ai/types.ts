@@ -22,23 +22,6 @@ export interface PassageSegment {
   text: string
 }
 
-export type WordPos =
-  | 'n'
-  | 'v'
-  | 'adj'
-  | 'adv'
-  | 'prep'
-  | 'conj'
-  | 'pron'
-  | 'det'
-  | 'other'
-
-export interface WordTag {
-  word: string
-  pos: WordPos
-  token_index: number
-}
-
 export interface SuggestedPassageVocab {
   word: string
   word_type: string
@@ -57,6 +40,5 @@ export interface PassageAnalysis {
   time_ok: number
   time_acceptable: number
   segments: PassageSegment[]
-  word_tags: WordTag[]
   suggested_vocabulary: SuggestedPassageVocab[]
 }

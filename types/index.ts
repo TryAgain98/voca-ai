@@ -105,26 +105,9 @@ export interface StreakReminderPrefs {
   reminder_hour: number
 }
 
-export type WordPos =
-  | 'n'
-  | 'v'
-  | 'adj'
-  | 'adv'
-  | 'prep'
-  | 'conj'
-  | 'pron'
-  | 'det'
-  | 'other'
-
 export interface PassageSegment {
   id: string
   text: string
-}
-
-export interface WordTag {
-  word: string
-  pos: WordPos
-  token_index: number
 }
 
 export interface Passage {
@@ -138,7 +121,6 @@ export interface Passage {
   time_ok: number | null
   time_acceptable: number | null
   segments: PassageSegment[]
-  word_tags: WordTag[]
   created_at: string
   updated_at: string
 }

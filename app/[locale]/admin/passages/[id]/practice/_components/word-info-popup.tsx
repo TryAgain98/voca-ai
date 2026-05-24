@@ -6,35 +6,15 @@ import {
   PopoverTrigger,
 } from '~/components/ui/popover'
 
-import type { Vocabulary, WordPos } from '~/types'
-
-const POS_LABEL: Record<WordPos, string> = {
-  n: 'noun',
-  v: 'verb',
-  adj: 'adjective',
-  adv: 'adverb',
-  prep: 'preposition',
-  conj: 'conjunction',
-  pron: 'pronoun',
-  det: 'determiner',
-  other: '',
-}
+import type { Vocabulary } from '~/types'
 
 interface WordInfoPopupProps {
   word: string
-  pos: string
   vocab: Vocabulary | null
   children: React.ReactNode
 }
 
-export function WordInfoPopup({
-  word,
-  pos,
-  vocab,
-  children,
-}: WordInfoPopupProps) {
-  const posLabel = POS_LABEL[pos as WordPos] ?? pos
-
+export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
   return (
     <Popover>
       <PopoverTrigger>{children}</PopoverTrigger>
@@ -48,14 +28,7 @@ export function WordInfoPopup({
         align="start"
       >
         <div className="flex flex-col gap-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-base font-semibold text-[#f7f8f8]">
-              {word}
-            </span>
-            {posLabel && (
-              <span className="text-xs text-[#8a8f98]">{posLabel}</span>
-            )}
-          </div>
+          <span className="text-base font-semibold text-[#f7f8f8]">{word}</span>
 
           {vocab?.phonetic && (
             <span className="font-mono text-xs text-[#7170ff]">

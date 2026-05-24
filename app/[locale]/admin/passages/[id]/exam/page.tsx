@@ -183,7 +183,6 @@ export default function ExamPage() {
         <>
           <ExamResults
             segments={passage.segments}
-            wordTags={passage.word_tags}
             wordResults={exam.wordResults}
             score={exam.score}
             elapsed={exam.elapsed}
