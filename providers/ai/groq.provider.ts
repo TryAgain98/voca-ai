@@ -30,7 +30,7 @@ export class GroqProvider extends BaseAIProvider {
   ): Promise<ExtractedVocabulary[]> {
     const res = await this.client.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 2048,
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',

@@ -25,7 +25,7 @@ export class OpenAIProvider extends BaseAIProvider {
   ): Promise<ExtractedVocabulary[]> {
     const res = await this.client.chat.completions.create({
       model: 'gpt-4o-mini',
-      max_tokens: 2048,
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',

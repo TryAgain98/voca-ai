@@ -63,5 +63,23 @@ export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
     .trim()
     // Fix single-quoted JSON values (e.g. "phonetic": '/riːd/' → "phonetic": "/riːd/")
     .replace(/: '([^']*)'/g, ': "$1"')
-  return JSON.parse(cleaned) as ExtractedVocabulary[]
+
+  try {
+    return JSON.parse(cleaned) as ExtractedVocabulary[]
+  } catch {
+    return recoverTruncatedVocabularyJson(cleaned)
+  }
+}
+
+function recoverTruncatedVocabularyJson(raw: string): ExtractedVocabulary[] {
+  const arrayStart = raw.indexOf('[')
+  if (arrayStart === -1) throw new Error('No JSON array found in AI response')
+
+  const lastObjectEnd = raw.lastIndexOf('}')
+  if (lastObjectEnd === -1 || lastObjectEnd < arrayStart) {
+    throw new Error('No complete vocabulary entries in AI response')
+  }
+
+  const recovered = `${raw.slice(arrayStart, lastObjectEnd + 1)}]`
+  return JSON.parse(recovered) as ExtractedVocabulary[]
 }

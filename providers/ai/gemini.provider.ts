@@ -18,7 +18,13 @@ export class GeminiProvider extends BaseAIProvider {
     base64: string,
     mimeType: string,
   ): Promise<ExtractedVocabulary[]> {
-    const model = this.client.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    const model = this.client.getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      generationConfig: {
+        maxOutputTokens: 8192,
+        responseMimeType: 'application/json',
+      },
+    })
     const result = await model.generateContent([
       EXTRACT_VOCABULARY_PROMPT,
       { inlineData: { mimeType, data: base64 } },
