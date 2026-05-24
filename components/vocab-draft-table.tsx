@@ -2,6 +2,7 @@
 
 import { Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { Fragment } from 'react'
 
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -16,12 +17,19 @@ import {
 } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 
-import type { DraftStatus, DraftVocabulary } from '~/types/vocab-draft'
+import { VocabDraftConflictPanel } from './vocab-draft-conflict-panel'
+
+import type {
+  ConflictAction,
+  DraftStatus,
+  DraftVocabulary,
+} from '~/types/vocab-draft'
 
 interface VocabDraftTableProps {
   rows: DraftVocabulary[]
   onUpdate: (id: string, field: keyof DraftVocabulary, value: string) => void
   onDelete: (id: string) => void
+  onResolveConflict: (id: string, action: ConflictAction) => void
 }
 
 const COLUMN_FIELDS: { field: keyof DraftVocabulary; minWidth: string }[] = [
@@ -38,8 +46,7 @@ const EDITABLE_FIELDS = new Set<keyof DraftVocabulary>(
 )
 
 function rowBg(status?: DraftStatus): string {
-  if (status === 'duplicate') return 'bg-muted/40 opacity-60'
-  if (status === 'modified') return 'bg-amber-50/40 dark:bg-amber-950/20'
+  if (status === 'conflict') return 'bg-indigo-50/30 dark:bg-indigo-950/20'
   return ''
 }
 
@@ -51,23 +58,13 @@ function StatusBadge({
   t: ReturnType<typeof useTranslations>
 }): React.ReactNode {
   if (!status || status === 'new') return null
-  if (status === 'duplicate')
-    return (
-      <Badge
-        variant="secondary"
-        className="shrink-0 cursor-default text-[10px]"
-        title={t('duplicateTitle')}
-      >
-        {t('duplicateBadge')}
-      </Badge>
-    )
   return (
     <Badge
       variant="outline"
-      className="shrink-0 cursor-default border-amber-500 text-[10px] text-amber-600"
-      title={t('modifiedTitle')}
+      className="shrink-0 cursor-default border-indigo-500 text-[10px] text-indigo-600 dark:text-indigo-400"
+      title={t('conflictTitle')}
     >
-      {t('modifiedBadge')}
+      {t('conflictBadge')}
     </Badge>
   )
 }
@@ -76,6 +73,7 @@ export function VocabDraftTable({
   rows,
   onUpdate,
   onDelete,
+  onResolveConflict,
 }: VocabDraftTableProps): React.ReactNode {
   const t = useTranslations('Import')
 
@@ -87,6 +85,8 @@ export function VocabDraftTable({
     example: t('colExample'),
     description: t('colDescription'),
   }
+
+  const visibleRows = rows.filter((v) => v.status !== 'duplicate')
 
   return (
     <div className="border-border rounded-lg border">
@@ -103,39 +103,65 @@ export function VocabDraftTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((v) => (
-            <TableRow key={v._id} className={cn(rowBg(v.status))}>
-              <TableCell className="p-1">
-                <StatusBadge status={v.status} t={t} />
-              </TableCell>
-              {COLUMN_FIELDS.map((c) => (
-                <TableCell key={String(c.field)} className="p-1">
-                  <Input
-                    value={String(v[c.field] ?? '')}
-                    onChange={(e) => {
-                      if (EDITABLE_FIELDS.has(c.field)) {
-                        onUpdate(
-                          v._id,
-                          c.field as keyof DraftVocabulary,
-                          e.target.value,
-                        )
-                      }
-                    }}
-                    className="focus:bg-background h-8 border-transparent bg-transparent px-2 focus:border-inherit"
-                  />
+          {visibleRows.map((v) => (
+            <Fragment key={v._id}>
+              <TableRow
+                className={cn(
+                  rowBg(v.status),
+                  v.status === 'conflict' && 'border-b-0',
+                )}
+              >
+                <TableCell className="p-1 align-top">
+                  <StatusBadge status={v.status} t={t} />
                 </TableCell>
-              ))}
-              <TableCell className="p-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-destructive h-8 w-8"
-                  onClick={() => onDelete(v._id)}
+                {COLUMN_FIELDS.map((c) => (
+                  <TableCell key={String(c.field)} className="p-1 align-top">
+                    <Input
+                      value={String(v[c.field] ?? '')}
+                      onChange={(e) => {
+                        if (EDITABLE_FIELDS.has(c.field)) {
+                          onUpdate(
+                            v._id,
+                            c.field as keyof DraftVocabulary,
+                            e.target.value,
+                          )
+                        }
+                      }}
+                      className="focus:bg-background h-8 border-transparent bg-transparent px-2 focus:border-inherit"
+                    />
+                  </TableCell>
+                ))}
+                <TableCell className="p-1 align-top">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive h-8 w-8"
+                    onClick={() => onDelete(v._id)}
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </TableCell>
+              </TableRow>
+              {v.status === 'conflict' && (
+                <TableRow
+                  key={`${v._id}-conflict`}
+                  className={cn(
+                    rowBg('conflict'),
+                    'border-t-0 hover:bg-transparent',
+                  )}
                 >
-                  <Trash2 size={14} />
-                </Button>
-              </TableCell>
-            </TableRow>
+                  <TableCell
+                    colSpan={COLUMN_FIELDS.length + 2}
+                    className="px-1 pt-0 pb-1"
+                  >
+                    <VocabDraftConflictPanel
+                      draft={v}
+                      onResolve={onResolveConflict}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+            </Fragment>
           ))}
         </TableBody>
       </Table>

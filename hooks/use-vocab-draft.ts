@@ -7,27 +7,22 @@ import { useBulkCreateVocabularies } from '~/hooks/use-vocabularies'
 import { lessonsService } from '~/services/lessons.service'
 import { vocabulariesService } from '~/services/vocabularies.service'
 
-import type { DraftStatus, DraftVocabulary } from '~/types/vocab-draft'
+import type { ConflictAction, DraftVocabulary } from '~/types/vocab-draft'
 
 type VocabInput = Omit<
   DraftVocabulary,
-  '_id' | '_dbId' | 'status' | '_dbSnapshot'
+  '_id' | '_dbId' | 'status' | '_dbConflicts' | 'conflictAction'
 >
 
-const CONTENT_FIELDS = [
-  'word_type',
-  'phonetic',
-  'meaning',
-  'example',
-  'description',
-] as const
+const exactKey = (
+  word: string,
+  wordType: string | null,
+  meaning: string | null,
+): string =>
+  `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}|${(meaning ?? '').trim().toLowerCase()}`
 
-function isDifferentFromDb(draft: DraftVocabulary): boolean {
-  if (!draft._dbSnapshot) return false
-  return CONTENT_FIELDS.some(
-    (f) => (draft[f] ?? '').trim() !== (draft._dbSnapshot![f] ?? '').trim(),
-  )
-}
+const wordTypeKey = (word: string, wordType: string | null): string =>
+  `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}`
 
 export interface UseVocabDraftReturn {
   rows: DraftVocabulary[]
@@ -38,7 +33,7 @@ export interface UseVocabDraftReturn {
   isCheckingDuplicates: boolean
   newCount: number
   dupCount: number
-  modCount: number
+  conflictCount: number
   canSave: boolean
   setLessonId: (id: string) => void
   setIsNewLesson: (v: boolean) => void
@@ -47,6 +42,7 @@ export interface UseVocabDraftReturn {
   update: (id: string, field: keyof DraftVocabulary, value: string) => void
   remove: (id: string) => void
   add: () => void
+  resolveConflict: (id: string, action: ConflictAction) => void
   save: () => Promise<boolean>
   reset: () => void
 }
@@ -65,7 +61,7 @@ export function useVocabDraft(): UseVocabDraftReturn {
     const drafts: DraftVocabulary[] = vocabs.map((v) => ({
       ...v,
       _id: crypto.randomUUID(),
-      status: 'new' as DraftStatus,
+      status: 'new',
     }))
     setRows(drafts)
 
@@ -74,51 +70,47 @@ export function useVocabDraft(): UseVocabDraftReturn {
       const words = drafts.map((d) => d.word.trim()).filter(Boolean)
       const existing = await vocabulariesService.findByWords(words)
 
-      if (existing.length > 0) {
-        const dbKey = (
-          word: string,
-          wordType: string | null,
-          meaning: string | null,
-        ) =>
-          `${word.trim().toLowerCase()}|${(wordType ?? '').trim().toLowerCase()}|${(meaning ?? '').trim().toLowerCase()}`
+      if (existing.length === 0) return
 
-        const existingMap = new Map(
-          existing.map((e) => [
-            dbKey(e.word, e.word_type ?? null, e.meaning ?? null),
-            e,
-          ]),
-        )
+      const exactMap = new Map(
+        existing.map((e) => [
+          exactKey(e.word, e.word_type ?? null, e.meaning ?? null),
+          e,
+        ]),
+      )
 
-        setRows((prev) =>
-          prev.map((draft) => {
-            const match = existingMap.get(
-              dbKey(draft.word, draft.word_type, draft.meaning),
-            )
-            if (!match) return draft
-            const snapshot: Omit<
-              DraftVocabulary,
-              '_id' | '_dbId' | 'status' | '_dbSnapshot'
-            > = {
-              word: match.word,
-              word_type: match.word_type ?? '',
-              phonetic: match.phonetic ?? '',
-              meaning: match.meaning,
-              example: match.example ?? '',
-              description: match.description ?? '',
-            }
-            const draftWithSnapshot = { ...draft, _dbSnapshot: snapshot }
-            const autoStatus: DraftStatus = isDifferentFromDb(draftWithSnapshot)
-              ? 'modified'
-              : 'duplicate'
+      const wtGroupMap = new Map<string, typeof existing>()
+      for (const e of existing) {
+        const k = wordTypeKey(e.word, e.word_type ?? null)
+        const group = wtGroupMap.get(k) ?? []
+        group.push(e)
+        wtGroupMap.set(k, group)
+      }
+
+      setRows((prev) =>
+        prev.map((draft) => {
+          if (
+            exactMap.has(exactKey(draft.word, draft.word_type, draft.meaning))
+          ) {
+            return { ...draft, status: 'duplicate' }
+          }
+
+          const wtMatches =
+            wtGroupMap.get(wordTypeKey(draft.word, draft.word_type)) ?? []
+          if (wtMatches.length > 0) {
             return {
               ...draft,
-              _dbId: match.id,
-              status: autoStatus,
-              _dbSnapshot: snapshot,
+              status: 'conflict',
+              _dbConflicts: wtMatches.map((e) => ({
+                id: e.id,
+                meaning: e.meaning,
+              })),
             }
-          }),
-        )
-      }
+          }
+
+          return draft
+        }),
+      )
     } finally {
       setIsCheckingDuplicates(false)
     }
@@ -130,14 +122,7 @@ export function useVocabDraft(): UseVocabDraftReturn {
     value: string,
   ): void {
     setRows((prev) =>
-      prev.map((v) => {
-        if (v._id !== id) return v
-        const updated = { ...v, [field]: value }
-        if (updated.status === 'duplicate' || updated.status === 'modified') {
-          updated.status = isDifferentFromDb(updated) ? 'modified' : 'duplicate'
-        }
-        return updated
-      }),
+      prev.map((v) => (v._id === id ? { ...v, [field]: value } : v)),
     )
   }
 
@@ -161,6 +146,22 @@ export function useVocabDraft(): UseVocabDraftReturn {
     ])
   }
 
+  function resolveConflict(id: string, action: ConflictAction): void {
+    setRows((prev) =>
+      prev.map((v) => {
+        if (v._id !== id) return v
+        if (v.conflictAction === action) {
+          return { ...v, conflictAction: undefined, _dbId: undefined }
+        }
+        const dbId =
+          action === 'update_existing'
+            ? (v._dbConflicts?.[0]?.id ?? undefined)
+            : undefined
+        return { ...v, conflictAction: action, _dbId: dbId }
+      }),
+    )
+  }
+
   async function save(): Promise<boolean> {
     setIsSavingState(true)
     try {
@@ -169,11 +170,19 @@ export function useVocabDraft(): UseVocabDraftReturn {
             .id
         : lessonId
 
-      const toInsert = rows.filter(
-        (v) => v.word.trim() && v.status !== 'duplicate',
+      const newWords = rows.filter(
+        (v) =>
+          v.word.trim() &&
+          (v.status === 'new' ||
+            (v.status === 'conflict' && v.conflictAction === 'create_new')),
       )
-      const newWords = toInsert.filter((v) => v.status === 'new')
-      const modifiedWords = toInsert.filter((v) => v.status === 'modified')
+      const toUpdate = rows.filter(
+        (v) =>
+          v.word.trim() &&
+          v.status === 'conflict' &&
+          v.conflictAction === 'update_existing' &&
+          !!v._dbId,
+      )
 
       let savedCount = 0
 
@@ -192,7 +201,7 @@ export function useVocabDraft(): UseVocabDraftReturn {
         savedCount += newWords.length
       }
 
-      for (const v of modifiedWords) {
+      for (const v of toUpdate) {
         if (!v._dbId) continue
         await vocabulariesService.update(v._dbId, {
           meaning: v.meaning.trim(),
@@ -205,7 +214,10 @@ export function useVocabDraft(): UseVocabDraftReturn {
       }
 
       const skipped = rows.filter(
-        (v) => v.word.trim() && v.status === 'duplicate',
+        (v) =>
+          v.word.trim() &&
+          (v.status === 'duplicate' ||
+            (v.status === 'conflict' && !v.conflictAction)),
       ).length
 
       toast.success(
@@ -229,13 +241,22 @@ export function useVocabDraft(): UseVocabDraftReturn {
     setNewLessonName('')
   }
 
-  const newCount = rows.filter(
-    (v) => v.word.trim() && v.status !== 'duplicate',
-  ).length
+  const newCount = rows.filter((v) => {
+    if (!v.word.trim()) return false
+    if (v.status === 'new') return true
+    if (v.status === 'conflict')
+      return (
+        v.conflictAction === 'create_new' ||
+        v.conflictAction === 'update_existing'
+      )
+    return false
+  }).length
   const dupCount = rows.filter(
     (v) => v.word.trim() && v.status === 'duplicate',
   ).length
-  const modCount = rows.filter((v) => v.status === 'modified').length
+  const conflictCount = rows.filter(
+    (v) => v.word.trim() && v.status === 'conflict' && !v.conflictAction,
+  ).length
   const hasLesson = isNewLesson ? !!newLessonName.trim() : !!lessonId
 
   return {
@@ -247,7 +268,7 @@ export function useVocabDraft(): UseVocabDraftReturn {
     isCheckingDuplicates,
     newCount,
     dupCount,
-    modCount,
+    conflictCount,
     canSave: newCount > 0 && hasLesson,
     setLessonId,
     setIsNewLesson,
@@ -256,6 +277,7 @@ export function useVocabDraft(): UseVocabDraftReturn {
     update,
     remove,
     add,
+    resolveConflict,
     save,
     reset,
   }

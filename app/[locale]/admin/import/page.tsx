@@ -40,6 +40,9 @@ export default function ImportPage() {
           vocabularies={flow.vocabularies}
           isSaving={flow.isSaving}
           isCheckingDuplicates={flow.isCheckingDuplicates}
+          newCount={flow.newCount}
+          dupCount={flow.dupCount}
+          conflictCount={flow.conflictCount}
           lessonId={flow.lessonId}
           isNewLesson={flow.isNewLesson}
           newLessonName={flow.newLessonName}
@@ -49,6 +52,7 @@ export default function ImportPage() {
           onUpdate={flow.updateVocabulary}
           onDelete={flow.deleteVocabulary}
           onAdd={flow.addVocabulary}
+          onResolveConflict={flow.resolveConflict}
           onConfirm={flow.confirm}
           onBack={flow.reset}
         />

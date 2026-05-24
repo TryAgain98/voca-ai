@@ -5,17 +5,21 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
+import { VocabDraftDuplicateNotice } from '~/components/vocab-draft-duplicate-notice'
 import { VocabDraftTable } from '~/components/vocab-draft-table'
 import { cn } from '~/lib/utils'
 
 import { LessonSelector } from './lesson-selector'
 
-import type { DraftVocabulary } from '~/types/vocab-draft'
+import type { ConflictAction, DraftVocabulary } from '~/types/vocab-draft'
 
 interface VocabularyEditorProps {
   vocabularies: DraftVocabulary[]
   isSaving: boolean
   isCheckingDuplicates: boolean
+  newCount: number
+  dupCount: number
+  conflictCount: number
   lessonId: string
   isNewLesson: boolean
   newLessonName: string
@@ -25,6 +29,7 @@ interface VocabularyEditorProps {
   onUpdate: (id: string, field: keyof DraftVocabulary, value: string) => void
   onDelete: (id: string) => void
   onAdd: () => void
+  onResolveConflict: (id: string, action: ConflictAction) => void
   onConfirm: () => void
   onBack: () => void
 }
@@ -33,6 +38,8 @@ export function VocabularyEditor({
   vocabularies,
   isSaving,
   isCheckingDuplicates,
+  newCount,
+  conflictCount,
   lessonId,
   isNewLesson,
   newLessonName,
@@ -42,6 +49,7 @@ export function VocabularyEditor({
   onUpdate,
   onDelete,
   onAdd,
+  onResolveConflict,
   onConfirm,
   onBack,
 }: VocabularyEditorProps) {
@@ -61,14 +69,6 @@ export function VocabularyEditor({
   }, [])
 
   const hasLesson = isNewLesson ? !!newLessonName.trim() : !!lessonId
-
-  const newCount = vocabularies.filter(
-    (v) => v.word.trim() && v.status !== 'duplicate',
-  ).length
-  const dupCount = vocabularies.filter(
-    (v) => v.word.trim() && v.status === 'duplicate',
-  ).length
-  const modCount = vocabularies.filter((v) => v.status === 'modified').length
 
   return (
     <div className="flex flex-col gap-3">
@@ -127,9 +127,9 @@ export function VocabularyEditor({
               {t('checkingDuplicates')}
             </span>
           )}
-          {!isCheckingDuplicates && dupCount > 0 && (
-            <span className="text-muted-foreground text-xs">
-              {t('duplicateStats', { dupCount, modCount, newCount })}
+          {!isCheckingDuplicates && conflictCount > 0 && (
+            <span className="text-xs text-indigo-500">
+              {t('conflictStats', { conflictCount })}
             </span>
           )}
         </div>
@@ -139,10 +139,13 @@ export function VocabularyEditor({
         </Button>
       </div>
 
+      <VocabDraftDuplicateNotice rows={vocabularies} />
+
       <VocabDraftTable
         rows={vocabularies}
         onUpdate={onUpdate}
         onDelete={onDelete}
+        onResolveConflict={onResolveConflict}
       />
     </div>
   )

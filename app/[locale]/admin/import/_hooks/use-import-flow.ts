@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 import { useVocabDraft } from '~/hooks/use-vocab-draft'
 
-import type { DraftVocabulary } from '~/types/vocab-draft'
+import type { ConflictAction, DraftVocabulary } from '~/types/vocab-draft'
 
 export type { DraftStatus, DraftVocabulary } from '~/types/vocab-draft'
 
@@ -21,6 +21,9 @@ interface UseImportFlowReturn {
   vocabularies: DraftVocabulary[]
   isSaving: boolean
   isCheckingDuplicates: boolean
+  newCount: number
+  dupCount: number
+  conflictCount: number
   addImages: (files: File[]) => void
   removeImage: (index: number) => void
   setLessonId: (id: string) => void
@@ -33,6 +36,7 @@ interface UseImportFlowReturn {
   ) => void
   deleteVocabulary: (id: string) => void
   addVocabulary: () => void
+  resolveConflict: (id: string, action: ConflictAction) => void
   extract: () => Promise<void>
   confirm: () => Promise<void>
   reset: () => void
@@ -81,7 +85,10 @@ export function useImportFlow(): UseImportFlowReturn {
       })
       if (!res.ok) throw new Error('Extraction failed')
       const { vocabularies: items } = (await res.json()) as {
-        vocabularies: Omit<DraftVocabulary, '_id' | 'status' | '_dbSnapshot'>[]
+        vocabularies: Omit<
+          DraftVocabulary,
+          '_id' | 'status' | '_dbConflicts' | 'conflictAction'
+        >[]
       }
 
       await vocabDraft.initialize(items)
@@ -118,6 +125,9 @@ export function useImportFlow(): UseImportFlowReturn {
     newLessonName: vocabDraft.newLessonName,
     isSaving: vocabDraft.isSaving,
     isCheckingDuplicates: vocabDraft.isCheckingDuplicates,
+    newCount: vocabDraft.newCount,
+    dupCount: vocabDraft.dupCount,
+    conflictCount: vocabDraft.conflictCount,
     addImages,
     removeImage,
     setLessonId: vocabDraft.setLessonId,
@@ -126,6 +136,7 @@ export function useImportFlow(): UseImportFlowReturn {
     updateVocabulary: vocabDraft.update,
     deleteVocabulary: vocabDraft.remove,
     addVocabulary: vocabDraft.add,
+    resolveConflict: vocabDraft.resolveConflict,
     extract,
     confirm,
     reset,

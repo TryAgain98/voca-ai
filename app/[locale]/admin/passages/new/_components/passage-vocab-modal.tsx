@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
+import { VocabDraftDuplicateNotice } from '~/components/vocab-draft-duplicate-notice'
 import { VocabDraftTable } from '~/components/vocab-draft-table'
 import { useVocabDraft } from '~/hooks/use-vocab-draft'
 import { LessonSelector } from '~admin/import/_components/lesson-selector'
@@ -70,12 +71,10 @@ export function PassageVocabModal({
                     {tImport('checkingDuplicates')}
                   </span>
                 )}
-                {!draft.isCheckingDuplicates && draft.dupCount > 0 && (
-                  <span className="text-muted-foreground text-xs">
-                    {tImport('duplicateStats', {
-                      dupCount: draft.dupCount,
-                      modCount: draft.modCount,
-                      newCount: draft.newCount,
+                {!draft.isCheckingDuplicates && draft.conflictCount > 0 && (
+                  <span className="text-xs text-indigo-500">
+                    {tImport('conflictStats', {
+                      conflictCount: draft.conflictCount,
                     })}
                   </span>
                 )}
@@ -96,10 +95,13 @@ export function PassageVocabModal({
           </DialogHeader>
 
           <div className="min-h-0 flex-1 overflow-auto px-6 py-4">
+            <VocabDraftDuplicateNotice rows={draft.rows} />
+
             <VocabDraftTable
               rows={draft.rows}
               onUpdate={draft.update}
               onDelete={draft.remove}
+              onResolveConflict={draft.resolveConflict}
             />
           </div>
 

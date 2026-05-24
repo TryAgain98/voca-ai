@@ -589,7 +589,16 @@
     "duplicateBadge": "Giống DB",
     "duplicateTitle": "Nội dung giống hệt DB — sẽ bỏ qua, không lưu lại",
     "modifiedBadge": "AI cập nhật",
-    "modifiedTitle": "AI phát hiện nội dung khác DB — sẽ tự động cập nhật. Bạn có thể sửa thêm trước khi lưu"
+    "modifiedTitle": "AI phát hiện nội dung khác DB — sẽ tự động cập nhật. Bạn có thể sửa thêm trước khi lưu",
+    "conflictBadge": "Trùng từ+loại",
+    "conflictTitle": "Từ và loại từ đã có trong DB với nghĩa khác — bạn cần quyết định",
+    "conflictAiMeaning": "Nghĩa AI:",
+    "conflictExistingMeaning": "Trong DB:",
+    "conflictActionCreateNew": "Lưu thêm",
+    "conflictActionUpdate": "Cập nhật DB",
+    "conflictSkipHint": "Chưa chọn — sẽ bỏ qua",
+    "conflictStats": "— {conflictCount} cần xử lý",
+    "duplicateNotice": "Bỏ qua {count} từ đã có trong DB (trùng hoàn toàn):"
   },
   "Passages": {
     "title": "Đoạn văn luyện nói",

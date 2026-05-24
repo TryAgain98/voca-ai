@@ -1,4 +1,11 @@
-export type DraftStatus = 'new' | 'duplicate' | 'modified'
+export type DraftStatus = 'new' | 'duplicate' | 'conflict'
+
+export type ConflictAction = 'create_new' | 'update_existing'
+
+export interface ConflictEntry {
+  id: string
+  meaning: string
+}
 
 export interface DraftVocabulary {
   _id: string
@@ -10,8 +17,6 @@ export interface DraftVocabulary {
   example: string
   description: string
   status?: DraftStatus
-  _dbSnapshot?: Omit<
-    DraftVocabulary,
-    '_id' | '_dbId' | 'status' | '_dbSnapshot'
-  >
+  conflictAction?: ConflictAction
+  _dbConflicts?: ConflictEntry[]
 }

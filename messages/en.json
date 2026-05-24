@@ -589,7 +589,16 @@
     "duplicateBadge": "Same as DB",
     "duplicateTitle": "Content identical to DB — will be skipped, not saved",
     "modifiedBadge": "AI updated",
-    "modifiedTitle": "AI detected different content from DB — will auto update. You can edit before saving"
+    "modifiedTitle": "AI detected different content from DB — will auto update. You can edit before saving",
+    "conflictBadge": "Word conflict",
+    "conflictTitle": "Same word & type already exists in DB with a different meaning — choose what to do",
+    "conflictAiMeaning": "AI meaning:",
+    "conflictExistingMeaning": "In DB:",
+    "conflictActionCreateNew": "Save as new",
+    "conflictActionUpdate": "Update DB entry",
+    "conflictSkipHint": "Not selected — will be skipped",
+    "conflictStats": "— {conflictCount} need decision",
+    "duplicateNotice": "Skipped {count} words already in DB (identical):"
   },
   "Passages": {
     "title": "Speaking passages",
