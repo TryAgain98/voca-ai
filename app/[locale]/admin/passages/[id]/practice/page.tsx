@@ -97,7 +97,7 @@ export default function PracticePage() {
           {passage.time_good && (
             <span className="text-xs text-[#8a8f98]">
               <span className="text-emerald-400">
-                {t('timeGood')}: {passage.time_good}s
+                {t('timeLabel')}: {passage.time_good}s
               </span>
             </span>
           )}

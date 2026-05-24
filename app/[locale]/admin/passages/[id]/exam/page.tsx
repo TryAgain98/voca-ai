@@ -3,6 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import {
   ArrowLeft,
+  Clock,
   Loader2,
   Mic,
   Play,
@@ -73,7 +74,7 @@ export default function ExamPage() {
             </div>
           )}
         </div>
-        <div className="pl-11">
+        <div className="flex items-center gap-2 pl-11">
           <span
             className="rounded-full border px-2 py-0.5 text-[10px] font-[510] text-orange-400"
             style={{
@@ -83,6 +84,14 @@ export default function ExamPage() {
           >
             {t('examMode')}
           </span>
+          {passage.time_good && (
+            <span className="inline-flex items-center gap-1 text-xs text-[#8a8f98]">
+              <Clock size={12} className="text-emerald-400" />
+              <span className="text-emerald-400">
+                {t('timeLabel')}: {passage.time_good}s
+              </span>
+            </span>
+          )}
         </div>
       </div>
 
