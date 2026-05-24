@@ -41,11 +41,19 @@ async function fetchDictEntry(word: string): Promise<DictEntry | null> {
       }>
     }>
     const entry = data[0]
-    const defObj = entry?.meanings?.[0]?.definitions?.[0]
+    let defObj: { definition?: string; example?: string } | undefined
+    for (const meaning of entry?.meanings ?? []) {
+      defObj = meaning.definitions?.find((d) => d.definition)
+      if (defObj) break
+    }
+    if (!defObj?.definition) {
+      dictCache.set(key, null)
+      return null
+    }
     const result: DictEntry = {
       phonetic: entry?.phonetic,
-      definition: defObj?.definition ?? '',
-      example: defObj?.example,
+      definition: defObj.definition,
+      example: defObj.example,
     }
     dictCache.set(key, result)
     return result
@@ -70,6 +78,7 @@ export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   function handleOpenChange(open: boolean) {
+    if (open) tts.speak()
     if (!open || vocab || dictEntry !== undefined) return
     setIsLoading(true)
     fetchDictEntry(word).then((entry) => {

@@ -5,7 +5,9 @@
 - **Backgrounds**: Marketing: `#08090a` | Panel: `#0f1011` | Surface: `#191a1b` | Hover: `#28282c`.
 - **Text**: Primary: `#f7f8f8` (Near-white) | Secondary: `#d0d6e0` (Gray) | Muted: `#8a8f98`.
 - **Accents**: Brand: `#5e6ad2` | Active/Links: `#7170ff` | Hover: `#828fff`.
-- **Borders**: Subtle: `rgba(255,255,255,0.05)` | Standard: `rgba(255,255,255,0.08)`.
+- **Borders (dark surface)**: Subtle: `rgba(255,255,255,0.05)` | Standard: `rgba(255,255,255,0.08)` | Emphasis: `rgba(255,255,255,0.15)`.
+- **Borders (light surface)**: Subtle: `rgba(0,0,0,0.06)` | Standard: `rgba(0,0,0,0.1)` | Emphasis: `rgba(0,0,0,0.16)`.
+- **Text (light surface)**: Primary: `#0f1011` | Secondary: `#28282c` | Muted: `#6b7180`.
 - **Status**: Success: `#10b981` (Emerald).
 
 ## Typography (Inter Variable)
@@ -26,8 +28,9 @@
 ## ✅ Do's & ❌ Don'ts
 
 - **DO**: Use weight 510 for UI labels/navigation.
-- **DO**: Use semi-transparent white borders on dark surfaces.
+- **DO**: Use semi-transparent white borders on dark surfaces. Use semi-transparent black borders on light surfaces.
 - **DON'T**: Use pure white (`#ffffff`) for text or solid colored bgs for buttons (except Primary CTA).
+- **DON'T**: Use `rgba(255,255,255,N)` borders on light surfaces — they are invisible.
 - **DON'T**: Use positive letter-spacing on display headings.
 - **DON'T**: Introduce warm colors; keep it cool/achromatic.
 
