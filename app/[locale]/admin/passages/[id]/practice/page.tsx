@@ -59,7 +59,7 @@ export default function PracticePage() {
               <ArrowLeft size={16} />
             </Button>
           </Link>
-          <h1 className="min-w-0 flex-1 truncate text-sm font-[510] text-[#f7f8f8]">
+          <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-[510]">
             {passage.title}
           </h1>
           <div className="flex shrink-0 items-center gap-2">

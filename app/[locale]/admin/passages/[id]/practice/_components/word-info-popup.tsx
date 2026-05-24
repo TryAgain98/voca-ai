@@ -1,5 +1,6 @@
 'use client'
 
+import { Loader2, Volume2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -8,6 +9,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover'
+import { useTTS } from '~/hooks/use-tts'
+import { cn } from '~/lib/utils'
 
 import type { Vocabulary } from '~/types'
 
@@ -60,6 +63,7 @@ interface WordInfoPopupProps {
 
 export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
   const t = useTranslations('Passages')
+  const tts = useTTS(word)
   const [dictEntry, setDictEntry] = useState<DictEntry | null | undefined>(
     undefined,
   )
@@ -91,7 +95,26 @@ export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
         align="start"
       >
         <div className="flex flex-col gap-2">
-          <span className="text-base font-semibold text-[#f7f8f8]">{word}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-base font-semibold text-[#f7f8f8]">
+              {word}
+            </span>
+            <button
+              onClick={tts.speak}
+              className={cn(
+                'shrink-0 rounded p-0.5 transition-colors',
+                tts.isSpeaking
+                  ? 'text-[#7170ff]'
+                  : 'text-[#8a8f98] hover:text-[#d0d6e0]',
+              )}
+            >
+              {tts.isLoading ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Volume2 size={14} />
+              )}
+            </button>
+          </div>
 
           {phonetic && (
             <span className="font-mono text-xs text-[#7170ff]">{phonetic}</span>

@@ -38,6 +38,8 @@ function tokenizeWords(text: string): string[] {
   return text.match(/\b[\w']+\b/g) ?? []
 }
 
+const MIN_MATCH_SCORE = 45
+
 function alignWords(expected: string[], transcript: string[]): WordResult[] {
   const m = expected.length
   const n = transcript.length
@@ -47,8 +49,11 @@ function alignWords(expected: string[], transcript: string[]): WordResult[] {
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
+      const wordScore = scoreWord(expected[i - 1], transcript[j - 1])
+      // Reject near-zero matches to avoid cascade alignment errors when ASR
+      // drops or mishears a word — prefer marking it missed over a bad match.
       const matchScore =
-        dp[i - 1][j - 1] + scoreWord(expected[i - 1], transcript[j - 1])
+        wordScore >= MIN_MATCH_SCORE ? dp[i - 1][j - 1] + wordScore : -1
       const missScore = dp[i - 1][j]
       const skipScore = dp[i][j - 1]
 
