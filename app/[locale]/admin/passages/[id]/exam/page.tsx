@@ -162,7 +162,7 @@ export default function ExamPage() {
       {exam.state === 'done' && exam.wordResults && (
         <>
           <ExamResults
-            segments={passage.segments}
+            content={passage.content}
             wordResults={exam.wordResults}
             score={exam.score}
             elapsed={exam.elapsed}

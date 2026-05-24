@@ -1,7 +1,6 @@
 import type {
   ExtractedVocabulary,
   PassageAnalysis,
-  PassageSegment,
   SuggestedPassageVocab,
   TranslationDirection,
 } from './types'
@@ -95,11 +94,9 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 - content: the exact original English passage text (copy verbatim if provided as text; transcribe faithfully if from image)
 - title: a short English title (5-10 words) summarizing the passage
 - translation: full Vietnamese translation of the passage (natural, fluent)
-- summary: 1-2 sentence Vietnamese summary of the passage's main purpose/topic
 - time_good: estimated seconds for a fluent speaker to read aloud clearly (benchmark: ~140 wpm)
 - time_ok: estimated seconds for an intermediate learner (~100 wpm)
 - time_acceptable: estimated seconds for a slow learner (~70 wpm)
-- segments: split the passage into natural spoken chunks (by sentence or clause at commas/semicolons). Each chunk: {"id": "s1", "text": "..."}
 - suggested_vocabulary: 8-12 interesting or challenging words from the passage. Each: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning","example":"natural English sentence","description":"short Vietnamese usage note"}
 
 Return ONLY valid JSON, no markdown fences, no explanation.`
@@ -116,7 +113,6 @@ export function parsePassageAnalysis(raw: string): PassageAnalysis {
   const cleaned = cleanJson(raw)
   const parsed = JSON.parse(cleaned) as Partial<PassageAnalysis>
 
-  const segments = (parsed.segments ?? []) as PassageSegment[]
   const suggested = (parsed.suggested_vocabulary ??
     []) as SuggestedPassageVocab[]
 
@@ -124,11 +120,9 @@ export function parsePassageAnalysis(raw: string): PassageAnalysis {
     content: String(parsed.content ?? ''),
     title: String(parsed.title ?? ''),
     translation: String(parsed.translation ?? ''),
-    summary: String(parsed.summary ?? ''),
     time_good: Number(parsed.time_good ?? 0),
     time_ok: Number(parsed.time_ok ?? 0),
     time_acceptable: Number(parsed.time_acceptable ?? 0),
-    segments,
     suggested_vocabulary: suggested,
   }
 }

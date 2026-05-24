@@ -112,15 +112,13 @@ export interface PassageSegment {
 
 export interface Passage {
   id: string
-  user_id: string
+  created_by: string
   title: string
   content: string
   translation: string | null
-  summary: string | null
   time_good: number | null
   time_ok: number | null
   time_acceptable: number | null
-  segments: PassageSegment[]
   created_at: string
   updated_at: string
 }

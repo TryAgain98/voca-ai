@@ -4,6 +4,7 @@ import { Volume2 } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
+import { segmentsFromContent } from '~/lib/passage-segments'
 import { cn } from '~/lib/utils'
 
 import { WordInfoPopup } from './word-info-popup'
@@ -124,16 +125,18 @@ function SegmentBlock({
 }
 
 interface PassageTextProps {
-  segments: PassageSegment[]
+  content: string
   vocabMap: Map<string, Vocabulary>
   wordResults: WordResult[] | null
 }
 
 export function PassageText({
-  segments,
+  content,
   vocabMap,
   wordResults,
 }: PassageTextProps) {
+  const segments = useMemo(() => segmentsFromContent(content), [content])
+
   const segmentOffsets = useMemo(() => {
     const counts = segments.map(
       (seg) => (seg.text.match(/\b[\w']+\b/g) ?? []).length,

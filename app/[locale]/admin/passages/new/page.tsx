@@ -46,7 +46,6 @@ export default function NewPassagePage() {
       {flow.step === 'editing' && (
         <PassageEditStep
           title={flow.editableTitle}
-          summary={flow.editableSummary}
           translation={flow.editableTranslation}
           timeGood={flow.editableTimeGood}
           timeOk={flow.editableTimeOk}
@@ -54,7 +53,6 @@ export default function NewPassagePage() {
           suggestedVocabs={flow.suggestedVocabs}
           isSaving={flow.isSaving}
           onTitleChange={flow.setEditableTitle}
-          onSummaryChange={flow.setEditableSummary}
           onTranslationChange={flow.setEditableTranslation}
           onTimeGoodChange={flow.setEditableTimeGood}
           onTimeOkChange={flow.setEditableTimeOk}

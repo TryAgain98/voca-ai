@@ -17,8 +17,7 @@ export default function PassagesPage() {
   const { user } = useUser()
   const userId = user?.id ?? ''
 
-  const { data: passages = [], isLoading: passagesLoading } =
-    usePassages(userId)
+  const { data: passages = [], isLoading: passagesLoading } = usePassages()
   const { data: latestExams = [] } = useLatestExamsByUser(userId)
   const deletePassage = useDeletePassage()
 

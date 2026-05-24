@@ -15,11 +15,10 @@ class PassagesService extends BaseService<
     super('passages')
   }
 
-  async findByUser(userId: string): Promise<Passage[]> {
+  async findAll(): Promise<Passage[]> {
     const { data, error } = await supabase
       .from('passages')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false })
     if (error) throw error
     return data as Passage[]

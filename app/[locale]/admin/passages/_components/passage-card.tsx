@@ -47,11 +47,6 @@ export function PassageCard({ passage, onDelete }: PassageCardProps) {
           >
             {passage.title}
           </Link>
-          {passage.summary && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-[#8a8f98]">
-              {passage.summary}
-            </p>
-          )}
         </div>
         <Button
           variant="ghost"

@@ -7,11 +7,10 @@ import { passagesService } from '~/services/passages.service'
 
 import type { PassageInsert } from '~/types'
 
-export function usePassages(userId: string) {
+export function usePassages() {
   return useQuery({
-    queryKey: ['passages', userId],
-    queryFn: () => passagesService.findByUser(userId),
-    enabled: !!userId,
+    queryKey: ['passages'],
+    queryFn: () => passagesService.findAll(),
   })
 }
 

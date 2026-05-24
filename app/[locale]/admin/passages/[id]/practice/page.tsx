@@ -127,7 +127,7 @@ export default function PracticePage() {
         }}
       >
         <PassageText
-          segments={passage.segments}
+          content={passage.content}
           vocabMap={vocabMap}
           wordResults={session.wordResults}
         />

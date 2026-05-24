@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
 import { scoreBg, scoreColor, scoreLevel } from '~/lib/passage-score'
+import { segmentsFromContent } from '~/lib/passage-segments'
 import { cn } from '~/lib/utils'
 
 import type { PassageSegment, WordResult } from '~/types'
@@ -188,7 +189,7 @@ function SegmentResult({
 }
 
 interface ExamResultsProps {
-  segments: PassageSegment[]
+  content: string
   wordResults: WordResult[]
   score: number
   elapsed: number
@@ -196,7 +197,7 @@ interface ExamResultsProps {
 }
 
 export function ExamResults({
-  segments,
+  content,
   wordResults,
   score,
   elapsed,
@@ -208,6 +209,8 @@ export function ExamResults({
     benchmarkTime && elapsed > 0
       ? Math.max(0, Math.min(100, Math.round((benchmarkTime / elapsed) * 100)))
       : null
+
+  const segments = useMemo(() => segmentsFromContent(content), [content])
 
   const segmentOffsets = useMemo(() => {
     const counts = segments.map(

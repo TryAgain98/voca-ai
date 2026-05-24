@@ -14,7 +14,6 @@ import type { SuggestedPassageVocab } from '~/providers/ai/types'
 
 interface PassageEditStepProps {
   title: string
-  summary: string
   translation: string
   timeGood: number
   timeOk: number
@@ -22,7 +21,6 @@ interface PassageEditStepProps {
   suggestedVocabs: SuggestedPassageVocab[]
   isSaving: boolean
   onTitleChange: (v: string) => void
-  onSummaryChange: (v: string) => void
   onTranslationChange: (v: string) => void
   onTimeGoodChange: (v: number) => void
   onTimeOkChange: (v: number) => void
@@ -33,7 +31,6 @@ interface PassageEditStepProps {
 
 export function PassageEditStep({
   title,
-  summary,
   translation,
   timeGood,
   timeOk,
@@ -41,7 +38,6 @@ export function PassageEditStep({
   suggestedVocabs,
   isSaving,
   onTitleChange,
-  onSummaryChange,
   onTranslationChange,
   onTimeGoodChange,
   onTimeOkChange,
@@ -65,15 +61,6 @@ export function PassageEditStep({
           <Input
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-xs">{t('fieldSummary')}</Label>
-          <Textarea
-            value={summary}
-            onChange={(e) => onSummaryChange(e.target.value)}
-            className="min-h-20 resize-none text-sm"
           />
         </div>
 

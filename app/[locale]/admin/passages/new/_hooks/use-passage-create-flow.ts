@@ -23,7 +23,6 @@ interface UsePassageCreateFlowReturn {
   imagePreview: string | null
   analysis: PassageAnalysis | null
   editableTitle: string
-  editableSummary: string
   editableTranslation: string
   editableTimeGood: number
   editableTimeOk: number
@@ -34,7 +33,6 @@ interface UsePassageCreateFlowReturn {
   setText: (v: string) => void
   setImage: (file: File | null) => void
   setEditableTitle: (v: string) => void
-  setEditableSummary: (v: string) => void
   setEditableTranslation: (v: string) => void
   setEditableTimeGood: (v: number) => void
   setEditableTimeOk: (v: number) => void
@@ -59,7 +57,6 @@ export function usePassageCreateFlow(
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [analysis, setAnalysis] = useState<PassageAnalysis | null>(null)
   const [editableTitle, setEditableTitle] = useState('')
-  const [editableSummary, setEditableSummary] = useState('')
   const [editableTranslation, setEditableTranslation] = useState('')
   const [editableTimeGood, setEditableTimeGood] = useState(0)
   const [editableTimeOk, setEditableTimeOk] = useState(0)
@@ -111,7 +108,6 @@ export function usePassageCreateFlow(
 
       setAnalysis(data)
       setEditableTitle(data.title)
-      setEditableSummary(data.summary)
       setEditableTranslation(data.translation)
       setEditableTimeGood(data.time_good)
       setEditableTimeOk(data.time_ok)
@@ -129,15 +125,13 @@ export function usePassageCreateFlow(
     setIsSaving(true)
     try {
       const passage = await createPassage.mutateAsync({
-        user_id: userId,
+        created_by: userId,
         title: editableTitle.trim(),
         content: analysis.content || text.trim(),
         translation: editableTranslation.trim() || null,
-        summary: editableSummary.trim() || null,
         time_good: editableTimeGood || null,
         time_ok: editableTimeOk || null,
         time_acceptable: editableTimeAcceptable || null,
-        segments: analysis.segments,
       })
 
       toast.success('Đã lưu đoạn văn')
@@ -163,7 +157,6 @@ export function usePassageCreateFlow(
     imagePreview,
     analysis,
     editableTitle,
-    editableSummary,
     editableTranslation,
     editableTimeGood,
     editableTimeOk,
@@ -174,7 +167,6 @@ export function usePassageCreateFlow(
     setText,
     setImage,
     setEditableTitle,
-    setEditableSummary,
     setEditableTranslation,
     setEditableTimeGood,
     setEditableTimeOk,
