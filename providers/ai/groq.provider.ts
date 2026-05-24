@@ -93,6 +93,7 @@ export class GroqProvider extends BaseAIProvider {
       file,
       model: 'whisper-large-v3',
       language: 'en',
+      temperature: 0,
     })
     return transcription.text
   }

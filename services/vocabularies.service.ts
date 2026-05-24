@@ -59,6 +59,18 @@ class VocabulariesService extends BaseService<
     return data as Vocabulary[]
   }
 
+  async findByWord(word: string): Promise<Vocabulary | null> {
+    const { data, error } = await supabase
+      .from('vocabularies')
+      .select('*')
+      .ilike('word', word)
+      .is('deleted_at', null)
+      .limit(1)
+      .maybeSingle()
+    if (error) throw error
+    return data as Vocabulary | null
+  }
+
   async findByWords(words: string[]): Promise<Vocabulary[]> {
     const { data, error } = await supabase
       .from('vocabularies')

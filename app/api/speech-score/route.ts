@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 
+import { overallScore, scorePassage } from '~/lib/passage-score'
 import { GroqProvider } from '~/providers/ai'
 
 function levenshtein(a: string, b: string): number {
@@ -48,9 +49,18 @@ export async function POST(req: Request): Promise<NextResponse> {
 
     const groq = new GroqProvider()
     const transcript = await groq.transcribeAudio(audio)
-    const score = scoreTranscript(transcript, expected)
+    const wordResults = scorePassage(transcript, expected)
+    const pronunciationScore = overallScore(wordResults)
+    const score = wordResults.length
+      ? pronunciationScore
+      : scoreTranscript(transcript, expected)
 
-    return NextResponse.json({ transcript, score })
+    return NextResponse.json({
+      transcript,
+      score,
+      pronunciationScore,
+      wordResults,
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     return NextResponse.json({ error: message }, { status: 500 })

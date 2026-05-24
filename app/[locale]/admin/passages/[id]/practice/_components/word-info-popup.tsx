@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2, Volume2 } from 'lucide-react'
+import { useState } from 'react'
 
 import {
   Popover,
@@ -12,6 +13,8 @@ import { cn } from '~/lib/utils'
 
 import { useWordLookup } from '../_utils/passage-lookup-context'
 
+import type { WordDetailResponse } from '~/app/api/word-detail/route'
+
 interface WordInfoPopupProps {
   word: string
   children: React.ReactNode
@@ -19,18 +22,39 @@ interface WordInfoPopupProps {
 
 export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
   const tts = useTTS(word)
-  const { wordMap, isLoading } = useWordLookup()
-  const lookup = wordMap.get(word.toLowerCase())
+  const { wordMap, isLoading: isAiLoading } = useWordLookup()
+  const aiLookup = wordMap.get(word.toLowerCase())
+
+  const [detail, setDetail] = useState<WordDetailResponse | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
 
   function handleOpenChange(open: boolean): void {
-    if (open) tts.speak()
+    if (!open) return
+    tts.speak()
+    if (detail) return
+
+    setIsFetching(true)
+    fetch(`/api/word-detail?word=${encodeURIComponent(word)}`)
+      .then((res) =>
+        res.ok ? (res.json() as Promise<WordDetailResponse>) : null,
+      )
+      .then((data) => {
+        if (data) setDetail(data)
+      })
+      .catch(() => undefined)
+      .finally(() => setIsFetching(false))
   }
+
+  const isLoading = isFetching || (isAiLoading && !detail)
+  const ipa = detail?.ipa ?? aiLookup?.ipa
+  const meaning =
+    detail?.source === 'db' ? detail.meaning : (aiLookup?.meaning ?? null)
 
   return (
     <Popover onOpenChange={handleOpenChange}>
       <PopoverTrigger render={<span />}>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-64 p-3"
+        className="w-72 p-3"
         style={{
           background: '#191a1b',
           borderColor: 'rgba(255,255,255,0.1)',
@@ -40,9 +64,16 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
       >
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-base font-semibold text-[#f7f8f8]">
-              {word}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-semibold text-[#f7f8f8]">
+                {word}
+              </span>
+              {detail?.wordType && (
+                <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-[#8a8f98]">
+                  {detail.wordType}
+                </span>
+              )}
+            </div>
             <button
               onClick={tts.speak}
               className={cn(
@@ -67,13 +98,29 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
             </div>
           ) : (
             <>
-              {lookup?.ipa && (
-                <span className="font-mono text-xs text-[#7170ff]">
-                  {lookup.ipa}
-                </span>
+              {ipa && (
+                <span className="font-mono text-xs text-[#7170ff]">{ipa}</span>
               )}
-              {lookup?.meaning && (
-                <p className="text-sm text-[#d0d6e0]">{lookup.meaning}</p>
+              {meaning && <p className="text-sm text-[#d0d6e0]">{meaning}</p>}
+              {detail?.description && (
+                <p className="text-xs text-[#8a8f98]">{detail.description}</p>
+              )}
+              {detail?.example && (
+                <p className="text-xs text-[#8a8f98] italic">
+                  &ldquo;{detail.example}&rdquo;
+                </p>
+              )}
+              {detail?.synonyms && detail.synonyms.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {detail.synonyms.slice(0, 5).map((syn) => (
+                    <span
+                      key={syn}
+                      className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-[#8a8f98]"
+                    >
+                      {syn}
+                    </span>
+                  ))}
+                </div>
               )}
             </>
           )}

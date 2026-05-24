@@ -1,3 +1,6 @@
+import { dictionary } from 'cmu-pronouncing-dictionary'
+import { doubleMetaphone } from 'double-metaphone'
+
 import type { WordResult } from '~/types'
 
 function levenshtein(a: string, b: string): number {
@@ -21,17 +24,112 @@ function normalizeWord(w: string): string {
   return w.toLowerCase().replace(/[^a-z0-9']/g, '')
 }
 
+function normalizeDictionaryPronunciation(value: string): string {
+  return value.replace(/\d/g, '')
+}
+
+function getDictionaryPronunciations(word: string): string[] {
+  const pronunciations = new Set<string>()
+  const keys = [
+    word,
+    ...Array.from({ length: 10 }, (_, i) => `${word}(${i + 1})`),
+  ]
+
+  for (const key of keys) {
+    const pronunciation = dictionary[key as keyof typeof dictionary]
+    if (pronunciation) {
+      pronunciations.add(normalizeDictionaryPronunciation(pronunciation))
+    }
+  }
+
+  return [...pronunciations]
+}
+
+function haveSharedDictionaryPronunciation(a: string, b: string): boolean {
+  const aPronunciations = new Set(getDictionaryPronunciations(a))
+  if (aPronunciations.size === 0) return false
+
+  return getDictionaryPronunciations(b).some((pronunciation) =>
+    aPronunciations.has(pronunciation),
+  )
+}
+
+const VOWEL_PHONES = new Set([
+  'AA',
+  'AE',
+  'AH',
+  'AO',
+  'AW',
+  'AY',
+  'EH',
+  'ER',
+  'EY',
+  'IH',
+  'IY',
+  'OW',
+  'OY',
+  'UH',
+  'UW',
+])
+
+function getDictionaryVowelPatterns(word: string): string[] {
+  return getDictionaryPronunciations(word).map((pronunciation) =>
+    pronunciation
+      .split(' ')
+      .filter((phone) => VOWEL_PHONES.has(phone))
+      .join(' '),
+  )
+}
+
+function haveSharedDictionaryVowelPattern(a: string, b: string): boolean {
+  const aPatterns = new Set(getDictionaryVowelPatterns(a))
+  if (aPatterns.size === 0) return false
+
+  return getDictionaryVowelPatterns(b).some((pattern) => aPatterns.has(pattern))
+}
+
+function getPhoneticCodes(word: string): string[] {
+  return doubleMetaphone(word).filter(Boolean)
+}
+
+function haveSharedPhoneticCode(a: string, b: string): boolean {
+  const aCodes = new Set(getPhoneticCodes(a))
+  return getPhoneticCodes(b).some((code) => aCodes.has(code))
+}
+
+function normalizedLevenshteinScore(a: string, b: string): number {
+  const dist = levenshtein(a, b)
+  return Math.max(
+    0,
+    Math.round((1 - dist / Math.max(a.length, b.length)) * 100),
+  )
+}
+
 function scoreWord(expected: string, got: string): number {
   const a = normalizeWord(expected)
   const b = normalizeWord(got)
   if (!a) return 100
   if (!b) return 0
   if (a === b) return 100
-  const dist = levenshtein(a, b)
-  return Math.max(
-    0,
-    Math.round((1 - dist / Math.max(a.length, b.length)) * 100),
-  )
+
+  const textScore = normalizedLevenshteinScore(a, b)
+
+  if (haveSharedDictionaryPronunciation(a, b)) return 100
+
+  // ASR often writes a correctly pronounced word as a nearby real word
+  // (for example "spacious" -> "spaces"). Keep these as passable matches
+  // only when the spelling is still close enough to avoid broad false passes.
+  const hasFullDictionaryCoverage =
+    getDictionaryPronunciations(a).length > 0 &&
+    getDictionaryPronunciations(b).length > 0
+  const hasCompatibleVowels =
+    !hasFullDictionaryCoverage || haveSharedDictionaryVowelPattern(a, b)
+
+  if (textScore >= 60 && hasCompatibleVowels && haveSharedPhoneticCode(a, b)) {
+    return Math.max(textScore, 88)
+  }
+
+  return textScore
 }
 
 function tokenizeWords(text: string): string[] {

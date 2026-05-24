@@ -8,6 +8,12 @@ export interface PassageSpeechScore {
   pronunciationScore: number
 }
 
+interface SpeechScoreResponse {
+  transcript: string
+  wordResults?: WordResult[]
+  pronunciationScore?: number
+}
+
 export async function scorePassageAudio(
   audioBlob: Blob,
   passageContent: string,
@@ -22,12 +28,13 @@ export async function scorePassageAudio(
   })
   if (!res.ok) throw new Error('Scoring failed')
 
-  const data = (await res.json()) as { transcript: string }
-  const wordResults = scorePassage(data.transcript, passageContent)
+  const data = (await res.json()) as SpeechScoreResponse
+  const wordResults =
+    data.wordResults ?? scorePassage(data.transcript, passageContent)
 
   return {
     transcript: data.transcript,
     wordResults,
-    pronunciationScore: overallScore(wordResults),
+    pronunciationScore: data.pronunciationScore ?? overallScore(wordResults),
   }
 }
