@@ -5,17 +5,17 @@ import type {
   TranslationDirection,
 } from './types'
 
-export const EXTRACT_VOCABULARY_PROMPT = `You are an English dictionary. Extract all vocabulary words from this image.
+export const EXTRACT_VOCABULARY_PROMPT = `You are an English–Vietnamese dictionary. Extract all vocabulary words from this image.
 
 For each word, return:
 - word: the English word exactly as shown
 - word_type: part of speech (n, v, adj, adv, prep, conj, pron, etc.)
 - phonetic: IPA transcription (e.g. /riːd/) — use your dictionary knowledge if not shown in the image
-- meaning: Vietnamese meaning — use your dictionary knowledge if not shown in the image
-- example: a natural English example sentence — use your dictionary knowledge if not shown in the image
+- meaning: Vietnamese meaning (1–5 words) — give the most precise primary translation matching the word's part of speech and the context visible in the image. Be specific: prefer "khu phức hợp" over "tòa nhà" for complex (n), "tính năng" over "đặc điểm" for feature (n) in a tech context, etc. Never use an overly broad or generic translation.
+- example: a natural English example sentence consistent with the word_type — use your dictionary knowledge if not shown in the image
 - description: a short Vietnamese explanation of the word's nuance or usage, especially useful for words that are easily confused with similar words (e.g. see vs look vs watch, make vs do). Keep it under 2 sentences.
 
-Fill every field using your knowledge as an English dictionary. Never leave a field empty.
+Fill every field using your knowledge as an English–Vietnamese dictionary. Never leave a field empty.
 
 Return a JSON array in this exact format. Use ONLY double quotes for all strings. No single quotes, no markdown, no explanation:
 [
