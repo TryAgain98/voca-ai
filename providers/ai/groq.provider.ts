@@ -9,6 +9,7 @@ import {
   buildTranslationPrompt,
   buildVocabularyFillPrompt,
   parsePassageAnalysis,
+  parsePassageWordMap,
   parseVocabularyJson,
 } from './utils'
 
@@ -160,15 +161,12 @@ export class GroqProvider extends BaseAIProvider {
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       max_tokens: 8192,
       temperature: 0.1,
+      response_format: { type: 'json_object' },
       messages: [
         { role: 'user', content: buildPassageLookupPrompt(passageText) },
       ],
     })
     const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
-    const cleaned = raw
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/\s*```$/, '')
-      .trim()
-    return JSON.parse(cleaned) as PassageWordMap
+    return parsePassageWordMap(raw)
   }
 }

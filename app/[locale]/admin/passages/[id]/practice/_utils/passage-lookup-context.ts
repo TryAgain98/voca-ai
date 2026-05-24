@@ -1,14 +1,22 @@
 import { createContext, useContext } from 'react'
 
-import type { WordLookup } from '~/providers/ai'
+export interface PassageWordDetail {
+  meaning: string | null
+  ipa: string | null
+  wordType: string | null
+  example: string | null
+  synonyms: string[]
+  description: string | null
+  source: 'db' | 'ai'
+}
 
 export interface PassageLookupState {
-  wordMap: Map<string, WordLookup>
+  detailMap: Map<string, PassageWordDetail>
   isLoading: boolean
 }
 
 export const PassageLookupContext = createContext<PassageLookupState>({
-  wordMap: new Map(),
+  detailMap: new Map(),
   isLoading: false,
 })
 

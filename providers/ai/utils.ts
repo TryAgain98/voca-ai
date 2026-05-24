@@ -1,6 +1,7 @@
 import type {
   ExtractedVocabulary,
   PassageAnalysis,
+  PassageWordMap,
   SuggestedPassageVocab,
   TranslationDirection,
 } from './types'
@@ -125,6 +126,22 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
   Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"short Vietnamese usage note, especially for easily confused words"}
 
 Return ONLY valid JSON, no markdown fences, no explanation.`
+
+export function parsePassageWordMap(raw: string): PassageWordMap {
+  const stripped = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim()
+
+  const start = stripped.indexOf('{')
+  if (start === -1) throw new Error('No JSON object in AI response')
+  const end = stripped.lastIndexOf('}')
+  if (end === -1 || end < start)
+    throw new Error('Malformed JSON in AI response')
+
+  return JSON.parse(stripped.slice(start, end + 1)) as PassageWordMap
+}
 
 function cleanJson(raw: string): string {
   return raw

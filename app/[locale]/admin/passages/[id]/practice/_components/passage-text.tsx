@@ -11,7 +11,11 @@ import { PassageLookupContext } from '../_utils/passage-lookup-context'
 
 import { WordInfoPopup } from './word-info-popup'
 
-import type { PassageLookupState } from '../_utils/passage-lookup-context'
+import type {
+  PassageLookupState,
+  PassageWordDetail,
+} from '../_utils/passage-lookup-context'
+import type { WordDetailsBatchResponse } from '~/app/api/word-details-batch/route'
 import type { WordLookup } from '~/providers/ai'
 import type { PassageSegment, WordResult } from '~/types'
 
@@ -74,7 +78,7 @@ function tokenizeSegment(text: string): SegmentToken[] {
   return tokens
 }
 
-const passageCache = new Map<string, Map<string, WordLookup>>()
+const passageCache = new Map<string, Map<string, PassageWordDetail>>()
 const passageInFlight = new Map<string, Promise<void>>()
 
 interface SegmentBlockProps {
@@ -167,7 +171,7 @@ export function PassageText({
 
   const [lookupState, setLookupState] = useState<PassageLookupState>(() => {
     const cached = passageCache.get(passageId)
-    return { wordMap: cached ?? new Map(), isLoading: !cached }
+    return { detailMap: cached ?? new Map(), isLoading: !cached }
   })
 
   useEffect(() => {
@@ -181,16 +185,43 @@ export function PassageText({
           body: JSON.stringify({ passageText: content }),
         })
         if (!res.ok) throw new Error(`word-lookup ${res.status}`)
-        const data = (await res.json()) as Record<string, WordLookup>
-        const map = new Map(
-          Object.entries(data).map(([k, v]) => [k.toLowerCase(), v]),
-        )
-        passageCache.set(passageId, map)
-        setLookupState({ wordMap: map, isLoading: false })
+        const aiData = (await res.json()) as Record<string, WordLookup>
+
+        const words = Object.keys(aiData)
+        let dbData: WordDetailsBatchResponse = {}
+        try {
+          const dbRes = await fetch('/api/word-details-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ words }),
+          })
+          if (dbRes.ok)
+            dbData = (await dbRes.json()) as WordDetailsBatchResponse
+        } catch {
+          // non-fatal: fall back to AI data only
+        }
+
+        const detailMap = new Map<string, PassageWordDetail>()
+        for (const [word, ai] of Object.entries(aiData)) {
+          const key = word.toLowerCase()
+          const db = dbData[key]
+          detailMap.set(key, {
+            meaning: db?.meaning ?? ai.meaning,
+            ipa: db?.ipa ?? ai.ipa,
+            wordType: db?.wordType ?? null,
+            example: db?.example ?? null,
+            synonyms: db?.synonyms ?? [],
+            description: db?.description ?? null,
+            source: db ? 'db' : 'ai',
+          })
+        }
+
+        passageCache.set(passageId, detailMap)
+        setLookupState({ detailMap, isLoading: false })
       } catch {
-        const empty = new Map<string, WordLookup>()
+        const empty = new Map<string, PassageWordDetail>()
         passageCache.set(passageId, empty)
-        setLookupState({ wordMap: empty, isLoading: false })
+        setLookupState({ detailMap: empty, isLoading: false })
       } finally {
         passageInFlight.delete(passageId)
       }
@@ -200,8 +231,8 @@ export function PassageText({
     if (existing) {
       void existing.then(() => {
         const cached =
-          passageCache.get(passageId) ?? new Map<string, WordLookup>()
-        setLookupState({ wordMap: cached, isLoading: false })
+          passageCache.get(passageId) ?? new Map<string, PassageWordDetail>()
+        setLookupState({ detailMap: cached, isLoading: false })
       })
       return
     }

@@ -80,6 +80,17 @@ class VocabulariesService extends BaseService<
     return data as Vocabulary[]
   }
 
+  async findByWordsInsensitive(words: string[]): Promise<Vocabulary[]> {
+    if (words.length === 0) return []
+    const { data, error } = await supabase
+      .from('vocabularies')
+      .select('*')
+      .or(words.map((w) => `word.ilike.${w}`).join(','))
+      .is('deleted_at', null)
+    if (error) throw error
+    return (data ?? []) as Vocabulary[]
+  }
+
   async bulkCreate(items: VocabularyInsert[]): Promise<Vocabulary[]> {
     const withSynonyms = items.map((item) => ({
       ...item,

@@ -1,7 +1,6 @@
 'use client'
 
 import { Loader2, Volume2 } from 'lucide-react'
-import { useState } from 'react'
 
 import {
   Popover,
@@ -13,8 +12,6 @@ import { cn } from '~/lib/utils'
 
 import { useWordLookup } from '../_utils/passage-lookup-context'
 
-import type { WordDetailResponse } from '~/app/api/word-detail/route'
-
 interface WordInfoPopupProps {
   word: string
   children: React.ReactNode
@@ -22,33 +19,13 @@ interface WordInfoPopupProps {
 
 export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
   const tts = useTTS(word)
-  const { wordMap, isLoading: isAiLoading } = useWordLookup()
-  const aiLookup = wordMap.get(word.toLowerCase())
-
-  const [detail, setDetail] = useState<WordDetailResponse | null>(null)
-  const [isFetching, setIsFetching] = useState(false)
+  const { detailMap, isLoading } = useWordLookup()
+  const detail = detailMap.get(word.toLowerCase())
 
   function handleOpenChange(open: boolean): void {
     if (!open) return
     tts.speak()
-    if (detail) return
-
-    setIsFetching(true)
-    fetch(`/api/word-detail?word=${encodeURIComponent(word)}`)
-      .then((res) =>
-        res.ok ? (res.json() as Promise<WordDetailResponse>) : null,
-      )
-      .then((data) => {
-        if (data) setDetail(data)
-      })
-      .catch(() => undefined)
-      .finally(() => setIsFetching(false))
   }
-
-  const isLoading = isFetching || (isAiLoading && !detail)
-  const ipa = detail?.ipa ?? aiLookup?.ipa
-  const meaning =
-    detail?.source === 'db' ? detail.meaning : (aiLookup?.meaning ?? null)
 
   return (
     <Popover onOpenChange={handleOpenChange}>
@@ -98,10 +75,14 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
             </div>
           ) : (
             <>
-              {ipa && (
-                <span className="font-mono text-xs text-[#7170ff]">{ipa}</span>
+              {detail?.ipa && (
+                <span className="font-mono text-xs text-[#7170ff]">
+                  {detail.ipa}
+                </span>
               )}
-              {meaning && <p className="text-sm text-[#d0d6e0]">{meaning}</p>}
+              {detail?.meaning && (
+                <p className="text-sm text-[#d0d6e0]">{detail.meaning}</p>
+              )}
               {detail?.description && (
                 <p className="text-xs text-[#8a8f98]">{detail.description}</p>
               )}
