@@ -4,23 +4,18 @@ import { useUser } from '@clerk/nextjs'
 import { ArrowLeft, Loader2, Mic, RefreshCw, Save, Square } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 import { usePassage } from '~/hooks/use-passages'
 import { scoreColor } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
+import { BenchmarkSelector } from './_components/benchmark-selector'
 import { ExamResults } from './_components/exam-results'
 import { useExamSession } from './_hooks/use-exam-session'
 
 import type { BenchmarkKey } from './_hooks/use-exam-session'
-
-const BENCHMARKS: { key: BenchmarkKey; label: string; color: string }[] = [
-  { key: 'good', label: 'Tốt', color: 'text-emerald-400' },
-  { key: 'ok', label: 'Ổn', color: 'text-amber-400' },
-  { key: 'acceptable', label: 'Chấp nhận', color: 'text-orange-400' },
-]
 
 function formatTime(s: number): string {
   const m = Math.floor(s / 60)
@@ -31,6 +26,7 @@ function formatTime(s: number): string {
 export default function ExamPage() {
   const params = useParams()
   const locale = useLocale()
+  const t = useTranslations('Passages')
   const { user } = useUser()
   const passageId = params.id as string
 
@@ -49,6 +45,13 @@ export default function ExamPage() {
         ? passage?.time_ok
         : passage?.time_acceptable
 
+  const allBenchmarks: { key: BenchmarkKey; time: number | null }[] = [
+    { key: 'good', time: passage?.time_good ?? null },
+    { key: 'ok', time: passage?.time_ok ?? null },
+    { key: 'acceptable', time: passage?.time_acceptable ?? null },
+  ]
+  const benchmarkOptions = allBenchmarks.filter(({ time }) => time !== null)
+
   if (isLoading || !passage) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -59,78 +62,55 @@ export default function ExamPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Link href={`/${locale}/admin/passages/${passageId}/practice`}>
-          <Button variant="ghost" size="icon" className="size-8">
-            <ArrowLeft size={16} />
-          </Button>
-        </Link>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-semibold text-[#f7f8f8]">
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-3">
+          <Link href={`/${locale}/admin/passages/${passageId}/practice`}>
+            <Button variant="ghost" size="icon" className="size-8 shrink-0">
+              <ArrowLeft size={16} />
+            </Button>
+          </Link>
+          <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-[510]">
             {passage.title}
           </h1>
-          <p className="text-xs text-[#8a8f98]">Chế độ thi — không có gợi ý</p>
+          {exam.state === 'recording' && (
+            <div
+              className={cn(
+                'flex items-center gap-2 font-mono text-sm',
+                exam.elapsed > (benchmarkTime ?? 999)
+                  ? 'text-red-400'
+                  : 'text-[#d0d6e0]',
+              )}
+            >
+              <div className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
+              {formatTime(exam.elapsed)}
+            </div>
+          )}
         </div>
-        {exam.state === 'recording' && (
-          <div
-            className={cn(
-              'flex items-center gap-2 font-mono text-sm',
-              exam.elapsed > (benchmarkTime ?? 999)
-                ? 'text-red-400'
-                : 'text-[#d0d6e0]',
-            )}
+        <div className="pl-11">
+          <span
+            className="rounded-full border px-2 py-0.5 text-[10px] font-[510] text-orange-400"
+            style={{
+              background: 'rgba(251,146,60,0.08)',
+              borderColor: 'rgba(251,146,60,0.25)',
+            }}
           >
-            <div className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
-            {formatTime(exam.elapsed)}
-          </div>
-        )}
+            {t('examMode')}
+          </span>
+        </div>
       </div>
 
       {exam.state === 'idle' && (
         <>
-          {(passage.time_good ||
-            passage.time_ok ||
-            passage.time_acceptable) && (
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-[#8a8f98]">Chọn mốc thời gian:</p>
-              <div className="flex gap-2">
-                {BENCHMARKS.filter(({ key }) =>
-                  key === 'good'
-                    ? passage.time_good
-                    : key === 'ok'
-                      ? passage.time_ok
-                      : passage.time_acceptable,
-                ).map(({ key, label, color }) => {
-                  const time =
-                    key === 'good'
-                      ? passage.time_good
-                      : key === 'ok'
-                        ? passage.time_ok
-                        : passage.time_acceptable
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => exam.setSelectedBenchmark(key)}
-                      className={cn(
-                        'flex flex-col items-center gap-0.5 rounded-lg border px-4 py-2 text-sm transition-colors',
-                        exam.selectedBenchmark === key
-                          ? 'border-[#5e6ad2] bg-[#5e6ad2]/15'
-                          : 'border-white/8 bg-white/2 hover:border-white/15',
-                      )}
-                    >
-                      <span className={cn('font-semibold', color)}>
-                        {label}
-                      </span>
-                      <span className="text-xs text-[#8a8f98]">{time}s</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+          {benchmarkOptions.length > 0 && (
+            <BenchmarkSelector
+              options={benchmarkOptions}
+              selected={exam.selectedBenchmark}
+              onSelect={exam.setSelectedBenchmark}
+            />
           )}
 
           <div
-            className="rounded-xl border p-4 leading-relaxed text-[#d0d6e0]"
+            className="text-foreground rounded-xl border p-4 leading-relaxed"
             style={{
               background: 'rgba(255,255,255,0.02)',
               borderColor: 'rgba(255,255,255,0.08)',
@@ -144,7 +124,7 @@ export default function ExamPage() {
             className="w-full gap-2 bg-red-500 text-white hover:bg-red-400"
           >
             <Mic size={16} />
-            Bắt đầu thi
+            {t('examStart')}
           </Button>
         </>
       )}
@@ -152,7 +132,7 @@ export default function ExamPage() {
       {exam.state === 'recording' && (
         <>
           <div
-            className="rounded-xl border p-4 leading-relaxed text-[#d0d6e0]"
+            className="text-foreground rounded-xl border p-4 leading-relaxed"
             style={{
               background: 'rgba(255,255,255,0.02)',
               borderColor: 'rgba(255,255,255,0.08)',
@@ -167,7 +147,7 @@ export default function ExamPage() {
             className="w-full gap-2 border-red-400/40 text-red-400 hover:bg-red-400/10"
           >
             <Square size={14} />
-            Dừng và chấm điểm
+            {t('examStop')}
           </Button>
         </>
       )}
@@ -175,7 +155,7 @@ export default function ExamPage() {
       {exam.state === 'scoring' && (
         <div className="flex flex-col items-center gap-3 py-16">
           <Loader2 size={32} className="animate-spin text-[#5e6ad2]" />
-          <p className="text-sm text-[#8a8f98]">Đang chấm điểm...</p>
+          <p className="text-sm text-[#8a8f98]">{t('scoring')}</p>
         </div>
       )}
 
@@ -192,12 +172,12 @@ export default function ExamPage() {
           <div className="flex gap-3">
             <Button variant="outline" onClick={exam.reset} className="gap-2">
               <RefreshCw size={16} />
-              Thi lại
+              {t('examRetry')}
             </Button>
             {exam.isSaved ? (
               <div className="flex flex-1 items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
                 <Save size={16} />
-                Đã lưu kết quả
+                {t('savedResult')}
                 {exam.score > 0 && (
                   <span className="font-bold">({exam.score})</span>
                 )}
@@ -208,7 +188,7 @@ export default function ExamPage() {
                 onClick={() => exam.saveResult(passageId, user?.id ?? '')}
               >
                 <Save size={16} />
-                Lưu kết quả
+                {t('saveResult')}
                 {exam.score > 0 && (
                   <span
                     className={cn('ml-1 font-bold', scoreColor(exam.score))}

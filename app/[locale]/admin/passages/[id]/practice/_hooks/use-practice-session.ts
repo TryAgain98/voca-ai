@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
+import { useAudioRecorder } from '~/hooks/use-audio-recorder'
 import { useCreatePassageSession } from '~/hooks/use-passage-sessions'
 import { useSpeechRecognition } from '~/hooks/use-speech-recognition'
 import { overallScore, scorePassage } from '~/lib/passage-score'
@@ -14,10 +15,13 @@ interface UsePracticeSessionReturn {
   state: PracticeState
   wordResults: WordResult[] | null
   score: number
+  elapsedSeconds: number
+  audioUrl: string | null
   showTranslation: boolean
   isSupported: boolean
   toggleTranslation: () => void
   startListening: () => void
+  stopListening: () => void
   reset: () => void
   saveResult: (
     passageId: string,
@@ -30,8 +34,11 @@ export function usePracticeSession(
   passageContent: string,
 ): UsePracticeSessionReturn {
   const [showTranslation, setShowTranslation] = useState(false)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const speech = useSpeechRecognition()
+  const speech = useSpeechRecognition({ continuous: true })
+  const audioRecorder = useAudioRecorder()
   const createSession = useCreatePassageSession()
 
   const wordResults = useMemo(() => {
@@ -50,11 +57,36 @@ export function usePracticeSession(
       ? 'listening'
       : 'idle'
 
-  function startListening() {
+  const startTimer = useCallback(() => {
+    setElapsedSeconds(0)
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1)
+    }, 1000)
+  }, [])
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  async function startListening() {
+    startTimer()
+    await audioRecorder.startRecording()
     speech.start()
   }
 
+  function stopListening() {
+    stopTimer()
+    audioRecorder.stopRecording()
+    speech.stop()
+  }
+
   function reset() {
+    stopTimer()
+    setElapsedSeconds(0)
+    audioRecorder.clearRecording()
     speech.reset()
   }
 
@@ -85,10 +117,13 @@ export function usePracticeSession(
     state,
     wordResults,
     score,
+    elapsedSeconds,
+    audioUrl: audioRecorder.audioUrl,
     showTranslation,
     isSupported: speech.isSupported,
     toggleTranslation,
     startListening,
+    stopListening,
     reset,
     saveResult,
   }

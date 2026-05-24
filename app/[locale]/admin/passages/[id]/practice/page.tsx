@@ -1,11 +1,10 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
 import { ArrowLeft, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useLocale } from 'next-intl'
-import { useMemo, useRef } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { useMemo } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { usePassageSessions } from '~/hooks/use-passage-sessions'
@@ -23,9 +22,8 @@ import type { Vocabulary } from '~/types'
 export default function PracticePage() {
   const params = useParams()
   const locale = useLocale()
-  const { user } = useUser()
+  const t = useTranslations('Passages')
   const passageId = params.id as string
-  const startedAtRef = useRef<number>(0)
 
   const { data: passage, isLoading } = usePassage(passageId)
   const { data: allVocabs = [] } = useVocabulariesByLessons()
@@ -37,12 +35,6 @@ export default function PracticePage() {
     allVocabs.forEach((v) => map.set(v.word.toLowerCase(), v))
     return map
   }, [allVocabs])
-
-  const segmentTranslations = useMemo(() => {
-    if (!passage?.translation || !passage.segments.length) return []
-    const fullTranslation = passage.translation
-    return passage.segments.map(() => fullTranslation)
-  }, [passage])
 
   const bestScore = useMemo(() => {
     const practiceSessions = sessions.filter((s) => s.mode === 'practice')
@@ -60,59 +52,72 @@ export default function PracticePage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Link href={`/${locale}/admin/passages`}>
-          <Button variant="ghost" size="icon" className="size-8">
-            <ArrowLeft size={16} />
-          </Button>
-        </Link>
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-semibold text-[#f7f8f8]">
-            {passage.title}
-          </h1>
-          {passage.summary && (
-            <p className="truncate text-xs text-[#8a8f98]">{passage.summary}</p>
-          )}
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {bestScore !== null && (
-            <span
-              className={cn('text-sm font-semibold', scoreColor(bestScore))}
-            >
-              Best: {bestScore}
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              'size-8',
-              session.showTranslation && 'text-[#7170ff]',
-            )}
-            onClick={session.toggleTranslation}
-            title="Toggle translation"
-          >
-            <Globe size={16} />
-          </Button>
-          <Link href={`/${locale}/admin/passages/${passageId}/exam`}>
-            <Button size="sm" className="gap-1.5">
-              Thi ngay
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-3">
+          <Link href={`/${locale}/admin/passages`}>
+            <Button variant="ghost" size="icon" className="size-8 shrink-0">
+              <ArrowLeft size={16} />
             </Button>
           </Link>
+          <h1 className="min-w-0 flex-1 truncate text-sm font-[510] text-[#f7f8f8]">
+            {passage.title}
+          </h1>
+          <div className="flex shrink-0 items-center gap-2">
+            {bestScore !== null && (
+              <span
+                className={cn('text-sm font-semibold', scoreColor(bestScore))}
+              >
+                {t('bestScore')}: {bestScore}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'gap-1.5 text-xs',
+                session.showTranslation
+                  ? 'text-[#7170ff]'
+                  : 'text-[#8a8f98] hover:text-[#d0d6e0]',
+              )}
+              onClick={session.toggleTranslation}
+            >
+              <Globe size={14} />
+              {t('meaningToggle')}
+            </Button>
+            <Link href={`/${locale}/admin/passages/${passageId}/exam`}>
+              <Button size="sm" className="gap-1.5">
+                {t('examNow')}
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 pl-11">
+          <span
+            className="rounded-full border px-2 py-0.5 text-[10px] font-[510] text-[#7170ff]"
+            style={{
+              background: 'rgba(113,112,255,0.08)',
+              borderColor: 'rgba(113,112,255,0.25)',
+            }}
+          >
+            {t('practiceMode')}
+          </span>
+          {passage.time_good && (
+            <span className="text-xs text-[#8a8f98]">
+              <span className="text-emerald-400">
+                {t('timeGood')}: {passage.time_good}s
+              </span>
+              {' · '}
+              <span className="text-amber-400">
+                {t('timeOk')}: {passage.time_ok}s
+              </span>
+              {' · '}
+              <span className="text-orange-400">
+                {t('timeAcceptable')}: {passage.time_acceptable}s
+              </span>
+            </span>
+          )}
         </div>
       </div>
-
-      {passage.time_good && (
-        <div className="flex gap-3 text-xs">
-          <span className="text-emerald-400">Tốt: {passage.time_good}s</span>
-          <span className="text-[#8a8f98]">·</span>
-          <span className="text-amber-400">Ổn: {passage.time_ok}s</span>
-          <span className="text-[#8a8f98]">·</span>
-          <span className="text-orange-400">
-            Chấp nhận: {passage.time_acceptable}s
-          </span>
-        </div>
-      )}
 
       <div
         className="rounded-xl border p-4"
@@ -125,26 +130,30 @@ export default function PracticePage() {
           segments={passage.segments}
           vocabMap={vocabMap}
           wordResults={session.wordResults}
-          showTranslation={session.showTranslation}
-          segmentTranslations={segmentTranslations}
         />
       </div>
+
+      {session.showTranslation && passage.translation && (
+        <div
+          className="rounded-xl border p-4"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderColor: 'rgba(255,255,255,0.08)',
+          }}
+        >
+          <p className="text-sm text-[#8a8f98] italic">{passage.translation}</p>
+        </div>
+      )}
 
       <PracticeRecorder
         state={session.state}
         score={session.score}
+        elapsedSeconds={session.elapsedSeconds}
+        audioUrl={session.audioUrl}
         isSupported={session.isSupported}
-        onStart={() => {
-          startedAtRef.current = Date.now()
-          session.startListening()
-        }}
+        onStart={session.startListening}
+        onStop={session.stopListening}
         onReset={session.reset}
-        onSave={() => {
-          const duration = Math.round(
-            (Date.now() - startedAtRef.current) / 1000,
-          )
-          session.saveResult(passageId, user?.id ?? '', duration)
-        }}
       />
     </div>
   )

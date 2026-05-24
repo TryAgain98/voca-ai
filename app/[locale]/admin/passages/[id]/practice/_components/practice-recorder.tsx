@@ -1,6 +1,7 @@
 'use client'
 
-import { Mic, MicOff, RefreshCw, Save } from 'lucide-react'
+import { Mic, Play, RefreshCw, Square } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
 import { scoreColor, scoreLevel } from '~/lib/passage-score'
@@ -8,31 +9,49 @@ import { cn } from '~/lib/utils'
 
 import type { PracticeState } from '../_hooks/use-practice-session'
 
-const MOTIVATION: Record<string, { title: string; hint: string }> = {
-  good: { title: '🎉 Xuất sắc!', hint: 'Phát âm rất tốt, tiếp tục phát huy!' },
-  ok: { title: '👍 Khá tốt!', hint: 'Một số từ cần luyện thêm — thử lại nhé.' },
-  poor: { title: '💪 Cố lên!', hint: 'Hãy nghe lại từng đoạn và luyện thêm.' },
+function formatTime(s: number): string {
+  const m = Math.floor(s / 60)
+  const sec = s % 60
+  return `${m}:${String(sec).padStart(2, '0')}`
 }
 
 interface PracticeRecorderProps {
   state: PracticeState
   score: number
+  elapsedSeconds: number
+  audioUrl: string | null
   isSupported: boolean
   onStart: () => void
+  onStop: () => void
   onReset: () => void
-  onSave: () => void
 }
 
 export function PracticeRecorder({
   state,
   score,
+  elapsedSeconds,
+  audioUrl,
   isSupported,
   onStart,
+  onStop,
   onReset,
-  onSave,
 }: PracticeRecorderProps) {
+  const t = useTranslations('Passages')
   const level = scoreLevel(score)
-  const motivation = MOTIVATION[level]!
+
+  const motivationTitle =
+    level === 'good'
+      ? t('motivationGoodTitle')
+      : level === 'ok'
+        ? t('motivationOkTitle')
+        : t('motivationPoorTitle')
+
+  const motivationHint =
+    level === 'good'
+      ? t('motivationGoodHint')
+      : level === 'ok'
+        ? t('motivationOkHint')
+        : t('motivationPoorHint')
 
   return (
     <div
@@ -50,12 +69,27 @@ export function PracticeRecorder({
             </span>
             <span className="text-xs text-[#8a8f98]">/ 100</span>
           </div>
-          <div>
+          <div className="flex flex-col gap-1">
             <p className="text-sm font-medium text-[#f7f8f8]">
-              {motivation.title}
+              {motivationTitle}
             </p>
-            <p className="mt-0.5 text-xs text-[#8a8f98]">{motivation.hint}</p>
+            <p className="text-xs text-[#8a8f98]">{motivationHint}</p>
+            <p className="text-xs text-[#8a8f98]">
+              {t('speakingTime')}: {formatTime(elapsedSeconds)}
+            </p>
           </div>
+        </div>
+      )}
+
+      {audioUrl && state === 'scored' && (
+        <div className="flex items-center gap-2">
+          <Play size={14} className="shrink-0 text-[#7170ff]" />
+          <audio
+            src={audioUrl}
+            controls
+            className="h-8 w-full"
+            style={{ colorScheme: 'dark' }}
+          />
         </div>
       )}
 
@@ -67,39 +101,42 @@ export function PracticeRecorder({
             className="flex-1 gap-2 bg-[#5e6ad2] text-white hover:bg-[#828fff]"
           >
             <Mic size={16} />
-            {isSupported ? 'Bắt đầu đọc' : 'Trình duyệt không hỗ trợ'}
+            {isSupported ? t('startReading') : t('browserNotSupported')}
           </Button>
         )}
 
         {state === 'listening' && (
-          <Button
-            variant="outline"
-            className="flex-1 gap-2 border-red-400/40 text-red-400"
-            disabled
-          >
-            <MicOff size={16} className="animate-pulse" />
-            Đang nghe...
-          </Button>
+          <>
+            <span
+              className={cn(
+                'font-mono text-sm tabular-nums',
+                elapsedSeconds > 0 ? 'text-[#d0d6e0]' : 'text-[#8a8f98]',
+              )}
+            >
+              {formatTime(elapsedSeconds)}
+            </span>
+            <div className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-400" />
+            <Button
+              variant="outline"
+              className="flex-1 gap-2 border-red-400/40 text-red-400 hover:bg-red-400/10"
+              onClick={onStop}
+            >
+              <Square size={14} />
+              {t('stopAnalyze')}
+            </Button>
+          </>
         )}
 
         {state === 'scored' && (
-          <>
-            <Button variant="outline" onClick={onReset} className="gap-2">
-              <RefreshCw size={16} />
-              Thử lại
-            </Button>
-            <Button onClick={onSave} className="flex-1 gap-2">
-              <Save size={16} />
-              Lưu kết quả
-            </Button>
-          </>
+          <Button variant="outline" onClick={onReset} className="flex-1 gap-2">
+            <RefreshCw size={16} />
+            {t('retry')}
+          </Button>
         )}
       </div>
 
       {!isSupported && (
-        <p className="text-xs text-[#8a8f98]">
-          Dùng Chrome hoặc Edge để sử dụng tính năng nhận diện giọng nói.
-        </p>
+        <p className="text-xs text-[#8a8f98]">{t('browserHint')}</p>
       )}
     </div>
   )
