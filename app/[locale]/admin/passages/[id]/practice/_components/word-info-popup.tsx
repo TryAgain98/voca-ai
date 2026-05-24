@@ -1,8 +1,6 @@
 'use client'
 
 import { Loader2, Volume2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useState } from 'react'
 
 import {
   Popover,
@@ -12,84 +10,21 @@ import {
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/utils'
 
-import type { Vocabulary } from '~/types'
-
-interface DictEntry {
-  phonetic?: string
-  definition: string
-  example?: string
-}
-
-const dictCache = new Map<string, DictEntry | null>()
-
-async function fetchDictEntry(word: string): Promise<DictEntry | null> {
-  const key = word.toLowerCase()
-  if (dictCache.has(key)) return dictCache.get(key)!
-
-  try {
-    const res = await fetch(
-      `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(key)}`,
-    )
-    if (!res.ok) {
-      dictCache.set(key, null)
-      return null
-    }
-    const data = (await res.json()) as Array<{
-      phonetic?: string
-      meanings?: Array<{
-        definitions?: Array<{ definition?: string; example?: string }>
-      }>
-    }>
-    const entry = data[0]
-    let defObj: { definition?: string; example?: string } | undefined
-    for (const meaning of entry?.meanings ?? []) {
-      defObj = meaning.definitions?.find((d) => d.definition)
-      if (defObj) break
-    }
-    if (!defObj?.definition) {
-      dictCache.set(key, null)
-      return null
-    }
-    const result: DictEntry = {
-      phonetic: entry?.phonetic,
-      definition: defObj.definition,
-      example: defObj.example,
-    }
-    dictCache.set(key, result)
-    return result
-  } catch {
-    dictCache.set(key, null)
-    return null
-  }
-}
+import { useWordLookup } from '../_utils/passage-lookup-context'
 
 interface WordInfoPopupProps {
   word: string
-  vocab: Vocabulary | null
   children: React.ReactNode
 }
 
-export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
-  const t = useTranslations('Passages')
+export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
   const tts = useTTS(word)
-  const [dictEntry, setDictEntry] = useState<DictEntry | null | undefined>(
-    undefined,
-  )
-  const [isLoading, setIsLoading] = useState(false)
+  const { wordMap, isLoading } = useWordLookup()
+  const lookup = wordMap.get(word.toLowerCase())
 
-  function handleOpenChange(open: boolean) {
+  function handleOpenChange(open: boolean): void {
     if (open) tts.speak()
-    if (!open || vocab || dictEntry !== undefined) return
-    setIsLoading(true)
-    fetchDictEntry(word).then((entry) => {
-      setDictEntry(entry)
-      setIsLoading(false)
-    })
   }
-
-  const phonetic = vocab?.phonetic ?? dictEntry?.phonetic
-  const meaning = vocab?.meaning ?? dictEntry?.definition
-  const example = vocab?.example ?? dictEntry?.example
 
   return (
     <Popover onOpenChange={handleOpenChange}>
@@ -125,25 +60,22 @@ export function WordInfoPopup({ word, vocab, children }: WordInfoPopupProps) {
             </button>
           </div>
 
-          {phonetic && (
-            <span className="font-mono text-xs text-[#7170ff]">{phonetic}</span>
-          )}
-
           {isLoading ? (
-            <p className="text-xs text-[#8a8f98]">{t('lookingUp')}</p>
-          ) : meaning ? (
-            <p className="text-sm text-[#d0d6e0]">{meaning}</p>
+            <div className="flex flex-col gap-1.5">
+              <div className="h-3 w-16 animate-pulse rounded bg-white/10" />
+              <div className="h-4 w-full animate-pulse rounded bg-white/10" />
+            </div>
           ) : (
-            <p className="text-xs text-[#8a8f98] italic">{t('wordNotFound')}</p>
-          )}
-
-          {example && (
-            <p
-              className="border-t pt-2 text-xs text-[#8a8f98] italic"
-              style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-            >
-              {example}
-            </p>
+            <>
+              {lookup?.ipa && (
+                <span className="font-mono text-xs text-[#7170ff]">
+                  {lookup.ipa}
+                </span>
+              )}
+              {lookup?.meaning && (
+                <p className="text-sm text-[#d0d6e0]">{lookup.meaning}</p>
+              )}
+            </>
           )}
         </div>
       </PopoverContent>

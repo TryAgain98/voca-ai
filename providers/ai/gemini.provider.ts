@@ -1,9 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 import { BaseAIProvider } from './base.provider'
-import { EXTRACT_VOCABULARY_PROMPT, parseVocabularyJson } from './utils'
+import {
+  EXTRACT_VOCABULARY_PROMPT,
+  buildPassageLookupPrompt,
+  parseVocabularyJson,
+} from './utils'
 
-import type { ExtractedVocabulary } from './types'
+import type { ExtractedVocabulary, PassageWordMap } from './types'
 
 export class GeminiProvider extends BaseAIProvider {
   readonly name = 'Gemini'
@@ -30,5 +34,19 @@ export class GeminiProvider extends BaseAIProvider {
       { inlineData: { mimeType, data: base64 } },
     ])
     return parseVocabularyJson(result.response.text())
+  }
+
+  async lookupPassageWords(passageText: string): Promise<PassageWordMap> {
+    const model = this.client.getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      generationConfig: {
+        maxOutputTokens: 8192,
+        responseMimeType: 'application/json',
+      },
+    })
+    const result = await model.generateContent(
+      buildPassageLookupPrompt(passageText),
+    )
+    return JSON.parse(result.response.text()) as PassageWordMap
   }
 }

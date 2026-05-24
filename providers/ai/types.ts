@@ -35,3 +35,10 @@ export interface PassageAnalysis {
   time_acceptable: number
   suggested_vocabulary: SuggestedPassageVocab[]
 }
+
+export interface WordLookup {
+  meaning: string | null
+  ipa: string | null
+}
+
+export type PassageWordMap = Record<string, WordLookup>

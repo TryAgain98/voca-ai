@@ -1,6 +1,7 @@
 import type {
   ExtractedVocabulary,
   PassageAnalysis,
+  PassageWordMap,
   TranslationDirection,
   VocabularyFill,
 } from './types'
@@ -46,6 +47,12 @@ export abstract class BaseAIProvider {
   ): Promise<PassageAnalysis> {
     return Promise.reject(
       new Error(`${this.name} does not support analyzePassage`),
+    )
+  }
+
+  lookupPassageWords(_passageText: string): Promise<PassageWordMap> {
+    return Promise.reject(
+      new Error(`${this.name} does not support lookupPassageWords`),
     )
   }
 }

@@ -1,149 +1,46 @@
 'use client'
 
-import { BookPlus, Loader2, PlusCircle, Trash2 } from 'lucide-react'
+import { BookPlus, Loader2, PlusCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '~/components/ui/dialog'
-import { Input } from '~/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '~/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
-import { useLessons } from '~/hooks/use-lessons'
-import { useBulkCreateVocabularies } from '~/hooks/use-vocabularies'
-import { lessonsService } from '~/services/lessons.service'
+import { VocabDraftTable } from '~/components/vocab-draft-table'
+import { useVocabDraft } from '~/hooks/use-vocab-draft'
+import { LessonSelector } from '~admin/import/_components/lesson-selector'
 
 import type { SuggestedPassageVocab } from '~/providers/ai/types'
-
-interface DraftRow {
-  _id: string
-  word: string
-  word_type: string
-  phonetic: string
-  meaning: string
-  example: string
-}
 
 interface PassageVocabModalProps {
   vocabs: SuggestedPassageVocab[]
 }
 
-const COLUMNS: { key: keyof DraftRow; label: string; width: string }[] = [
-  { key: 'word', label: 'Word', width: 'w-28' },
-  { key: 'word_type', label: 'Type', width: 'w-16' },
-  { key: 'phonetic', label: 'Phonetic', width: 'w-28' },
-  { key: 'meaning', label: 'Meaning', width: 'w-36' },
-  { key: 'example', label: 'Example', width: '' },
-]
-
-function toDraftRows(vocabs: SuggestedPassageVocab[]): DraftRow[] {
-  return vocabs.map((v) => ({
-    _id: crypto.randomUUID(),
-    word: v.word,
-    word_type: v.word_type,
-    phonetic: v.phonetic,
-    meaning: v.meaning,
-    example: v.example,
-  }))
-}
-
-export function PassageVocabModal({ vocabs }: PassageVocabModalProps) {
+export function PassageVocabModal({
+  vocabs,
+}: PassageVocabModalProps): React.ReactNode {
   const t = useTranslations('Passages')
   const tImport = useTranslations('Import')
   const tCommon = useTranslations('Common')
-  const { data: lessons = [] } = useLessons()
-  const bulkCreate = useBulkCreateVocabularies()
 
   const [open, setOpen] = useState(false)
-  const [rows, setRows] = useState<DraftRow[]>([])
-  const [lessonId, setLessonId] = useState('')
-  const [isNewLesson, setIsNewLesson] = useState(false)
-  const [newLessonName, setNewLessonName] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const draft = useVocabDraft()
 
-  function handleOpen() {
-    setRows(toDraftRows(vocabs))
-    setLessonId('')
-    setIsNewLesson(false)
-    setNewLessonName('')
+  function handleOpen(): void {
+    draft.reset()
+    void draft.initialize(vocabs)
     setOpen(true)
   }
 
-  function updateRow(id: string, field: keyof DraftRow, value: string) {
-    setRows((prev) =>
-      prev.map((r) => (r._id === id ? { ...r, [field]: value } : r)),
-    )
+  async function handleSave(): Promise<void> {
+    const ok = await draft.save()
+    if (ok) setOpen(false)
   }
-
-  function deleteRow(id: string) {
-    setRows((prev) => prev.filter((r) => r._id !== id))
-  }
-
-  function addRow() {
-    setRows((prev) => [
-      ...prev,
-      {
-        _id: crypto.randomUUID(),
-        word: '',
-        word_type: '',
-        phonetic: '',
-        meaning: '',
-        example: '',
-      },
-    ])
-  }
-
-  async function handleSave() {
-    const toSave = rows.filter((r) => r.word.trim() && r.meaning.trim())
-    if (!toSave.length) return
-    setIsSaving(true)
-    try {
-      const targetLessonId = isNewLesson
-        ? (await lessonsService.createAndReturn({ name: newLessonName.trim() }))
-            .id
-        : lessonId
-
-      await bulkCreate.mutateAsync(
-        toSave.map((r) => ({
-          lesson_id: targetLessonId,
-          word: r.word.trim(),
-          meaning: r.meaning.trim(),
-          word_type: r.word_type.trim() || undefined,
-          phonetic: r.phonetic.trim() || undefined,
-          example: r.example.trim() || undefined,
-        })),
-      )
-      toast.success(`Đã lưu ${toSave.length} từ vựng`)
-      setOpen(false)
-    } catch {
-      toast.error('Không thể lưu từ vựng')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const hasLesson = isNewLesson ? !!newLessonName.trim() : !!lessonId
-  const canSave =
-    rows.some((r) => r.word.trim() && r.meaning.trim()) && hasLesson
 
   return (
     <>
@@ -159,151 +56,99 @@ export function PassageVocabModal({ vocabs }: PassageVocabModalProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="flex max-h-[90vh] max-w-4xl flex-col gap-0 p-0">
+        <DialogContent className="flex h-[92vh] w-[96vw] max-w-7xl flex-col gap-0 overflow-hidden p-0 sm:max-w-7xl">
           <DialogHeader
-            className="border-b px-6 py-4"
+            className="shrink-0 border-b px-6 py-4"
             style={{ borderColor: 'rgba(255,255,255,0.08)' }}
           >
-            <DialogTitle>{t('addVocabFromPassage')}</DialogTitle>
+            <div className="flex items-center justify-between pr-6">
+              <DialogTitle>{t('addVocabFromPassage')}</DialogTitle>
+              <div className="flex items-center gap-3">
+                {draft.isCheckingDuplicates && (
+                  <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <Loader2 size={12} className="animate-spin" />
+                    {tImport('checkingDuplicates')}
+                  </span>
+                )}
+                {!draft.isCheckingDuplicates && draft.dupCount > 0 && (
+                  <span className="text-muted-foreground text-xs">
+                    {tImport('duplicateStats', {
+                      dupCount: draft.dupCount,
+                      modCount: draft.modCount,
+                      newCount: draft.newCount,
+                    })}
+                  </span>
+                )}
+                <span className="text-muted-foreground text-sm">
+                  {tImport('wordCount', { count: draft.rows.length })}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={draft.add}
+                  className="gap-1.5"
+                >
+                  <PlusCircle size={14} />
+                  {tImport('addRow')}
+                </Button>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-muted-foreground text-sm">
-                {tImport('wordCount', { count: rows.length })}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addRow}
-                className="gap-1.5"
-              >
-                <PlusCircle size={14} />
-                {tImport('addRow')}
-              </Button>
-            </div>
-
-            <div className="border-border rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {COLUMNS.map((c) => (
-                      <TableHead key={c.key} className={c.width}>
-                        {c.label}
-                      </TableHead>
-                    ))}
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row._id}>
-                      {COLUMNS.map((c) => (
-                        <TableCell key={c.key} className="p-1">
-                          <Input
-                            value={row[c.key]}
-                            onChange={(e) =>
-                              updateRow(row._id, c.key, e.target.value)
-                            }
-                            className="focus:bg-background h-8 border-transparent bg-transparent px-2 focus:border-inherit"
-                          />
-                        </TableCell>
-                      ))}
-                      <TableCell className="p-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground hover:text-destructive h-8 w-8"
-                          onClick={() => deleteRow(row._id)}
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+          <div className="min-h-0 flex-1 overflow-auto px-6 py-4">
+            <VocabDraftTable
+              rows={draft.rows}
+              onUpdate={draft.update}
+              onDelete={draft.remove}
+            />
           </div>
 
-          <DialogFooter
-            className="border-t px-6 py-4"
+          <div
+            className="shrink-0 rounded-b-lg border-t px-6 py-4"
             style={{ borderColor: 'rgba(255,255,255,0.08)' }}
           >
-            <div className="flex w-full items-center gap-3">
-              <div className="flex-1">
-                {!isNewLesson ? (
-                  <div className="flex gap-2">
-                    <Select
-                      value={lessonId}
-                      onValueChange={(v) => v && setLessonId(v)}
-                    >
-                      <SelectTrigger className="flex-1 text-sm">
-                        <span
-                          className={lessonId ? '' : 'text-muted-foreground'}
-                        >
-                          {lessonId
-                            ? (lessons.find((l) => l.id === lessonId)?.name ??
-                              tImport('lessonPlaceholder'))
-                            : tImport('lessonPlaceholder')}
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {lessons.map((l) => (
-                          <SelectItem key={l.id} value={l.id}>
-                            {l.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setIsNewLesson(true)}
-                    >
-                      <PlusCircle size={16} />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder={tImport('newLessonPlaceholder')}
-                      value={newLessonName}
-                      onChange={(e) => setNewLessonName(e.target.value)}
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && newLessonName.trim())
-                          setIsNewLesson(false)
-                        if (e.key === 'Escape') setIsNewLesson(false)
-                      }}
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsNewLesson(false)}
-                    >
-                      OK
-                    </Button>
-                  </div>
-                )}
+            <div className="flex items-center gap-3">
+              <div className="w-72 shrink-0">
+                <LessonSelector
+                  lessonId={draft.lessonId}
+                  isNewLesson={draft.isNewLesson}
+                  newLessonName={draft.newLessonName}
+                  onLessonChange={draft.setLessonId}
+                  onToggleNewLesson={draft.setIsNewLesson}
+                  onNewLessonNameChange={draft.setNewLessonName}
+                  showLabel={false}
+                />
               </div>
+              <div className="flex-1" />
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={draft.isSaving}
+              >
+                {tCommon('cancel')}
+              </Button>
               <Button
                 onClick={handleSave}
-                disabled={!canSave || isSaving}
-                className="shrink-0 gap-2"
+                disabled={!draft.canSave || draft.isSaving}
+                title={
+                  !draft.canSave && draft.newCount === 0
+                    ? tImport('noSavableWords')
+                    : ''
+                }
               >
-                {isSaving ? (
-                  <Loader2 size={15} className="animate-spin" />
-                ) : null}
-                {isSaving
-                  ? tCommon('saving')
-                  : tImport('saveButton', {
-                      count: rows.filter(
-                        (r) => r.word.trim() && r.meaning.trim(),
-                      ).length,
-                    })}
+                {draft.isSaving ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" />
+                    {tCommon('saving')}
+                  </>
+                ) : draft.newCount > 0 ? (
+                  tImport('saveButton', { count: draft.newCount })
+                ) : (
+                  tImport('noNewWords')
+                )}
               </Button>
             </div>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

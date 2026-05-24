@@ -9,15 +9,12 @@ import { useMemo } from 'react'
 import { Button } from '~/components/ui/button'
 import { usePassageSessions } from '~/hooks/use-passage-sessions'
 import { usePassage } from '~/hooks/use-passages'
-import { useVocabulariesByLessons } from '~/hooks/use-vocabularies'
 import { scoreColor } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
 import { PassageText } from './_components/passage-text'
 import { PracticeRecorder } from './_components/practice-recorder'
 import { usePracticeSession } from './_hooks/use-practice-session'
-
-import type { Vocabulary } from '~/types'
 
 export default function PracticePage() {
   const params = useParams()
@@ -26,15 +23,8 @@ export default function PracticePage() {
   const passageId = params.id as string
 
   const { data: passage, isLoading } = usePassage(passageId)
-  const { data: allVocabs = [] } = useVocabulariesByLessons()
   const { data: sessions = [] } = usePassageSessions(passageId)
   const session = usePracticeSession(passage?.content ?? '')
-
-  const vocabMap = useMemo(() => {
-    const map = new Map<string, Vocabulary>()
-    allVocabs.forEach((v) => map.set(v.word.toLowerCase(), v))
-    return map
-  }, [allVocabs])
 
   const bestScore = useMemo(() => {
     const practiceSessions = sessions.filter((s) => s.mode === 'practice')
@@ -128,7 +118,7 @@ export default function PracticePage() {
       >
         <PassageText
           content={passage.content}
-          vocabMap={vocabMap}
+          passageId={passageId}
           wordResults={session.wordResults}
         />
       </div>

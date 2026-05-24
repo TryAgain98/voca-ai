@@ -89,6 +89,27 @@ function recoverTruncatedVocabularyJson(raw: string): ExtractedVocabulary[] {
   return JSON.parse(recovered) as ExtractedVocabulary[]
 }
 
+export function buildPassageLookupPrompt(passageText: string): string {
+  return `You are a vocabulary assistant for Vietnamese English learners.
+
+Read this English passage and identify every vocabulary unit worth knowing:
+
+"${passageText}"
+
+Rules for identifying units:
+- Hyphenated compounds are ONE unit: state-of-the-art, well-known, up-to-date, co-founder
+- Phrasal verbs are ONE unit: give up, look after, break down, take off
+- Include all content words: nouns, verbs, adjectives, adverbs, prepositions with non-literal meaning
+- Exclude pure function words: a, an, the, is, are, was, were, be, been, being, I, you, he, she, it, we, they, me, him, her, us, them, and, but, or, so, yet, nor
+
+For each unit provide:
+- "meaning": Vietnamese meaning in this specific context (1–5 words). null only for the excluded function words above.
+- "ipa": IPA transcription for single words and hyphenated compounds. null for space-separated phrases.
+
+Return ONLY valid JSON — lowercase keys matching exact text in the passage, no markdown:
+{"state-of-the-art": {"meaning": "tiên tiến nhất", "ipa": "/ˌsteɪt.əv.ðəˈɑːrt/"}, "rapidly": {"meaning": "nhanh chóng", "ipa": "/ˈræp.ɪd.li/"}, "give up": {"meaning": "từ bỏ", "ipa": null}}`
+}
+
 export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Analyze the English passage provided and return a single JSON object with these fields:
 
 - content: the exact original English passage text (copy verbatim if provided as text; transcribe faithfully if from image)
@@ -97,7 +118,11 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 - time_good: estimated seconds for a fluent speaker to read aloud clearly (benchmark: ~140 wpm)
 - time_ok: estimated seconds for an intermediate learner (~100 wpm)
 - time_acceptable: estimated seconds for a slow learner (~70 wpm)
-- suggested_vocabulary: 8-12 interesting or challenging words from the passage. Each: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning","example":"natural English sentence","description":"short Vietnamese usage note"}
+- suggested_vocabulary: ALL words worth learning from the passage — include every word a non-native learner might not know. Scale with passage length: a 50-word passage may yield 5-8 words; a 500-word passage may yield 30-50 words.
+
+  EXCLUDE (do not include these): to-be verbs (is, are, was, were, am, be, been, being), personal pronouns (I, you, he, she, it, we, they, me, him, her, us, them), basic articles/determiners (a, an, the, this, that, these, those), basic prepositions (in, on, at, to, for, of, by, with, from, into, onto, about, above, below, between, through, during, before, after), basic conjunctions (and, but, or, so, yet, nor, although, because, since, while, when, if, that), numbers, and any word a beginner learner already knows (go, come, eat, drink, day, night, big, small, good, bad, new, old, people, time, year, way, do, make, get, have, take, see, know, think, say, look, want, give, use, find, tell, ask, work, seem, feel, try, leave, call, keep, let, begin, show, hear, play, run, move, live, believe, hold, bring, write, happen, provide, stand, lose, pay, meet, include, continue, set, learn, change, lead, understand, watch, follow, stop, create, speak, read, allow, add, grow, open, walk, win, offer, remember, love, consider, appear, buy, wait, serve, die, send, expect, build, stay, fall, cut, reach, kill, remain, suggest, raise, pass, sell, require, report, decide, pull).
+
+  Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"short Vietnamese usage note, especially for easily confused words"}
 
 Return ONLY valid JSON, no markdown fences, no explanation.`
 

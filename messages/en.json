@@ -606,6 +606,7 @@
     "analyzeButton": "Analyze with AI",
     "analyzing": "Analyzing passage...",
     "editTitle": "Review passage",
+    "fieldContent": "Passage",
     "fieldTitle": "Title",
     "fieldTranslation": "Translation",
     "fieldTimeGood": "Good (s)",

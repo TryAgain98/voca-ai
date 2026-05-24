@@ -4,12 +4,17 @@ import { BaseAIProvider } from './base.provider'
 import {
   ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
+  buildPassageLookupPrompt,
   buildSynonymCheckPrompt,
   parsePassageAnalysis,
   parseVocabularyJson,
 } from './utils'
 
-import type { ExtractedVocabulary, PassageAnalysis } from './types'
+import type {
+  ExtractedVocabulary,
+  PassageAnalysis,
+  PassageWordMap,
+} from './types'
 
 const SUPPORTED_MIME_TYPES = [
   'image/jpeg',
@@ -119,5 +124,25 @@ export class AnthropicProvider extends BaseAIProvider {
     })
     const text = res.content[0].type === 'text' ? res.content[0].text : ''
     return text.trim().toLowerCase().startsWith('yes')
+  }
+
+  async lookupPassageWords(passageText: string): Promise<PassageWordMap> {
+    const res = await this.client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 8192,
+      messages: [
+        {
+          role: 'user',
+          content: buildPassageLookupPrompt(passageText),
+        },
+      ],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : '{}'
+    const cleaned = text
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim()
+    return JSON.parse(cleaned) as PassageWordMap
   }
 }

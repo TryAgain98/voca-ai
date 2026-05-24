@@ -45,6 +45,7 @@ export default function NewPassagePage() {
 
       {flow.step === 'editing' && (
         <PassageEditStep
+          passageContent={flow.analysis?.content ?? flow.text}
           title={flow.editableTitle}
           translation={flow.editableTranslation}
           timeGood={flow.editableTimeGood}

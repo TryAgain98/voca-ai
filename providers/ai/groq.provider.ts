@@ -4,6 +4,7 @@ import { BaseAIProvider } from './base.provider'
 import {
   ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
+  buildPassageLookupPrompt,
   buildSynonymCheckPrompt,
   buildTranslationPrompt,
   buildVocabularyFillPrompt,
@@ -14,6 +15,7 @@ import {
 import type {
   ExtractedVocabulary,
   PassageAnalysis,
+  PassageWordMap,
   TranslationDirection,
   VocabularyFill,
 } from './types'
@@ -150,5 +152,22 @@ export class GroqProvider extends BaseAIProvider {
     })
     const answer = res.choices[0]?.message?.content?.trim().toLowerCase() ?? ''
     return answer.startsWith('yes')
+  }
+
+  async lookupPassageWords(passageText: string): Promise<PassageWordMap> {
+    const res = await this.client.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      max_tokens: 8192,
+      temperature: 0.1,
+      messages: [
+        { role: 'user', content: buildPassageLookupPrompt(passageText) },
+      ],
+    })
+    const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim()
+    return JSON.parse(cleaned) as PassageWordMap
   }
 }

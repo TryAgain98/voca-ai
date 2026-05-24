@@ -1,25 +1,16 @@
 'use client'
 
-import { Loader2, PlusCircle, Trash2 } from 'lucide-react'
+import { Loader2, PlusCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table'
+import { VocabDraftTable } from '~/components/vocab-draft-table'
 import { cn } from '~/lib/utils'
 
 import { LessonSelector } from './lesson-selector'
 
-import type { DraftStatus, DraftVocabulary } from '../_hooks/use-import-flow'
+import type { DraftVocabulary } from '~/types/vocab-draft'
 
 interface VocabularyEditorProps {
   vocabularies: DraftVocabulary[]
@@ -36,25 +27,6 @@ interface VocabularyEditorProps {
   onAdd: () => void
   onConfirm: () => void
   onBack: () => void
-}
-
-const COLUMN_FIELDS: { field: keyof DraftVocabulary; width: string }[] = [
-  { field: 'word', width: 'w-28' },
-  { field: 'word_type', width: 'w-16' },
-  { field: 'phonetic', width: 'w-28' },
-  { field: 'meaning', width: 'w-32' },
-  { field: 'example', width: 'w-48' },
-  { field: 'description', width: '' },
-]
-
-const EDITABLE_FIELDS = new Set<keyof DraftVocabulary>(
-  COLUMN_FIELDS.map((c) => c.field),
-)
-
-function rowBg(status?: DraftStatus) {
-  if (status === 'duplicate') return 'bg-muted/40 opacity-60'
-  if (status === 'modified') return 'bg-amber-50/40 dark:bg-amber-950/20'
-  return ''
 }
 
 export function VocabularyEditor({
@@ -97,38 +69,6 @@ export function VocabularyEditor({
     (v) => v.word.trim() && v.status === 'duplicate',
   ).length
   const modCount = vocabularies.filter((v) => v.status === 'modified').length
-
-  const colLabels: Record<string, string> = {
-    word: t('colWord'),
-    word_type: t('colType'),
-    phonetic: t('colPhonetic'),
-    meaning: t('colMeaning'),
-    example: t('colExample'),
-    description: t('colDescription'),
-  }
-
-  function StatusBadge({ status }: { status?: DraftStatus }) {
-    if (!status || status === 'new') return null
-    if (status === 'duplicate')
-      return (
-        <Badge
-          variant="secondary"
-          className="shrink-0 cursor-default text-[10px]"
-          title={t('duplicateTitle')}
-        >
-          {t('duplicateBadge')}
-        </Badge>
-      )
-    return (
-      <Badge
-        variant="outline"
-        className="shrink-0 cursor-default border-amber-500 text-[10px] text-amber-600"
-        title={t('modifiedTitle')}
-      >
-        {t('modifiedBadge')}
-      </Badge>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -199,59 +139,11 @@ export function VocabularyEditor({
         </Button>
       </div>
 
-      <div className="border-border rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-6" />
-              {COLUMN_FIELDS.map((c) => (
-                <TableHead key={c.field} className={c.width}>
-                  {colLabels[c.field]}
-                </TableHead>
-              ))}
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {vocabularies.map((v) => (
-              <TableRow key={v._id} className={rowBg(v.status)}>
-                <TableCell className="p-1">
-                  <StatusBadge status={v.status} />
-                </TableCell>
-
-                {COLUMN_FIELDS.map((c) => (
-                  <TableCell key={c.field} className="p-1">
-                    <Input
-                      value={String(v[c.field] ?? '')}
-                      onChange={(e) => {
-                        if (EDITABLE_FIELDS.has(c.field)) {
-                          onUpdate(
-                            v._id,
-                            c.field as keyof DraftVocabulary,
-                            e.target.value,
-                          )
-                        }
-                      }}
-                      className="focus:bg-background h-8 border-transparent bg-transparent px-2 focus:border-inherit"
-                    />
-                  </TableCell>
-                ))}
-
-                <TableCell className="p-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive h-8 w-8"
-                    onClick={() => onDelete(v._id)}
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <VocabDraftTable
+        rows={vocabularies}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+      />
     </div>
   )
 }
