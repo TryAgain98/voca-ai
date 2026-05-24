@@ -29,14 +29,8 @@ export default function ImportPage() {
         <SetupStep
           imageFiles={flow.imageFiles}
           imagePreviews={flow.imagePreviews}
-          lessonId={flow.lessonId}
-          isNewLesson={flow.isNewLesson}
-          newLessonName={flow.newLessonName}
           onImagesAdd={flow.addImages}
           onImageRemove={flow.removeImage}
-          onLessonChange={flow.setLessonId}
-          onToggleNewLesson={flow.setIsNewLesson}
-          onNewLessonNameChange={flow.setNewLessonName}
           onExtract={flow.extract}
         />
       )}
@@ -46,6 +40,12 @@ export default function ImportPage() {
           vocabularies={flow.vocabularies}
           isSaving={flow.isSaving}
           isCheckingDuplicates={flow.isCheckingDuplicates}
+          lessonId={flow.lessonId}
+          isNewLesson={flow.isNewLesson}
+          newLessonName={flow.newLessonName}
+          onLessonChange={flow.setLessonId}
+          onToggleNewLesson={flow.setIsNewLesson}
+          onNewLessonNameChange={flow.setNewLessonName}
           onUpdate={flow.updateVocabulary}
           onDelete={flow.deleteVocabulary}
           onAdd={flow.addVocabulary}

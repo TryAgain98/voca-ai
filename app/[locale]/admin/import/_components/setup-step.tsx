@@ -1,20 +1,11 @@
 'use client'
 
-import { ImageIcon, Images, Plus, PlusCircle, Upload, X } from 'lucide-react'
+import { ImageIcon, Images, Plus, Upload, X } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
-import { Label } from '~/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '~/components/ui/select'
-import { useLessons } from '~/hooks/use-lessons'
 import { cn } from '~/lib/utils'
 
 import type { DragEvent } from 'react'
@@ -22,38 +13,23 @@ import type { DragEvent } from 'react'
 interface SetupStepProps {
   imageFiles: File[]
   imagePreviews: string[]
-  lessonId: string
-  isNewLesson: boolean
-  newLessonName: string
   onImagesAdd: (files: File[]) => void
   onImageRemove: (index: number) => void
-  onLessonChange: (id: string) => void
-  onToggleNewLesson: (v: boolean) => void
-  onNewLessonNameChange: (name: string) => void
   onExtract: () => void
 }
 
 export function SetupStep({
   imageFiles,
   imagePreviews,
-  lessonId,
-  isNewLesson,
-  newLessonName,
   onImagesAdd,
   onImageRemove,
-  onLessonChange,
-  onToggleNewLesson,
-  onNewLessonNameChange,
   onExtract,
 }: SetupStepProps) {
   const t = useTranslations('Import')
-  const tCommon = useTranslations('Common')
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const { data: lessons = [] } = useLessons()
 
-  const canExtract =
-    imageFiles.length > 0 && (isNewLesson ? newLessonName.trim() : lessonId)
+  const canExtract = imageFiles.length > 0
 
   function handleFiles(files: FileList | File[]) {
     onImagesAdd(Array.from(files))
@@ -165,55 +141,6 @@ export function SetupStep({
             e.target.value = ''
           }}
         />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>{t('lessonLabel')}</Label>
-        {!isNewLesson ? (
-          <div className="flex gap-2">
-            <Select
-              value={lessonId}
-              onValueChange={(v) => v && onLessonChange(v)}
-            >
-              <SelectTrigger className="flex-1">
-                <span
-                  className={`flex flex-1 truncate text-left text-sm${!lessonId ? 'text-muted-foreground' : ''}`}
-                >
-                  {lessonId
-                    ? (lessons.find((l) => l.id === lessonId)?.name ??
-                      t('lessonPlaceholder'))
-                    : t('lessonPlaceholder')}
-                </span>
-              </SelectTrigger>
-              <SelectContent>
-                {lessons.map((l) => (
-                  <SelectItem key={l.id} value={l.id}>
-                    {l.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => onToggleNewLesson(true)}
-            >
-              <PlusCircle size={16} />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <Input
-              placeholder={t('newLessonPlaceholder')}
-              value={newLessonName}
-              onChange={(e) => onNewLessonNameChange(e.target.value)}
-              autoFocus
-            />
-            <Button variant="outline" onClick={() => onToggleNewLesson(false)}>
-              {tCommon('cancel')}
-            </Button>
-          </div>
-        )}
       </div>
 
       <Button
