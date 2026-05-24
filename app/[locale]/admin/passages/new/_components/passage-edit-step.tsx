@@ -17,15 +17,11 @@ interface PassageEditStepProps {
   title: string
   translation: string
   timeGood: number
-  timeOk: number
-  timeAcceptable: number
   suggestedVocabs: SuggestedPassageVocab[]
   isSaving: boolean
   onTitleChange: (v: string) => void
   onTranslationChange: (v: string) => void
   onTimeGoodChange: (v: number) => void
-  onTimeOkChange: (v: number) => void
-  onTimeAcceptableChange: (v: number) => void
   onSave: () => void
   onBack: () => void
 }
@@ -35,15 +31,11 @@ export function PassageEditStep({
   title,
   translation,
   timeGood,
-  timeOk,
-  timeAcceptable,
   suggestedVocabs,
   isSaving,
   onTitleChange,
   onTranslationChange,
   onTimeGoodChange,
-  onTimeOkChange,
-  onTimeAcceptableChange,
   onSave,
   onBack,
 }: PassageEditStepProps) {
@@ -86,38 +78,15 @@ export function PassageEditStep({
           <p className="text-muted-foreground text-xs">
             {t('timeBenchmarksHint')}
           </p>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs text-emerald-400">
-                {t('timeGood')}
-              </Label>
-              <Input
-                type="number"
-                value={timeGood}
-                onChange={(e) => onTimeGoodChange(Number(e.target.value))}
-                className="text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs text-amber-400">{t('timeOk')}</Label>
-              <Input
-                type="number"
-                value={timeOk}
-                onChange={(e) => onTimeOkChange(Number(e.target.value))}
-                className="text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs text-orange-400">
-                {t('timeAcceptable')}
-              </Label>
-              <Input
-                type="number"
-                value={timeAcceptable}
-                onChange={(e) => onTimeAcceptableChange(Number(e.target.value))}
-                className="text-sm"
-              />
-            </div>
+          <div className="flex max-w-48 flex-col gap-1">
+            <Label className="text-xs text-emerald-400">{t('timeGood')}</Label>
+            <Input
+              type="number"
+              min={1}
+              value={timeGood}
+              onChange={(e) => onTimeGoodChange(Number(e.target.value))}
+              className="text-sm"
+            />
           </div>
         </div>
       </div>

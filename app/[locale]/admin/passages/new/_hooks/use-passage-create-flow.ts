@@ -25,8 +25,6 @@ interface UsePassageCreateFlowReturn {
   editableTitle: string
   editableTranslation: string
   editableTimeGood: number
-  editableTimeOk: number
-  editableTimeAcceptable: number
   suggestedVocabs: SuggestedPassageVocab[]
   isSaving: boolean
   setTab: (tab: SetupTab) => void
@@ -35,8 +33,6 @@ interface UsePassageCreateFlowReturn {
   setEditableTitle: (v: string) => void
   setEditableTranslation: (v: string) => void
   setEditableTimeGood: (v: number) => void
-  setEditableTimeOk: (v: number) => void
-  setEditableTimeAcceptable: (v: number) => void
   analyze: () => Promise<void>
   save: () => Promise<void>
   reset: () => void
@@ -59,8 +55,6 @@ export function usePassageCreateFlow(
   const [editableTitle, setEditableTitle] = useState('')
   const [editableTranslation, setEditableTranslation] = useState('')
   const [editableTimeGood, setEditableTimeGood] = useState(0)
-  const [editableTimeOk, setEditableTimeOk] = useState(0)
-  const [editableTimeAcceptable, setEditableTimeAcceptable] = useState(0)
   const [suggestedVocabs, setSuggestedVocabs] = useState<
     SuggestedPassageVocab[]
   >([])
@@ -110,8 +104,6 @@ export function usePassageCreateFlow(
       setEditableTitle(data.title)
       setEditableTranslation(data.translation)
       setEditableTimeGood(data.time_good)
-      setEditableTimeOk(data.time_ok)
-      setEditableTimeAcceptable(data.time_acceptable)
       setSuggestedVocabs(data.suggested_vocabulary)
       setStep('editing')
     } catch {
@@ -130,8 +122,8 @@ export function usePassageCreateFlow(
         content: analysis.content || text.trim(),
         translation: editableTranslation.trim() || null,
         time_good: editableTimeGood || null,
-        time_ok: editableTimeOk || null,
-        time_acceptable: editableTimeAcceptable || null,
+        time_ok: null,
+        time_acceptable: null,
       })
 
       toast.success('Đã lưu đoạn văn')
@@ -159,8 +151,6 @@ export function usePassageCreateFlow(
     editableTitle,
     editableTranslation,
     editableTimeGood,
-    editableTimeOk,
-    editableTimeAcceptable,
     suggestedVocabs,
     isSaving,
     setTab,
@@ -169,8 +159,6 @@ export function usePassageCreateFlow(
     setEditableTitle,
     setEditableTranslation,
     setEditableTimeGood,
-    setEditableTimeOk,
-    setEditableTimeAcceptable,
     analyze,
     save,
     reset,

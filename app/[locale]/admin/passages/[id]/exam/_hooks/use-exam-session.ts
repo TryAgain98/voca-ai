@@ -11,7 +11,6 @@ import { scorePassageAudio } from '~/lib/passage-speech-scoring'
 import type { WordResult } from '~/types'
 
 export type ExamState = 'idle' | 'recording' | 'scoring' | 'done'
-export type BenchmarkKey = 'good' | 'ok' | 'acceptable'
 
 interface UseExamSessionReturn {
   state: ExamState
@@ -21,8 +20,6 @@ interface UseExamSessionReturn {
   elapsed: number
   audioUrl: string | null
   isSaved: boolean
-  selectedBenchmark: BenchmarkKey
-  setSelectedBenchmark: (b: BenchmarkKey) => void
   startRecording: () => void
   stopAndScore: () => void
   reset: () => void
@@ -31,9 +28,7 @@ interface UseExamSessionReturn {
 
 export function useExamSession(
   passageContent: string,
-  timeGood: number | null,
-  timeOk: number | null,
-  timeAcceptable: number | null,
+  benchmarkTime: number | null,
 ): UseExamSessionReturn {
   const [state, setState] = useState<ExamState>('idle')
   const [wordResults, setWordResults] = useState<WordResult[] | null>(null)
@@ -42,18 +37,11 @@ export function useExamSession(
   const [pronunciationScore, setPronunciationScore] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const [isSaved, setIsSaved] = useState(false)
-  const [selectedBenchmark, setSelectedBenchmark] = useState<BenchmarkKey>('ok')
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef = useRef<number>(0)
   const audioRecorder = useAudioRecorder()
   const createSession = useCreatePassageSession()
-
-  const getBenchmarkTime = useCallback(() => {
-    if (selectedBenchmark === 'good') return timeGood
-    if (selectedBenchmark === 'ok') return timeOk
-    return timeAcceptable
-  }, [selectedBenchmark, timeGood, timeOk, timeAcceptable])
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -100,7 +88,7 @@ export function useExamSession(
       const examScore = calculatePassageExamScore(
         result.pronunciationScore,
         finalElapsed,
-        getBenchmarkTime(),
+        benchmarkTime,
       )
 
       setTranscript(result.transcript)
@@ -131,7 +119,7 @@ export function useExamSession(
     const examScore = calculatePassageExamScore(
       pronunciationScore,
       elapsed,
-      getBenchmarkTime(),
+      benchmarkTime,
     )
 
     createSession.mutate(
@@ -158,8 +146,6 @@ export function useExamSession(
     elapsed,
     audioUrl: audioRecorder.audioUrl,
     isSaved,
-    selectedBenchmark,
-    setSelectedBenchmark,
     startRecording,
     stopAndScore,
     reset,

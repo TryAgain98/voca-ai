@@ -1,13 +1,24 @@
 'use client'
 
-import { Volume2 } from 'lucide-react'
-import { useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { CheckCircle2, Volume2, XCircle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
-import { scoreBg, scoreColor, scoreLevel } from '~/lib/passage-score'
+import {
+  calculatePassageExamScore,
+  evaluatePassageExamOutcome,
+  scoreBg,
+  scoreColor,
+} from '~/lib/passage-score'
 import { segmentsFromContent } from '~/lib/passage-segments'
 import { cn } from '~/lib/utils'
 
+import { WordInfoPopup } from '../../practice/_components/word-info-popup'
+import { PassageLookupContext } from '../../practice/_utils/passage-lookup-context'
+
+import type { PassageLookupState } from '../../practice/_utils/passage-lookup-context'
+import type { WordLookup } from '~/providers/ai'
 import type { PassageSegment, WordResult } from '~/types'
 
 interface SegmentToken {
@@ -54,14 +65,8 @@ function tokenizeSegment(text: string): SegmentToken[] {
   return tokens
 }
 
-const VERDICT: Record<string, { title: string; hint: string }> = {
-  good: { title: '🏆 Xuất sắc!', hint: 'Phát âm và tốc độ rất tốt!' },
-  ok: { title: '👍 Khá tốt!', hint: 'Một số từ cần cải thiện — thử lại nhé.' },
-  poor: {
-    title: '💪 Cần luyện thêm!',
-    hint: 'Hãy dùng chế độ luyện tập trước khi thi lại.',
-  },
-}
+const passageCache = new Map<string, Map<string, WordLookup>>()
+const passageInFlight = new Map<string, Promise<void>>()
 
 interface SegmentResultProps {
   segment: PassageSegment
@@ -95,7 +100,10 @@ function SegmentResult({
       : 100
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
       className={cn(
         'flex items-start gap-3 rounded-lg border p-3',
         segmentScore < 65
@@ -137,43 +145,25 @@ function SegmentResult({
               )
             }
 
+            const isMissing = !wr.got
+
             return (
-              <span
-                key={tok.key}
-                title={wr.got ? `Bạn nói: "${wr.got}"` : 'Bỏ qua'}
-                className={cn(
-                  'cursor-help rounded px-0.5 transition-colors',
-                  scoreColor(wr.score),
-                  scoreBg(wr.score),
-                )}
-              >
-                {tok.text}
-              </span>
+              <WordInfoPopup key={tok.key} word={tok.text}>
+                <span
+                  title={isMissing ? 'Chưa đọc' : `Bạn nói: "${wr.got}"`}
+                  className={cn(
+                    'cursor-pointer rounded px-0.5 underline-offset-2 transition-colors hover:underline',
+                    isMissing
+                      ? 'bg-white/5 text-[#8a8f98]'
+                      : [scoreColor(wr.score), scoreBg(wr.score)],
+                  )}
+                >
+                  {tok.text}
+                </span>
+              </WordInfoPopup>
             )
           })}
         </p>
-
-        {segmentScore < 85 && (
-          <div className="mt-2 text-xs text-[#8a8f98]">
-            {tokens
-              .filter((t) => t.isWord)
-              .map((t) => {
-                const r = wordResults[resultOffset + t.wordIdx]
-                if (!r || r.score >= 85) return null
-                return (
-                  <span key={t.key} className="mr-2">
-                    <span className={scoreColor(r.score)}>{r.word}</span>
-                    {r.got && r.got !== r.word && (
-                      <span className="text-[#8a8f98]">
-                        {' '}
-                        → &ldquo;{r.got}&rdquo;
-                      </span>
-                    )}
-                  </span>
-                )
-              })}
-          </div>
-        )}
       </div>
 
       <span
@@ -184,7 +174,7 @@ function SegmentResult({
       >
         {segmentScore}
       </span>
-    </div>
+    </motion.div>
   )
 }
 
@@ -192,6 +182,8 @@ interface ExamResultsProps {
   content: string
   wordResults: WordResult[]
   score: number
+  scoreLabel?: string
+  pronunciationScore: number
   elapsed: number
   benchmarkTime: number | null
 }
@@ -200,15 +192,34 @@ export function ExamResults({
   content,
   wordResults,
   score,
+  scoreLabel = 'điểm tham khảo',
+  pronunciationScore,
   elapsed,
   benchmarkTime,
 }: ExamResultsProps) {
-  const level = scoreLevel(score)
-  const verdict = VERDICT[level]!
-  const fluency =
-    benchmarkTime && elapsed > 0
-      ? Math.max(0, Math.min(100, Math.round((benchmarkTime / elapsed) * 100)))
-      : null
+  const [lookupState, setLookupState] = useState<PassageLookupState>(() => {
+    const cached = passageCache.get(content)
+    return { wordMap: cached ?? new Map(), isLoading: !cached }
+  })
+
+  const examScore = calculatePassageExamScore(
+    pronunciationScore,
+    elapsed,
+    benchmarkTime,
+  )
+  const outcome = evaluatePassageExamOutcome(
+    wordResults,
+    elapsed,
+    benchmarkTime,
+  )
+
+  const outcomeReasons = [
+    outcome.missingCount > 0 ? `${outcome.missingCount} từ chưa đọc` : null,
+    outcome.incorrectCount > 0
+      ? `${outcome.incorrectCount} từ chưa đúng`
+      : null,
+    outcome.overTime ? 'quá thời gian cho phép' : null,
+  ].filter(Boolean)
 
   const segments = useMemo(() => segmentsFromContent(content), [content])
 
@@ -219,51 +230,168 @@ export function ExamResults({
     return counts.map((_, i) => counts.slice(0, i).reduce((s, c) => s + c, 0))
   }, [segments])
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div
-        className="flex items-center gap-6 rounded-xl border p-5"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          borderColor: 'rgba(255,255,255,0.08)',
-        }}
-      >
-        <div className="flex flex-col items-center gap-1">
-          <span className={cn('text-5xl font-bold', scoreColor(score))}>
-            {score}
-          </span>
-          <span className="text-xs text-[#8a8f98]">phát âm</span>
-        </div>
-        {fluency !== null && (
-          <div className="flex flex-col items-center gap-1">
-            <span className={cn('text-5xl font-bold', scoreColor(fluency))}>
-              {fluency}
-            </span>
-            <span className="text-xs text-[#8a8f98]">tốc độ</span>
-          </div>
-        )}
-        <div>
-          <p className="text-base font-medium text-[#f7f8f8]">
-            {verdict.title}
-          </p>
-          <p className="mt-0.5 text-sm text-[#8a8f98]">{verdict.hint}</p>
-          <p className="mt-1 text-xs text-[#8a8f98]">
-            Thời gian: {elapsed}s
-            {benchmarkTime ? ` / mốc: ${benchmarkTime}s` : ''}
-          </p>
-        </div>
-      </div>
+  useEffect(() => {
+    const cached = passageCache.get(content)
+    if (cached) {
+      return
+    }
 
-      <div className="flex flex-col gap-2">
-        {segments.map((segment, i) => (
-          <SegmentResult
-            key={segment.id}
-            segment={segment}
-            wordResults={wordResults}
-            resultOffset={segmentOffsets[i] ?? 0}
-          />
-        ))}
-      </div>
-    </div>
+    const doFetch = async (): Promise<void> => {
+      try {
+        const res = await fetch('/api/word-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passageText: content }),
+        })
+        if (!res.ok) throw new Error(`word-lookup ${res.status}`)
+        const data = (await res.json()) as Record<string, WordLookup>
+        const map = new Map(
+          Object.entries(data).map(([k, v]) => [k.toLowerCase(), v]),
+        )
+        passageCache.set(content, map)
+        setLookupState({ wordMap: map, isLoading: false })
+      } catch {
+        const empty = new Map<string, WordLookup>()
+        passageCache.set(content, empty)
+        setLookupState({ wordMap: empty, isLoading: false })
+      } finally {
+        passageInFlight.delete(content)
+      }
+    }
+
+    const existing = passageInFlight.get(content)
+    if (existing) {
+      void existing.then(() => {
+        const latest =
+          passageCache.get(content) ?? new Map<string, WordLookup>()
+        setLookupState({ wordMap: latest, isLoading: false })
+      })
+      return
+    }
+
+    const promise = doFetch()
+    passageInFlight.set(content, promise)
+  }, [content])
+
+  return (
+    <PassageLookupContext.Provider value={lookupState}>
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="flex flex-col gap-4"
+      >
+        <div
+          className={cn(
+            'flex items-center gap-6 rounded-xl border p-5',
+            outcome.passed ? 'border-emerald-400/20' : 'border-red-400/20',
+          )}
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+          }}
+        >
+          <div
+            className={cn(
+              'flex size-16 shrink-0 items-center justify-center rounded-full',
+              outcome.passed
+                ? 'bg-emerald-400/10 text-emerald-400'
+                : 'bg-red-400/10 text-red-400',
+            )}
+          >
+            {outcome.passed ? (
+              <CheckCircle2 size={34} />
+            ) : (
+              <XCircle size={34} />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p
+              className={cn(
+                'text-xl font-semibold',
+                outcome.passed ? 'text-emerald-400' : 'text-red-400',
+              )}
+            >
+              {outcome.passed ? 'Đạt' : 'Chưa đạt'}
+            </p>
+            <p className="mt-1 text-sm text-[#8a8f98]">
+              {outcome.passed
+                ? 'Bạn đã đọc đúng, đủ và trong thời gian cho phép.'
+                : outcomeReasons.length > 0
+                  ? `Cần thi lại: ${outcomeReasons.join(', ')}.`
+                  : 'Cần thi lại để đạt đủ điều kiện.'}
+            </p>
+            <p className="mt-1 text-xs text-[#8a8f98]">
+              Thời gian: {elapsed}s
+              {benchmarkTime ? ` / mốc: ${benchmarkTime}s` : ''}
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className={cn('text-5xl font-bold', scoreColor(score))}>
+              {score}
+            </span>
+            <span className="text-xs text-[#8a8f98]">{scoreLabel}</span>
+          </div>
+          {pronunciationScore !== score && (
+            <div className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  'text-5xl font-bold',
+                  scoreColor(pronunciationScore),
+                )}
+              >
+                {pronunciationScore}
+              </span>
+              <span className="text-xs text-[#8a8f98]">phát âm</span>
+            </div>
+          )}
+          {benchmarkTime !== null && (
+            <div className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  'text-5xl font-bold',
+                  examScore.timePenalty > 0
+                    ? 'text-red-400'
+                    : 'text-emerald-400',
+                )}
+              >
+                {examScore.timePenalty > 0 ? `-${examScore.timePenalty}` : '✓'}
+              </span>
+              <span className="text-xs text-[#8a8f98]">thời gian</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-white/8 bg-white/2 px-3 py-2 text-xs text-[#8a8f98]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-emerald-400" />
+            đúng
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-amber-400" />
+            gần đúng
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-red-400" />
+            đọc sai
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-[#8a8f98]" />
+            chưa đọc
+          </span>
+          <span className="ml-auto">Click vào từ để nghe và xem nghĩa.</span>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {segments.map((segment, i) => (
+            <SegmentResult
+              key={segment.id}
+              segment={segment}
+              wordResults={wordResults}
+              resultOffset={segmentOffsets[i] ?? 0}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </PassageLookupContext.Provider>
   )
 }

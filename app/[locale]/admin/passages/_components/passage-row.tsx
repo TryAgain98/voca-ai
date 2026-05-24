@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '~/components/ui/button'
-import { scoreColor } from '~/lib/passage-score'
+import { evaluatePassageExamOutcome, scoreColor } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
 import type { Passage, PassageSession } from '~/types'
@@ -37,16 +37,9 @@ function formatDate(dateStr: string, locale: string): string {
   }).format(new Date(dateStr))
 }
 
-function formatBenchmarks(
-  good: number | null,
-  ok: number | null,
-  acceptable: number | null,
-): string | null {
-  if (!good && !ok && !acceptable) return null
-  return [good, ok, acceptable]
-    .filter(Boolean)
-    .map((s) => `${s}s`)
-    .join(' — ')
+function formatBenchmark(good: number | null): string | null {
+  if (!good) return null
+  return `${good}s`
 }
 
 export function PassageRow({
@@ -58,12 +51,16 @@ export function PassageRow({
   const t = useTranslations('Passages')
   const locale = useLocale()
   const wordCount = passage.content.trim().split(/\s+/).length
-  const benchmarks = formatBenchmarks(
-    passage.time_good,
-    passage.time_ok,
-    passage.time_acceptable,
-  )
+  const benchmark = formatBenchmark(passage.time_good)
   const hasExam = !!lastExam
+  const examOutcome = lastExam
+    ? evaluatePassageExamOutcome(
+        lastExam.word_results,
+        lastExam.duration_seconds,
+        passage.time_good,
+      )
+    : null
+  const examScore = lastExam?.overall_score ?? lastExam?.pronunciation_score
 
   return (
     <tr className="group border-border hover:bg-muted/30 border-b transition-colors">
@@ -78,12 +75,12 @@ export function PassageRow({
           </span>
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <span>{t('wordsCount', { count: wordCount })}</span>
-            {benchmarks && (
+            {benchmark && (
               <>
                 <span>·</span>
                 <span className="flex items-center gap-1">
                   <Clock size={10} />
-                  {benchmarks}
+                  {benchmark}
                 </span>
               </>
             )}
@@ -96,24 +93,31 @@ export function PassageRow({
       </td>
 
       <td className="px-3 py-3">
-        {hasExam ? (
+        {hasExam && examOutcome ? (
           <span
             className={cn(
               'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold',
-              scoreColor(lastExam.overall_score ?? 0),
-              (lastExam.overall_score ?? 0) >= 85
-                ? 'bg-emerald-400/10'
-                : (lastExam.overall_score ?? 0) >= 65
-                  ? 'bg-amber-400/10'
-                  : 'bg-red-400/10',
+              examOutcome.passed
+                ? 'bg-emerald-400/10 text-emerald-400'
+                : 'bg-red-400/10 text-red-400',
             )}
           >
-            {lastExam.overall_score ?? lastExam.pronunciation_score ?? '—'}
+            {examOutcome.passed ? t('passed') : t('notPassed')}
           </span>
         ) : (
           <span className="text-muted-foreground text-xs">
             {t('notExamined')}
           </span>
+        )}
+      </td>
+
+      <td className="px-3 py-3">
+        {typeof examScore === 'number' ? (
+          <span className={cn('text-xs font-semibold', scoreColor(examScore))}>
+            {examScore}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-xs">—</span>
         )}
       </td>
 
@@ -138,8 +142,12 @@ export function PassageRow({
             </Button>
           </Link>
           <Link href={`/${locale}/admin/passages/${passage.id}/exam`}>
-            <Button size="sm" className="h-7 gap-1.5 text-xs">
-              {t('examButton')}
+            <Button
+              variant={examOutcome?.passed ? 'outline' : 'default'}
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+            >
+              {examOutcome?.passed ? t('retakeExamButton') : t('examButton')}
             </Button>
           </Link>
         </div>

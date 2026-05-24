@@ -127,6 +127,8 @@ export function overallScore(results: WordResult[]): number {
   return Math.round(sum / results.length)
 }
 
+export const PASSING_WORD_SCORE = 85
+
 export interface PassageExamScore {
   overallScore: number
   pronunciationScore: number
@@ -165,6 +167,39 @@ export function calculatePassageExamScore(
     pronunciationScore,
     fluencyScore: Math.max(0, 100 - timePenalty),
     timePenalty,
+  }
+}
+
+export interface PassageExamOutcome {
+  passed: boolean
+  missingCount: number
+  incorrectCount: number
+  overTime: boolean
+}
+
+export function evaluatePassageExamOutcome(
+  wordResults: WordResult[],
+  elapsedSeconds: number | null,
+  benchmarkSeconds: number | null,
+): PassageExamOutcome {
+  const missingCount = wordResults.filter((r) => !r.got).length
+  const incorrectCount = wordResults.filter(
+    (r) => r.got && r.score < PASSING_WORD_SCORE,
+  ).length
+  const overTime =
+    benchmarkSeconds !== null &&
+    elapsedSeconds !== null &&
+    elapsedSeconds > benchmarkSeconds
+
+  return {
+    passed:
+      wordResults.length > 0 &&
+      missingCount === 0 &&
+      incorrectCount === 0 &&
+      !overTime,
+    missingCount,
+    incorrectCount,
+    overTime,
   }
 }
 

@@ -19,11 +19,8 @@ import { usePassage } from '~/hooks/use-passages'
 import { scoreColor } from '~/lib/passage-score'
 import { cn } from '~/lib/utils'
 
-import { BenchmarkSelector } from './_components/benchmark-selector'
 import { ExamResults } from './_components/exam-results'
 import { useExamSession } from './_hooks/use-exam-session'
-
-import type { BenchmarkKey } from './_hooks/use-exam-session'
 
 function formatTime(s: number): string {
   const m = Math.floor(s / 60)
@@ -39,26 +36,8 @@ export default function ExamPage() {
   const passageId = params.id as string
 
   const { data: passage, isLoading } = usePassage(passageId)
-  const exam = useExamSession(
-    passage?.content ?? '',
-    passage?.time_good ?? null,
-    passage?.time_ok ?? null,
-    passage?.time_acceptable ?? null,
-  )
-
-  const benchmarkTime =
-    exam.selectedBenchmark === 'good'
-      ? passage?.time_good
-      : exam.selectedBenchmark === 'ok'
-        ? passage?.time_ok
-        : passage?.time_acceptable
-
-  const allBenchmarks: { key: BenchmarkKey; time: number | null }[] = [
-    { key: 'good', time: passage?.time_good ?? null },
-    { key: 'ok', time: passage?.time_ok ?? null },
-    { key: 'acceptable', time: passage?.time_acceptable ?? null },
-  ]
-  const benchmarkOptions = allBenchmarks.filter(({ time }) => time !== null)
+  const benchmarkTime = passage?.time_good ?? null
+  const exam = useExamSession(passage?.content ?? '', benchmarkTime)
 
   if (isLoading || !passage) {
     return (
@@ -109,14 +88,6 @@ export default function ExamPage() {
 
       {exam.state === 'idle' && (
         <>
-          {benchmarkOptions.length > 0 && (
-            <BenchmarkSelector
-              options={benchmarkOptions}
-              selected={exam.selectedBenchmark}
-              onSelect={exam.setSelectedBenchmark}
-            />
-          )}
-
           <div
             className="text-foreground rounded-xl border p-4 leading-relaxed"
             style={{

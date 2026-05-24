@@ -49,15 +49,11 @@ export default function NewPassagePage() {
           title={flow.editableTitle}
           translation={flow.editableTranslation}
           timeGood={flow.editableTimeGood}
-          timeOk={flow.editableTimeOk}
-          timeAcceptable={flow.editableTimeAcceptable}
           suggestedVocabs={flow.suggestedVocabs}
           isSaving={flow.isSaving}
           onTitleChange={flow.setEditableTitle}
           onTranslationChange={flow.setEditableTranslation}
           onTimeGoodChange={flow.setEditableTimeGood}
-          onTimeOkChange={flow.setEditableTimeOk}
-          onTimeAcceptableChange={flow.setEditableTimeAcceptable}
           onSave={flow.save}
           onBack={flow.reset}
         />

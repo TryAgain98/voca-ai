@@ -27,8 +27,7 @@ export default function PracticePage() {
   const { data: passage, isLoading } = usePassage(passageId)
   const { data: sessions = [] } = usePassageSessions(passageId)
   const session = usePracticeSession(passage?.content ?? '')
-  const benchmarkTime =
-    passage?.time_ok ?? passage?.time_good ?? passage?.time_acceptable ?? null
+  const benchmarkTime = passage?.time_good ?? null
 
   const bestScore = useMemo(() => {
     const practiceSessions = sessions.filter((s) => s.mode === 'practice')
@@ -100,14 +99,6 @@ export default function PracticePage() {
               <span className="text-emerald-400">
                 {t('timeGood')}: {passage.time_good}s
               </span>
-              {' · '}
-              <span className="text-amber-400">
-                {t('timeOk')}: {passage.time_ok}s
-              </span>
-              {' · '}
-              <span className="text-orange-400">
-                {t('timeAcceptable')}: {passage.time_acceptable}s
-              </span>
             </span>
           )}
         </div>
@@ -118,6 +109,8 @@ export default function PracticePage() {
           content={passage.content}
           wordResults={session.wordResults}
           score={session.score}
+          scoreLabel="phát âm"
+          pronunciationScore={session.score}
           elapsed={session.elapsedSeconds}
           benchmarkTime={benchmarkTime}
         />

@@ -115,9 +115,7 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 - content: the exact original English passage text (copy verbatim if provided as text; transcribe faithfully if from image)
 - title: a short English title (5-10 words) summarizing the passage
 - translation: full Vietnamese translation of the passage (natural, fluent)
-- time_good: estimated seconds for a fluent speaker to read aloud clearly (benchmark: ~140 wpm)
-- time_ok: estimated seconds for an intermediate learner (~100 wpm)
-- time_acceptable: estimated seconds for a slow learner (~70 wpm)
+- time_good: target seconds for reading aloud clearly at a good, fluent learner pace (benchmark: ~140 wpm)
 - suggested_vocabulary: Extract EVERY content word from the passage mechanically. Include ALL nouns, ALL verbs (except to-be), ALL adjectives, ALL adverbs. Do NOT skip words because they seem common or easy — if it is a noun/verb/adj/adv and not in the exclude list, it MUST be included. When in doubt, include it.
 
   EXCLUDE ONLY these exact categories: to-be verbs (is, are, was, were, am, be, been, being), personal pronouns (I, you, he, she, it, we, they, me, him, her, us, them), articles (a, an, the), demonstratives (this, that, these, those), basic prepositions (in, on, at, to, for, of, by, with, from, into, onto, about, above, below, between, through, during, before, after), coordinating/subordinating conjunctions (and, but, or, so, yet, nor, although, because, since, while, when, if, that), numbers, possessives (my, your, his, her, its, our, their).
@@ -148,8 +146,6 @@ export function parsePassageAnalysis(raw: string): PassageAnalysis {
     title: String(parsed.title ?? ''),
     translation: String(parsed.translation ?? ''),
     time_good: Number(parsed.time_good ?? 0),
-    time_ok: Number(parsed.time_ok ?? 0),
-    time_acceptable: Number(parsed.time_acceptable ?? 0),
     suggested_vocabulary: suggested,
   }
 }

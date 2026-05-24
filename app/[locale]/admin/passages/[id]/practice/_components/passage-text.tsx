@@ -114,12 +114,15 @@ function SegmentBlock({
         }
 
         const wr = wordResults?.[resultOffset + tok.wordIdx] ?? null
+        const isMissing = wr ? !wr.got : false
         const color = wr
-          ? wr.score >= 85
-            ? 'text-emerald-400'
-            : wr.score >= 65
-              ? 'text-amber-400'
-              : 'text-red-400'
+          ? isMissing
+            ? 'text-[#8a8f98]'
+            : wr.score >= 85
+              ? 'text-emerald-400'
+              : wr.score >= 65
+                ? 'text-amber-400'
+                : 'text-red-400'
           : 'text-foreground'
 
         return (

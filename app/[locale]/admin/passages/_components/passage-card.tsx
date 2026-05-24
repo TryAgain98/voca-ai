@@ -63,9 +63,7 @@ export function PassageCard({ passage, onDelete }: PassageCardProps) {
         {passage.time_good && (
           <span className="flex items-center gap-1">
             <Clock size={11} />
-            {formatSeconds(passage.time_good)} —{' '}
-            {formatSeconds(passage.time_ok)} —{' '}
-            {formatSeconds(passage.time_acceptable)}
+            {formatSeconds(passage.time_good)}
           </span>
         )}
       </div>

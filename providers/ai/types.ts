@@ -31,8 +31,6 @@ export interface PassageAnalysis {
   title: string
   translation: string
   time_good: number
-  time_ok: number
-  time_acceptable: number
   suggested_vocabulary: SuggestedPassageVocab[]
 }
 

@@ -4,12 +4,16 @@ import { useUser } from '@clerk/nextjs'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { useLatestExamsByUser } from '~/hooks/use-passage-sessions'
 import { useDeletePassage, usePassages } from '~/hooks/use-passages'
 
+import { PassageDeleteDialog } from './_components/passage-delete-dialog'
 import { PassageRow } from './_components/passage-row'
+
+import type { Passage } from '~/types'
 
 export default function PassagesPage() {
   const t = useTranslations('Passages')
@@ -20,12 +24,24 @@ export default function PassagesPage() {
   const { data: passages = [], isLoading: passagesLoading } = usePassages()
   const { data: latestExams = [] } = useLatestExamsByUser(userId)
   const deletePassage = useDeletePassage()
+  const [deletingPassage, setDeletingPassage] = useState<Passage | null>(null)
 
   const examByPassageId = Object.fromEntries(
     latestExams.map((s) => [s.passage_id, s]),
   )
 
   const isLoading = passagesLoading
+
+  async function handleDeleteConfirm(): Promise<void> {
+    if (!deletingPassage) return
+
+    try {
+      await deletePassage.mutateAsync(deletingPassage.id)
+      setDeletingPassage(null)
+    } catch {
+      // The mutation hook shows the error toast.
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,6 +98,9 @@ export default function PassagesPage() {
                   {t('tableColCreatedAt')}
                 </th>
                 <th className="px-3 py-2.5 text-left font-medium">
+                  {t('tableColResult')}
+                </th>
+                <th className="px-3 py-2.5 text-left font-medium">
                   {t('tableColScore')}
                 </th>
                 <th className="px-3 py-2.5 text-left font-medium">
@@ -99,13 +118,20 @@ export default function PassagesPage() {
                   index={index + 1}
                   passage={p}
                   lastExam={examByPassageId[p.id]}
-                  onDelete={(id) => deletePassage.mutate(id)}
+                  onDelete={() => setDeletingPassage(p)}
                 />
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <PassageDeleteDialog
+        passage={deletingPassage}
+        isPending={deletePassage.isPending}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingPassage(null)}
+      />
     </div>
   )
 }
