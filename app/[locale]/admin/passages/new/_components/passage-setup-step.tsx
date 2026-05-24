@@ -48,10 +48,7 @@ export function PassageSetupStep({
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <div
-        className="flex gap-1 rounded-lg border p-1"
-        style={{ background: 'rgba(255,255,255,0.02)' }}
-      >
+      <div className="bg-muted flex gap-1 rounded-lg border p-1">
         {(['text', 'image'] as SetupTab[]).map((t_) => (
           <button
             key={t_}
@@ -60,7 +57,7 @@ export function PassageSetupStep({
               'flex flex-1 items-center justify-center gap-2 rounded-md py-2 text-sm font-medium transition-colors',
               tab === t_
                 ? 'bg-[#5e6ad2] text-white'
-                : 'text-[#8a8f98] hover:text-[#d0d6e0]',
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {t_ === 'text' ? <Type size={14} /> : <ImageIcon size={14} />}

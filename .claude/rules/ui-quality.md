@@ -34,6 +34,15 @@
 - **DON'T**: Use positive letter-spacing on display headings.
 - **DON'T**: Introduce warm colors; keep it cool/achromatic.
 
+## ⚠️ Theme-Safety Rule (Recurring Bug Prevention)
+
+**NEVER hardcode colors in `style={}`** for backgrounds, borders, or text. This bypasses the theme system and is the root cause of light-theme breakage every time.
+
+- **WRONG**: `style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)', color: '#d0d6e0' }}`
+- **RIGHT**: `className="bg-card border-border text-muted-foreground"`
+
+Use Tailwind semantic tokens that auto-adapt: `bg-card`, `bg-muted`, `border`, `border-border`, `text-foreground`, `text-muted-foreground`, `text-secondary-foreground`. Reserve `style={}` only for dynamic computed values (e.g., widths from JS, animation transforms).
+
 ## 🧪 Quality & Error Handling
 
 - **Forms**: Use `@conform-to` + `Zod`. No hardcoded strings (use `i18n`).

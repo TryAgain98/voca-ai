@@ -13,6 +13,7 @@ import { PassageVocabModal } from './passage-vocab-modal'
 import type { SuggestedPassageVocab } from '~/providers/ai/types'
 
 interface PassageEditStepProps {
+  passageContent: string
   title: string
   translation: string
   timeGood: number
@@ -30,6 +31,7 @@ interface PassageEditStepProps {
 }
 
 export function PassageEditStep({
+  passageContent,
   title,
   translation,
   timeGood,
@@ -49,13 +51,16 @@ export function PassageEditStep({
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <div
-        className="flex flex-col gap-4 rounded-xl border p-5"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          borderColor: 'rgba(255,255,255,0.08)',
-        }}
-      >
+      <div className="bg-card flex flex-col gap-4 rounded-xl border p-5">
+        {passageContent && (
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs">{t('fieldContent')}</Label>
+            <div className="text-muted-foreground bg-muted min-h-24 rounded-md border px-3.5 py-3 font-mono text-sm leading-relaxed">
+              {passageContent}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-1.5">
           <Label className="text-xs">{t('fieldTitle')}</Label>
           <Input
