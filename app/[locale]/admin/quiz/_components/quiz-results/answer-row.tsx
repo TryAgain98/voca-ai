@@ -8,7 +8,7 @@ import { SpeakButton } from '~/components/layout/speak-button'
 import { cn } from '~/lib/cn'
 import { GRADE_EASY, GRADE_GOOD, deriveGrade } from '~/lib/mastery-scheduler'
 
-import { markActualChars } from './diff-chars'
+import { diffChars } from './diff-chars'
 
 import type { QuizExerciseResult } from '../../_types/quiz.types'
 import type { Exercise } from '~admin/review/_types/review.types'
@@ -86,15 +86,21 @@ interface DiffHighlightProps {
 }
 
 function DiffHighlight({ expected, actual }: DiffHighlightProps) {
-  const matched = markActualChars(expected, actual)
+  const ops = diffChars(expected, actual)
   return (
     <span className="font-mono font-[510]">
-      {actual.split('').map((char, i) => (
+      {ops.map((op, i) => (
         <span
           key={i}
-          className={matched[i] ? 'text-foreground' : 'text-rose-500'}
+          className={
+            op.type === 'match'
+              ? 'text-foreground'
+              : op.type === 'extra'
+                ? 'text-rose-500'
+                : 'text-muted-foreground/50 underline decoration-dotted'
+          }
         >
-          {char}
+          {op.char}
         </span>
       ))}
     </span>
