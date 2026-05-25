@@ -4,7 +4,13 @@
       "Bash(grep -nA 9 \"toReviewVocab\" /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/needs-testing-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/smart-hero-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/tricky-words-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/_components/unlearned-card.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/dashboard/words/_components/words-review-view.tsx /Users/hahuytoan/Workspace/my-app/voca-ai/app/\\\\[locale\\\\]/admin/quiz/_components/quiz-setup.tsx)",
       "Bash(git reset *)",
       "Bash(git show *)",
-      "Bash(find /Users/hahuytoan/Workspace/my-app/voca-ai/app/[locale]/admin/review/_components/exercises -type f -name \"*.tsx\")"
+      "Bash(find /Users/hahuytoan/Workspace/my-app/voca-ai/app/[locale]/admin/review/_components/exercises -type f -name \"*.tsx\")",
+      "Bash(grep -E \"tsx$\")",
+      "Bash(node -e \"const d = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/cmu-pronouncing-dictionary'\\); console.log\\('it=', d['it']\\); console.log\\(\\\\\"it's=\\\\\", d[\\\\\"it's\\\\\"]\\); console.log\\('its=', d['its']\\);\")",
+      "Bash(node -e \"const d = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/cmu-pronouncing-dictionary'\\); console.log\\('type:', typeof d\\); console.log\\('default?:', !!d.default\\); console.log\\('keys preview:', Object.keys\\(d\\).slice\\(0,5\\)\\);\")",
+      "Bash(node -e \"const { dictionary } = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/cmu-pronouncing-dictionary'\\); console.log\\(\\\\\"it's=\\\\\", dictionary[\\\\\"it's\\\\\"]\\); console.log\\('its=', dictionary['its']\\); console.log\\('it=', dictionary['it']\\); console.log\\(\\\\\"don't=\\\\\", dictionary[\\\\\"don't\\\\\"]\\); console.log\\(\\\\\"we're=\\\\\", dictionary[\\\\\"we're\\\\\"]\\);\")",
+      "Bash(node -e \"const { doubleMetaphone } = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/double-metaphone'\\); console.log\\(\\\\\"it's:\\\\\", doubleMetaphone\\(\\\\\"it's\\\\\"\\)\\); console.log\\('its:', doubleMetaphone\\('its'\\)\\); console.log\\('it:', doubleMetaphone\\('it'\\)\\); console.log\\('is:', doubleMetaphone\\('is'\\)\\);\")",
+      "Bash(npx tsx -e ' *)"
     ],
     "deny": [
       "Bash(git push --force *)",
