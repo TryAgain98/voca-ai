@@ -7,6 +7,7 @@ import { SpeakButton } from '~/components/layout/speak-button'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { TableCell, TableRow } from '~/components/ui/table'
+import { WordTypeBadge } from '~/components/word-type-badge'
 import { dayjs } from '~/lib/dayjs'
 
 import { LevelDots } from './level-dots'
@@ -109,14 +110,7 @@ export function VocabularyTableRow({
               <span className="font-semibold">
                 {highlight(voca.word, searchQuery)}
               </span>
-              {voca.word_type && (
-                <Badge
-                  variant="outline"
-                  className="h-4 px-1.5 py-0 text-[10px] font-normal"
-                >
-                  {voca.word_type}
-                </Badge>
-              )}
+              {voca.word_type && <WordTypeBadge value={voca.word_type} />}
             </div>
             {voca.phonetic && (
               <span className="text-muted-foreground font-mono text-xs">

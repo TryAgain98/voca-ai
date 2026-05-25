@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '~/components/ui/popover'
+import { WordTypeBadge } from '~/components/word-type-badge'
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/utils'
 
@@ -45,11 +46,7 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
               <span className="text-base font-semibold text-[#f7f8f8]">
                 {word}
               </span>
-              {detail?.wordType && (
-                <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-[#8a8f98]">
-                  {detail.wordType}
-                </span>
-              )}
+              {detail?.wordType && <WordTypeBadge value={detail.wordType} />}
             </div>
             <button
               onClick={tts.speak}

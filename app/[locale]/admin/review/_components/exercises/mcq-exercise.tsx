@@ -5,6 +5,7 @@ import { Volume2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
+import { WordTypeBadge } from '~/components/word-type-badge'
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 import { playCorrectSound, playWrongSound } from '~/lib/feedback-sound'
@@ -151,9 +152,10 @@ export function MCQExerciseCard({
             </button>
           </div>
           {exercise.vocab.word_type && (
-            <span className="mt-1 inline-block rounded bg-indigo-500/15 px-1.5 py-0.5 text-xs text-indigo-300">
-              {exercise.vocab.word_type}
-            </span>
+            <WordTypeBadge
+              value={exercise.vocab.word_type}
+              className="mt-1 flex h-5 text-xs"
+            />
           )}
           {exercise.vocab.example && (
             <p className="text-muted-foreground/70 mt-2 text-xs italic">

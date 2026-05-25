@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
+import { WordTypeBadge } from '~/components/word-type-badge'
+
 import { SpeakExercise } from '../../../../_types/review.types'
 
 import { ListenButton } from './listen-button'
@@ -44,9 +46,7 @@ export function VocabCard({
             )}
           </div>
           {vocab.word_type && (
-            <span className="w-fit rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-300">
-              {vocab.word_type}
-            </span>
+            <WordTypeBadge value={vocab.word_type} className="h-5 text-xs" />
           )}
         </div>
         <ListenButton
