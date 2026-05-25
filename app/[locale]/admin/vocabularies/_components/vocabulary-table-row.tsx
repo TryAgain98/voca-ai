@@ -107,7 +107,7 @@ export function VocabularyTableRow({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="font-semibold">
+              <span className="text-[15px] font-semibold">
                 {highlight(voca.word, searchQuery)}
               </span>
               {voca.word_type && <WordTypeBadge value={voca.word_type} />}
