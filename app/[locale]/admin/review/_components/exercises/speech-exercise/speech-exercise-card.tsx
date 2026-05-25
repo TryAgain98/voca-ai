@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { useSpeechRecognition } from '~/hooks/use-speech-recognition'
@@ -24,6 +24,19 @@ const CORRECT_ADVANCE_DELAY_MS = 1200
 const QUIZ_ADVANCE_DELAY_MS = 350
 const AUTO_RECORD_DELAY_MS = 250
 const IS_SPEECH_DEBUG_ENABLED = process.env.NODE_ENV !== 'production'
+
+function isEditableKeyboardTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+
+  const tagName = target.tagName
+  return (
+    tagName === 'INPUT' ||
+    tagName === 'TEXTAREA' ||
+    tagName === 'SELECT' ||
+    target.isContentEditable ||
+    target.closest('[contenteditable="true"]') !== null
+  )
+}
 
 interface SpeechExerciseCardProps {
   exercise: SpeakExercise
@@ -47,6 +60,14 @@ export function SpeechExerciseCard({
   const startedAtRef = useRef<number>(0)
   const autoRecordRef = useRef(true)
   const ttsWasActiveRef = useRef(false)
+
+  const startMic = useCallback(() => {
+    reset()
+    autoRecordRef.current = false
+    ttsWasActiveRef.current = false
+    startedAtRef.current = Date.now()
+    start()
+  }, [reset, start])
 
   useEffect(() => {
     if (!isSupported) return
@@ -83,6 +104,37 @@ export function SpeechExerciseCard({
         : null,
     [alternatives, exercise.vocab.word, status, transcript],
   )
+
+  const canStartMicWithShortcut =
+    isSupported &&
+    !isTTSActive &&
+    (status === 'idle' ||
+      status === 'error' ||
+      (!isQuiz && status === 'done' && !!diff && !diff.isPass))
+
+  useEffect(() => {
+    if (!canStartMicWithShortcut) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== 'Tab') return
+      if (
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.isComposing ||
+        isEditableKeyboardTarget(event.target)
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      startMic()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canStartMicWithShortcut, startMic])
 
   useEffect(() => {
     if (!IS_SPEECH_DEBUG_ENABLED || status !== 'done' || !diff) return
@@ -163,19 +215,11 @@ export function SpeechExerciseCard({
   }
 
   const handleSpeak = () => {
-    reset()
-    autoRecordRef.current = false
-    ttsWasActiveRef.current = false
-    startedAtRef.current = Date.now()
-    start()
+    startMic()
   }
 
   const handleRetry = () => {
-    reset()
-    autoRecordRef.current = false
-    ttsWasActiveRef.current = false
-    startedAtRef.current = Date.now()
-    start()
+    startMic()
   }
 
   if (!isSupported) {

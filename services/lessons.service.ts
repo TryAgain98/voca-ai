@@ -12,6 +12,15 @@ class LessonsService extends BaseService<Lesson, LessonInsert, LessonUpdate> {
     super('lessons')
   }
 
+  async findAll(): Promise<Lesson[]> {
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Lesson[]
+  }
+
   async createAndReturn(payload: LessonInsert): Promise<Lesson> {
     const { data, error } = await supabase
       .from('lessons')
