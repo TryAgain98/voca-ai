@@ -136,6 +136,76 @@ function tokenizeWords(text: string): string[] {
   return text.match(/\b[\w']+\b/g) ?? []
 }
 
+const CONTRACTION_EXPANSIONS: Record<string, string> = {
+  "it's": 'it is',
+  "that's": 'that is',
+  "there's": 'there is',
+  "here's": 'here is',
+  "what's": 'what is',
+  "who's": 'who is',
+  "where's": 'where is',
+  "how's": 'how is',
+  "when's": 'when is',
+  "he's": 'he is',
+  "she's": 'she is',
+  "let's": 'let us',
+  "we're": 'we are',
+  "they're": 'they are',
+  "you're": 'you are',
+  "i'm": 'i am',
+  "i've": 'i have',
+  "we've": 'we have',
+  "they've": 'they have',
+  "you've": 'you have',
+  "i'll": 'i will',
+  "we'll": 'we will',
+  "they'll": 'they will',
+  "you'll": 'you will',
+  "he'll": 'he will',
+  "she'll": 'she will',
+  "i'd": 'i would',
+  "we'd": 'we would',
+  "they'd": 'they would',
+  "you'd": 'you would',
+  "he'd": 'he would',
+  "she'd": 'she would',
+  "don't": 'do not',
+  "doesn't": 'does not',
+  "didn't": 'did not',
+  "won't": 'will not',
+  "wouldn't": 'would not',
+  "shouldn't": 'should not',
+  "couldn't": 'could not',
+  "can't": 'can not',
+  "isn't": 'is not',
+  "aren't": 'are not',
+  "wasn't": 'was not',
+  "weren't": 'were not',
+  "hasn't": 'has not',
+  "haven't": 'have not',
+  "hadn't": 'had not',
+}
+
+function getContractionExpansion(word: string): [string, string] | null {
+  const expansion = CONTRACTION_EXPANSIONS[word.toLowerCase()]
+  if (!expansion) return null
+  const parts = expansion.split(' ')
+  if (parts.length !== 2) return null
+  return [parts[0], parts[1]]
+}
+
+function scoreContractionPair(
+  expected: string,
+  gotFirst: string,
+  gotSecond: string,
+): number {
+  const expansion = getContractionExpansion(expected)
+  if (!expansion) return 0
+  const s1 = scoreWord(expansion[0], gotFirst)
+  const s2 = scoreWord(expansion[1], gotSecond)
+  return Math.round((s1 + s2) / 2)
+}
+
 const MIN_MATCH_SCORE = 45
 
 function alignWords(expected: string[], transcript: string[]): WordResult[] {
@@ -155,10 +225,28 @@ function alignWords(expected: string[], transcript: string[]): WordResult[] {
       const missScore = dp[i - 1][j]
       const skipScore = dp[i][j - 1]
 
-      if (matchScore >= missScore && matchScore >= skipScore) {
+      // ASR often expands contractions ("it's" → "it is"). Allow an expected
+      // contraction to consume two adjacent transcript tokens.
+      let pairScore = -1
+      if (j >= 2 && getContractionExpansion(expected[i - 1])) {
+        const pairWordScore = scoreContractionPair(
+          expected[i - 1],
+          transcript[j - 2],
+          transcript[j - 1],
+        )
+        if (pairWordScore >= MIN_MATCH_SCORE) {
+          pairScore = dp[i - 1][j - 2] + pairWordScore
+        }
+      }
+
+      const best = Math.max(matchScore, missScore, skipScore, pairScore)
+      if (best === pairScore && pairScore >= 0) {
+        dp[i][j] = pairScore
+        choice[i][j] = 'matchPair'
+      } else if (best === matchScore && matchScore >= 0) {
         dp[i][j] = matchScore
         choice[i][j] = 'match'
-      } else if (missScore >= skipScore) {
+      } else if (best === missScore) {
         dp[i][j] = missScore
         choice[i][j] = 'miss'
       } else {
@@ -194,6 +282,18 @@ function alignWords(expected: string[], transcript: string[]): WordResult[] {
       results[i - 1] = { word: w, expected: w, got: g, score: scoreWord(w, g) }
       i--
       j--
+    } else if (op === 'matchPair') {
+      const w = expected[i - 1]
+      const g1 = transcript[j - 2]
+      const g2 = transcript[j - 1]
+      results[i - 1] = {
+        word: w,
+        expected: w,
+        got: `${g1} ${g2}`,
+        score: scoreContractionPair(w, g1, g2),
+      }
+      i--
+      j -= 2
     } else if (op === 'miss') {
       results[i - 1] = {
         word: expected[i - 1],
