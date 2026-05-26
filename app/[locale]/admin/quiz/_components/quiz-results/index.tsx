@@ -12,6 +12,7 @@ import { useSaveQuizSession } from '~/hooks/use-quiz-sessions'
 import { useRecordStreakActivity } from '~/hooks/use-streak'
 import { useApplyQuizMastery } from '~/hooks/use-word-mastery'
 import { dayjs } from '~/lib/dayjs'
+import { diffQuizAnswer } from '~/lib/quiz-answer-diff'
 
 import { AnswersBreakdown } from './answers-breakdown'
 import { ConfettiBurst } from './confetti-burst'
@@ -67,13 +68,19 @@ export function QuizResults({
 
     const incorrectWords: QuizIncorrectWord[] = results
       .filter((r) => !r.isCorrect)
-      .map((r) => ({
-        word_id: r.exercise.vocab.id,
-        word: r.exercise.vocab.word,
-        meaning: r.exercise.vocab.meaning,
-        user_answer: r.userAnswer ?? '',
-        correct_answer: getExpectedAnswer(r.exercise),
-      }))
+      .map((r) => {
+        const correctAnswer = getExpectedAnswer(r.exercise)
+        const userAnswer = r.userAnswer ?? ''
+
+        return {
+          word_id: r.exercise.vocab.id,
+          word: r.exercise.vocab.word,
+          meaning: r.exercise.vocab.meaning,
+          user_answer: userAnswer,
+          correct_answer: correctAnswer,
+          answer_diff: diffQuizAnswer(correctAnswer, userAnswer),
+        }
+      })
 
     saveSession(
       {

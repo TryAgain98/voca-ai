@@ -129,6 +129,8 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
 
   const handleAnswer = useCallback<AnswerHandler>(
     (isCorrect, meta?: AnswerMeta) => {
+      if (!submitAnswer(isCorrect, meta)) return
+
       if (meta?.usedHint && meta.answerCorrect && !isCorrect) {
         setMascotMood('hint')
       } else if (isCorrect) {
@@ -138,16 +140,16 @@ export function QuizSessionView({ setup, onExit }: QuizSessionViewProps) {
         setMascotMood('stumble')
         playWrongSound()
       }
-      submitAnswer(isCorrect, meta)
       if (currentIndex + 1 < total) playNextQuestionSound()
     },
     [currentIndex, submitAnswer, total],
   )
 
   const handleTimeout = useCallback(() => {
+    if (!submitAnswer(false, { responseMs: QUIZ_PER_QUESTION_MS })) return
+
     setMascotMood('stumble')
     playWrongSound()
-    submitAnswer(false, { responseMs: QUIZ_PER_QUESTION_MS })
     if (currentIndex + 1 < total) playNextQuestionSound()
   }, [currentIndex, submitAnswer, total])
 

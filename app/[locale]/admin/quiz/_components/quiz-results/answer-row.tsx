@@ -85,22 +85,27 @@ interface DiffHighlightProps {
   actual: string
 }
 
+function formatDiffChar(char: string): string {
+  return char === ' ' ? '·' : char
+}
+
 function DiffHighlight({ expected, actual }: DiffHighlightProps) {
   const ops = diffChars(expected, actual)
+
   return (
-    <span className="font-mono font-[510]">
+    <span className="font-mono text-xs font-[510] break-words">
       {ops.map((op, i) => (
         <span
-          key={i}
-          className={
-            op.type === 'match'
-              ? 'text-foreground'
-              : op.type === 'extra'
-                ? 'text-rose-500'
-                : 'text-muted-foreground/50 underline decoration-dotted'
-          }
+          key={`${op.type}-${i}`}
+          className={cn(
+            op.type === 'match' && 'text-foreground',
+            op.type === 'wrong' && 'text-rose-500',
+            op.type === 'missing' && 'text-muted-foreground/45',
+            op.type === 'extra' &&
+              'rounded bg-rose-500/10 px-0.5 text-rose-500',
+          )}
         >
-          {op.char}
+          {formatDiffChar(op.char)}
         </span>
       ))}
     </span>
@@ -191,17 +196,21 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
           )}
         </div>
         {!answerCorrect && (
-          <div className="mt-1 flex flex-wrap items-baseline gap-x-4 text-xs">
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
             <span className="text-muted-foreground/70">
               {t('expected')}:{' '}
               <span className="font-[510] text-emerald-500">{expected}</span>
             </span>
-            {result.userAnswer && (
-              <span className="text-muted-foreground/70">
-                {t('yourAnswer')}:{' '}
+            <span className="text-muted-foreground/70">
+              {t('yourAnswer')}:{' '}
+              {result.userAnswer ? (
                 <DiffHighlight expected={expected} actual={result.userAnswer} />
-              </span>
-            )}
+              ) : (
+                <span className="text-muted-foreground/50 font-[510]">
+                  {t('noAnswer')}
+                </span>
+              )}
+            </span>
           </div>
         )}
         {answerCorrect &&

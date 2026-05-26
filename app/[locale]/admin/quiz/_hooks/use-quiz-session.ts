@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { findSiblings } from '~/lib/answer-pattern'
 import { dayjs } from '~/lib/dayjs'
@@ -83,7 +83,7 @@ interface UseQuizSessionReturn {
   isComplete: boolean
   startTime: Date
   endTime: Date | null
-  submitAnswer: (isCorrect: boolean, meta?: AnswerMeta) => void
+  submitAnswer: (isCorrect: boolean, meta?: AnswerMeta) => boolean
 }
 
 export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
@@ -94,13 +94,17 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [results, setResults] = useState<QuizExerciseResult[]>([])
   const [endTime, setEndTime] = useState<Date | null>(null)
+  const submittedIndexesRef = useRef<Set<number>>(new Set())
 
   const isComplete = currentIndex >= queue.length
   const currentExercise = queue[currentIndex] ?? null
 
   const submitAnswer = useCallback(
     (isCorrect: boolean, meta?: AnswerMeta) => {
-      if (!currentExercise) return
+      if (!currentExercise) return false
+      if (submittedIndexesRef.current.has(currentIndex)) return false
+      submittedIndexesRef.current.add(currentIndex)
+
       setResults((prev) => [
         ...prev,
         {
@@ -118,6 +122,7 @@ export function useQuizSession(setup: QuizSetup): UseQuizSessionReturn {
       if (nextIndex >= queue.length) {
         setEndTime(dayjs().toDate())
       }
+      return true
     },
     [currentExercise, currentIndex, queue.length],
   )

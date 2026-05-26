@@ -67,6 +67,15 @@ export interface QuizIncorrectWord {
   meaning: string
   user_answer: string
   correct_answer: string
+  answer_diff?: QuizAnswerDiffOp[]
+}
+
+export type QuizAnswerDiffOpType = 'match' | 'wrong' | 'missing' | 'extra'
+
+export interface QuizAnswerDiffOp {
+  type: QuizAnswerDiffOpType
+  char: string
+  expected_char?: string
 }
 
 export interface QuizSession {
@@ -149,3 +158,19 @@ export interface PassageSession {
 }
 
 export type PassageSessionInsert = Omit<PassageSession, 'id' | 'created_at'>
+
+export interface AppErrorLog {
+  id: string
+  user_id: string | null
+  source: string
+  action: string
+  message: string
+  name: string | null
+  stack: string | null
+  details: Record<string, unknown>
+  url: string | null
+  user_agent: string | null
+  created_at: string
+}
+
+export type AppErrorLogInsert = Omit<AppErrorLog, 'id' | 'created_at'>

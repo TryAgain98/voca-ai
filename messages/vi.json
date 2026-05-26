@@ -368,6 +368,7 @@
       "noMistakes": "Hoàn hảo — không sai câu nào ✨",
       "expected": "Đáp án",
       "yourAnswer": "Bạn gõ",
+      "noAnswer": "Chưa nhập",
       "hintNoScore": "Dùng gợi ý, không tính điểm",
       "pronMissed": "Phát âm sai",
       "pronMissedHint": "Đã ghi nhận chính tả, sẽ ôn lại phát âm vào mai",

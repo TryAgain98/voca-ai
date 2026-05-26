@@ -368,6 +368,7 @@
       "noMistakes": "Clean run — no mistakes ✨",
       "expected": "Expected",
       "yourAnswer": "You typed",
+      "noAnswer": "No answer",
       "hintNoScore": "Hint used, no score",
       "pronMissed": "Pronunciation failed",
       "pronMissedHint": "Typing counted, but we'll review pronunciation tomorrow",

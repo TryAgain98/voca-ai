@@ -10,8 +10,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from '~/components/ui/sheet'
+import { cn } from '~/lib/cn'
+import { diffQuizAnswer } from '~/lib/quiz-answer-diff'
 
-import type { QuizSession } from '~/types'
+import type { QuizAnswerDiffOp, QuizSession } from '~/types'
 
 interface QuizSessionDetailSheetProps {
   session: QuizSession | null
@@ -88,34 +90,65 @@ export function QuizSessionDetailSheet({
           ) : (
             <div className="flex flex-col gap-3">
               <p className="text-sm font-semibold">{t('mistakesTitle')}</p>
-              {session.incorrect_words.map((w, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border border-red-500/15 bg-red-500/5 px-4 py-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <XCircle size={14} className="shrink-0 text-red-500" />
-                    <span className="text-sm font-semibold">{w.word}</span>
-                    <span className="text-muted-foreground text-xs">
-                      &mdash; {w.meaning}
-                    </span>
-                  </div>
-                  {w.user_answer && (
-                    <div className="mt-2 pl-5">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <span className="text-muted-foreground shrink-0">
-                          {t('yourAnswer')}:
-                        </span>
-                        <span className="text-red-400">{w.user_answer}</span>
-                      </div>
+              {session.incorrect_words.map((w, i) => {
+                const answerDiff =
+                  w.answer_diff ??
+                  diffQuizAnswer(w.correct_answer, w.user_answer)
+
+                return (
+                  <div
+                    key={i}
+                    className="rounded-xl border border-red-500/15 bg-red-500/5 px-4 py-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <XCircle size={14} className="shrink-0 text-red-500" />
+                      <span className="text-sm font-semibold">{w.word}</span>
+                      <span className="text-muted-foreground text-xs">
+                        &mdash; {w.meaning}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {w.user_answer && (
+                      <div className="mt-2 pl-5">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-muted-foreground shrink-0">
+                            {t('yourAnswer')}:
+                          </span>
+                          <PersistedAnswerDiff diff={answerDiff} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
       </SheetContent>
     </Sheet>
+  )
+}
+
+function formatDiffChar(char: string): string {
+  return char === ' ' ? '·' : char
+}
+
+function PersistedAnswerDiff({ diff }: { diff: QuizAnswerDiffOp[] }) {
+  return (
+    <span className="font-mono text-xs font-[510] break-words">
+      {diff.map((op, i) => (
+        <span
+          key={`${op.type}-${i}`}
+          className={cn(
+            op.type === 'match' && 'text-foreground',
+            op.type === 'wrong' && 'text-rose-500',
+            op.type === 'missing' && 'text-muted-foreground/45',
+            op.type === 'extra' &&
+              'rounded bg-rose-500/10 px-0.5 text-rose-500',
+          )}
+        >
+          {formatDiffChar(op.char)}
+        </span>
+      ))}
+    </span>
   )
 }
