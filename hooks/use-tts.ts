@@ -4,32 +4,8 @@ import { useTTSSettingsStore } from '~/stores/tts-settings'
 
 let currentAudio: HTMLAudioElement | null = null
 
-// Blob URL cache keyed by text — survives re-renders, cleared on page reload
-const audioCache = new Map<string, string>()
-// In-flight fetch deduplication — prevents parallel requests for the same text
-const pendingFetches = new Map<string, Promise<string | null>>()
-
-// Concurrency limiter — max 3 simultaneous TTS requests to avoid flooding Edge TTS
-const MAX_CONCURRENT = 3
-let activeCount = 0
-const waitQueue: Array<() => void> = []
-
-function acquireSlot(): Promise<void> {
-  if (activeCount < MAX_CONCURRENT) {
-    activeCount++
-    return Promise.resolve()
-  }
-  return new Promise((resolve) => waitQueue.push(resolve))
-}
-
-function releaseSlot(): void {
-  const next = waitQueue.shift()
-  if (next) {
-    next()
-  } else {
-    activeCount--
-  }
-}
+// Deduplicates in-flight prefetch requests for the same URL
+const pendingPrefetches = new Set<string>()
 
 let speechPrewarmed = false
 function prewarmSpeechEngine(): void {
@@ -47,34 +23,17 @@ function prewarmSpeechEngine(): void {
   setTimeout(() => window.speechSynthesis.cancel(), 200)
 }
 
-async function fetchAudioUrl(
-  text: string,
-  voice: string,
-  speed: number,
-): Promise<string | null> {
-  if (audioCache.has(text)) return audioCache.get(text)!
-  if (pendingFetches.has(text)) return pendingFetches.get(text)!
+function buildTTSUrl(text: string, voice: string, speed: number): string {
+  const params = new URLSearchParams({ text, voice, speed: String(speed) })
+  return `/api/tts?${params.toString()}`
+}
 
-  const promise = (async () => {
-    await acquireSlot()
-    try {
-      const params = new URLSearchParams({ text, voice, speed: String(speed) })
-      const res = await fetch(`/api/tts?${params.toString()}`)
-      if (!res.ok) return null
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      audioCache.set(text, url)
-      return url
-    } catch {
-      return null
-    } finally {
-      releaseSlot()
-      pendingFetches.delete(text)
-    }
-  })()
-
-  pendingFetches.set(text, promise)
-  return promise
+// Warms the HTTP disk cache — browser stores response on disk, not in RAM
+function prefetchTTSUrl(text: string, voice: string, speed: number): void {
+  const url = buildTTSUrl(text, voice, speed)
+  if (pendingPrefetches.has(url)) return
+  pendingPrefetches.add(url)
+  void fetch(url).finally(() => pendingPrefetches.delete(url))
 }
 
 interface UseTTSOptions {
@@ -107,9 +66,23 @@ export function useTTS(
     if (engine === 'web-speech') {
       prewarmSpeechEngine()
     } else if (prefetch) {
-      void fetchAudioUrl(text, openaiVoice, openaiSpeed)
+      prefetchTTSUrl(text, openaiVoice, openaiSpeed)
     }
   }, [engine, prefetch, text, openaiVoice, openaiSpeed])
+
+  useEffect(() => {
+    return () => {
+      if (currentAudio) {
+        currentAudio.pause()
+        currentAudio = null
+      }
+      if (typeof window !== 'undefined') {
+        window.speechSynthesis?.cancel()
+      }
+      setSpeakingText(null)
+      setLoadingText(null)
+    }
+  }, [setSpeakingText, setLoadingText])
 
   const stopAll = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -147,21 +120,15 @@ export function useTTS(
     window.speechSynthesis.speak(utterance)
   }, [text, webSpeechRate, webSpeechPitch, webSpeechVoiceURI, setSpeakingText])
 
-  const speakOpenAI = useCallback(async () => {
+  const speakOpenAI = useCallback(() => {
     if (currentAudio) {
       currentAudio.pause()
       currentAudio = null
     }
     setSpeakingText(null)
-    if (!audioCache.has(text)) setLoadingText(text)
+    setLoadingText(text)
 
-    const url = await fetchAudioUrl(text, openaiVoice, openaiSpeed)
-    if (!url) {
-      setLoadingText(null)
-      setSpeakingText(null)
-      return
-    }
-
+    const url = buildTTSUrl(text, openaiVoice, openaiSpeed)
     const audio = new Audio(url)
     currentAudio = audio
 
@@ -177,16 +144,13 @@ export function useTTS(
       setLoadingText(null)
       setSpeakingText(null)
       currentAudio = null
-      audioCache.delete(text)
     }
 
-    try {
-      await audio.play()
-    } catch {
+    audio.play().catch(() => {
       setLoadingText(null)
       setSpeakingText(null)
       currentAudio = null
-    }
+    })
   }, [text, openaiVoice, openaiSpeed, setSpeakingText, setLoadingText])
 
   const speak = useCallback(() => {
@@ -198,7 +162,7 @@ export function useTTS(
     if (engine === 'web-speech') {
       speakWebSpeech()
     } else {
-      void speakOpenAI()
+      speakOpenAI()
     }
   }, [engine, isSpeaking, isLoading, stopAll, speakWebSpeech, speakOpenAI])
 
