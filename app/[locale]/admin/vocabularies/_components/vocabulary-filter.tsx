@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, X } from 'lucide-react'
+import { Sparkles, Search, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Badge } from '~/components/ui/badge'
@@ -22,9 +22,11 @@ interface VocabularyFilterProps {
   lessonFilter: string
   searchQuery: string
   statusFilter: MasteryStatus | 'all'
+  isSlippedTodayFilter: boolean
   onLessonChange: (value: string) => void
   onSearchChange: (value: string) => void
   onStatusChange: (value: MasteryStatus | 'all') => void
+  onSlippedTodayChange: (value: boolean) => void
   onClearFilters: () => void
 }
 
@@ -33,15 +35,20 @@ export function VocabularyFilter({
   lessonFilter,
   searchQuery,
   statusFilter,
+  isSlippedTodayFilter,
   onLessonChange,
   onSearchChange,
   onStatusChange,
+  onSlippedTodayChange,
   onClearFilters,
 }: VocabularyFilterProps) {
   const t = useTranslations('Vocabularies')
 
   const isFiltering =
-    lessonFilter !== ALL || searchQuery.trim() !== '' || statusFilter !== ALL
+    lessonFilter !== ALL ||
+    searchQuery.trim() !== '' ||
+    statusFilter !== ALL ||
+    isSlippedTodayFilter
   const selectedLesson = lessons.find((l) => l.id === lessonFilter)
 
   return (
@@ -94,6 +101,19 @@ export function VocabularyFilter({
           </SelectContent>
         </Select>
 
+        <button
+          type="button"
+          onClick={() => onSlippedTodayChange(!isSlippedTodayFilter)}
+          className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-[510] transition-colors ${
+            isSlippedTodayFilter
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+              : 'border-border text-muted-foreground hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400'
+          }`}
+        >
+          <Sparkles size={13} strokeWidth={1.8} />
+          {t('filterSlippedToday')}
+        </button>
+
         <div className="relative max-w-sm flex-1">
           <Search
             size={14}
@@ -132,6 +152,22 @@ export function VocabularyFilter({
               <button
                 type="button"
                 onClick={() => onLessonChange(ALL)}
+                className="hover:bg-muted rounded-sm p-0.5"
+              >
+                <X size={10} />
+              </button>
+            </Badge>
+          )}
+
+          {isSlippedTodayFilter && (
+            <Badge
+              variant="secondary"
+              className="cursor-default gap-1 border-amber-500/30 bg-amber-500/10 pr-1 text-xs font-normal text-amber-600 dark:text-amber-400"
+            >
+              {t('filterSlippedToday')}
+              <button
+                type="button"
+                onClick={() => onSlippedTodayChange(false)}
                 className="hover:bg-muted rounded-sm p-0.5"
               >
                 <X size={10} />

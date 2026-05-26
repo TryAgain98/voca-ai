@@ -35,7 +35,6 @@ export interface DashboardStats {
 
 const NEEDS_TESTING_PREVIEW_LIMIT = 50
 const FADING_PREVIEW_LIMIT = 20
-const WRONG_TODAY_PREVIEW_LIMIT = 20
 const FADING_RETENTION_THRESHOLD = 0.85
 const RECENT_TEST_COOLDOWN_MS = 60 * 60 * 1000
 const UNTESTED_PRIORITY = 50
@@ -302,7 +301,7 @@ class WordMasteryService {
         .slice(0, FADING_PREVIEW_LIMIT)
         .map((c) => c.word),
       wrongTodayCount,
-      wrongTodayWords: wrongTodayList.slice(0, WRONG_TODAY_PREVIEW_LIMIT),
+      wrongTodayWords: wrongTodayList,
       averageRetention: retentionN > 0 ? retentionSum / retentionN : 1,
     }
   }

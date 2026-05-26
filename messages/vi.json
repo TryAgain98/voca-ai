@@ -137,7 +137,7 @@
       "celebrateWrong": {
         "headline": "{count, plural, =1 {Hôm nay bạn lỡ 1 từ} other {Hôm nay bạn lỡ # từ}}",
         "encourage": "Không áp lực — chỉ cần lướt nhẹ một lần tối nay là mai bài kiểm tra sẽ dễ như chơi.",
-        "cta": "Luyện tập {count} từ ngay"
+        "cta": "Xem {count} từ bị sai"
       },
       "celebrateLearn": {
         "headline": "Vẫn còn năng lượng?",
@@ -520,7 +520,11 @@
     "gradeAgain": "Quên",
     "gradeHard": "Khó",
     "gradeGood": "Được",
-    "gradeEasy": "Dễ"
+    "gradeEasy": "Dễ",
+    "filterSlippedToday": "Từ sai hôm nay",
+    "slippedTodayBannerTitle": "{count, plural, =1 {1 từ bị sai hôm nay} other {# từ bị sai hôm nay}}",
+    "slippedTodayBannerDesc": "Xem lại các từ này trước khi luyện tập để ghi nhớ lâu hơn.",
+    "slippedTodayPractice": "Luyện tập ngay"
   },
   "Users": {
     "title": "Học viên",

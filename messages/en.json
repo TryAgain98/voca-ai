@@ -137,7 +137,7 @@
       "celebrateWrong": {
         "headline": "{count, plural, =1 {1 word slipped today} other {# words slipped today}}",
         "encourage": "No pressure — a single relaxed pass tonight makes tomorrow's check feel effortless.",
-        "cta": "Practice {count} now"
+        "cta": "View {count} slipped words"
       },
       "celebrateLearn": {
         "headline": "Got more energy?",
@@ -520,7 +520,11 @@
     "gradeAgain": "Again",
     "gradeHard": "Hard",
     "gradeGood": "Good",
-    "gradeEasy": "Easy"
+    "gradeEasy": "Easy",
+    "filterSlippedToday": "Slipped today",
+    "slippedTodayBannerTitle": "{count, plural, =1 {1 word slipped today} other {# words slipped today}}",
+    "slippedTodayBannerDesc": "Review these words before practicing to lock them in.",
+    "slippedTodayPractice": "Practice now"
   },
   "Users": {
     "title": "Learners",

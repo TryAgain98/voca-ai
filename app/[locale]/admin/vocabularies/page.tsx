@@ -1,7 +1,8 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { Plus } from 'lucide-react'
+import { Dumbbell, Plus } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
 
@@ -19,6 +20,7 @@ import { VocabularyDetailSheet } from './_components/vocabulary-detail-sheet'
 import { VocabularyFilter } from './_components/vocabulary-filter'
 import { VocabularyFormDialog } from './_components/vocabulary-form-dialog'
 import { VocabularyTable } from './_components/vocabulary-table'
+import { useSlippedTodayFilter } from './_hooks/use-slipped-today-filter'
 
 import type { MasteryStatus, VocabWithMastery, Vocabulary } from '~/types'
 
@@ -28,11 +30,15 @@ export default function VocabulariesPage() {
   const t = useTranslations('Vocabularies')
   const { user } = useUser()
   const { data: lessons = [] } = useLessons()
+  const searchParams = useSearchParams()
 
   const [lessonFilter, setLessonFilter] = useState(ALL)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<MasteryStatus | 'all'>(ALL)
   const [sortByDue, setSortByDue] = useState<'asc' | 'desc' | null>(null)
+  const [slippedTodayFilter, setSlippedTodayFilter] = useState(
+    () => searchParams.get('filter') === 'slipped-today',
+  )
   const [page, setPage] = useState(1)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Vocabulary | null>(null)
@@ -47,12 +53,19 @@ export default function VocabulariesPage() {
     lessonId,
   )
 
+  const { wrongTodayIds, wrongTodayCount, onPracticeNow } =
+    useSlippedTodayFilter(slippedTodayFilter)
+
   const createVocabulary = useCreateVocabulary()
   const updateVocabulary = useUpdateVocabulary()
   const deleteVocabulary = useDeleteVocabulary()
 
   const filtered = useMemo(() => {
     let result = vocabularies
+
+    if (wrongTodayIds) {
+      result = result.filter((v) => wrongTodayIds.has(v.id))
+    }
 
     const q = searchQuery.toLowerCase().trim()
     if (q) {
@@ -80,10 +93,13 @@ export default function VocabulariesPage() {
     }
 
     return result
-  }, [vocabularies, searchQuery, statusFilter, sortByDue])
+  }, [vocabularies, searchQuery, statusFilter, sortByDue, wrongTodayIds])
 
   const isFiltering =
-    lessonFilter !== ALL || searchQuery.trim() !== '' || statusFilter !== ALL
+    lessonFilter !== ALL ||
+    searchQuery.trim() !== '' ||
+    statusFilter !== ALL ||
+    slippedTodayFilter
 
   const handleLessonChange = (value: string) => {
     setLessonFilter(value)
@@ -104,6 +120,7 @@ export default function VocabulariesPage() {
     setLessonFilter(ALL)
     setSearchQuery('')
     setStatusFilter(ALL)
+    setSlippedTodayFilter(false)
     setPage(1)
   }
 
@@ -144,8 +161,8 @@ export default function VocabulariesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
             {t('wordCount', { count: filtered.length })}
@@ -154,15 +171,27 @@ export default function VocabulariesPage() {
             )}
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null)
-            setFormOpen(true)
-          }}
-        >
-          <Plus />
-          {t('addButton')}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          {slippedTodayFilter && wrongTodayCount > 0 && (
+            <button
+              type="button"
+              onClick={onPracticeNow}
+              className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-[510] text-amber-600 transition-colors hover:bg-amber-500/15 dark:text-amber-400"
+            >
+              <Dumbbell size={13} strokeWidth={1.8} />
+              {t('slippedTodayPractice')}
+            </button>
+          )}
+          <Button
+            onClick={() => {
+              setEditing(null)
+              setFormOpen(true)
+            }}
+          >
+            <Plus />
+            {t('addButton')}
+          </Button>
+        </div>
       </div>
 
       <VocabularyFilter
@@ -170,9 +199,11 @@ export default function VocabulariesPage() {
         lessonFilter={lessonFilter}
         searchQuery={searchQuery}
         statusFilter={statusFilter}
+        isSlippedTodayFilter={slippedTodayFilter}
         onLessonChange={handleLessonChange}
         onSearchChange={handleSearchChange}
         onStatusChange={handleStatusChange}
+        onSlippedTodayChange={setSlippedTodayFilter}
         onClearFilters={handleClearFilters}
       />
 

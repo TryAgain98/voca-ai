@@ -69,6 +69,9 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     setPendingReview(words.slice(0, HERO_BATCH_LIMIT).map(toReviewVocab))
     router.push(`/${locale}/admin/review`)
   }
+  const goViewSlippedToday = () => {
+    router.push(`/${locale}/admin/vocabularies?filter=slipped-today`)
+  }
 
   if (hasTest) {
     const batch = Math.min(props.needsTestingCount, HERO_BATCH_LIMIT)
@@ -102,7 +105,7 @@ export function SmartHeroCard(props: SmartHeroCardProps) {
     <HeroCelebrate
       wrongTodayCount={props.wrongTodayCount}
       unlearnedCount={props.unlearnedCount}
-      onPracticeWrong={() => goReviewWith(props.wrongTodayWords)}
+      onPracticeWrong={goViewSlippedToday}
       onLearnNew={() => goReviewWith(props.unlearnedWords)}
       isViewMode={props.isViewMode}
     />
