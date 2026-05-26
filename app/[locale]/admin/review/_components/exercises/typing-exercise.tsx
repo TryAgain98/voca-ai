@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { SpeakButton } from '~/components/layout/speak-button'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { WordTypeBadge } from '~/components/word-type-badge'
 import { useTTS } from '~/hooks/use-tts'
 import { checkAnswer } from '~/lib/answer-pattern'
 import { cn } from '~/lib/cn'
@@ -202,9 +203,17 @@ export function TypingExerciseCard({
             </div>
           ) : (
             <>
-              <p className="text-lg leading-tight font-medium">
-                {exercise.vocab.meaning}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-lg leading-tight font-medium">
+                  {exercise.vocab.meaning}
+                </p>
+                {exercise.vocab.word_type && (
+                  <WordTypeBadge
+                    value={exercise.vocab.word_type}
+                    className="h-5 text-xs"
+                  />
+                )}
+              </div>
               {exercise.vocab.description && (
                 <p className="text-muted-foreground/80 mt-1 text-xs leading-snug">
                   {exercise.vocab.description}
@@ -270,6 +279,7 @@ export function TypingExerciseCard({
               })
             }
             correctAnswer={exercise.vocab.word}
+            correctWordType={exercise.vocab.word_type}
             synonyms={exercise.vocab.synonyms}
           />
         )}

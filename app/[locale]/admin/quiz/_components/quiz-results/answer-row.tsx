@@ -5,6 +5,7 @@ import { CheckCircle2, Clock, Lightbulb, Mic, XCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { SpeakButton } from '~/components/layout/speak-button'
+import { WordTypeBadge } from '~/components/word-type-badge'
 import { cn } from '~/lib/cn'
 import { GRADE_EASY, GRADE_GOOD, deriveGrade } from '~/lib/mastery-scheduler'
 
@@ -169,6 +170,12 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
           <span className="text-foreground text-sm font-[590]">
             {result.exercise.vocab.word}
           </span>
+          {result.exercise.vocab.word_type && (
+            <WordTypeBadge
+              value={result.exercise.vocab.word_type}
+              className="h-5 text-xs"
+            />
+          )}
           <SpeakButton
             text={result.exercise.vocab.word}
             className="-my-1 size-6"

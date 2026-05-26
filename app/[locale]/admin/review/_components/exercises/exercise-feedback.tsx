@@ -5,12 +5,14 @@ import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
 
 import { Button } from '~/components/ui/button'
+import { WordTypeBadge } from '~/components/word-type-badge'
 
 interface ExerciseFeedbackProps {
   show: boolean
   isCorrect: boolean
   onContinue: () => void
   correctAnswer?: string
+  correctWordType?: string | null
   synonyms?: string[]
 }
 
@@ -19,6 +21,7 @@ export function ExerciseFeedback({
   isCorrect,
   onContinue,
   correctAnswer,
+  correctWordType,
   synonyms,
 }: ExerciseFeedbackProps) {
   const t = useTranslations('Review')
@@ -63,8 +66,16 @@ export function ExerciseFeedback({
               <span className="text-muted-foreground">
                 {t('correctAnswer')}:{' '}
               </span>
-              <span className="font-semibold text-green-400">
-                {correctAnswer}
+              <span className="inline-flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-green-400">
+                  {correctAnswer}
+                </span>
+                {correctWordType && (
+                  <WordTypeBadge
+                    value={correctWordType}
+                    className="h-5 text-xs"
+                  />
+                )}
               </span>
             </p>
           )}
