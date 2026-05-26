@@ -10,7 +10,13 @@
       "Bash(node -e \"const d = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/cmu-pronouncing-dictionary'\\); console.log\\('type:', typeof d\\); console.log\\('default?:', !!d.default\\); console.log\\('keys preview:', Object.keys\\(d\\).slice\\(0,5\\)\\);\")",
       "Bash(node -e \"const { dictionary } = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/cmu-pronouncing-dictionary'\\); console.log\\(\\\\\"it's=\\\\\", dictionary[\\\\\"it's\\\\\"]\\); console.log\\('its=', dictionary['its']\\); console.log\\('it=', dictionary['it']\\); console.log\\(\\\\\"don't=\\\\\", dictionary[\\\\\"don't\\\\\"]\\); console.log\\(\\\\\"we're=\\\\\", dictionary[\\\\\"we're\\\\\"]\\);\")",
       "Bash(node -e \"const { doubleMetaphone } = require\\('/Users/hahuytoan/Workspace/my-app/voca-ai/node_modules/double-metaphone'\\); console.log\\(\\\\\"it's:\\\\\", doubleMetaphone\\(\\\\\"it's\\\\\"\\)\\); console.log\\('its:', doubleMetaphone\\('its'\\)\\); console.log\\('it:', doubleMetaphone\\('it'\\)\\); console.log\\('is:', doubleMetaphone\\('is'\\)\\);\")",
-      "Bash(npx tsx -e ' *)"
+      "Bash(npx tsx -e ' *)",
+      "Bash(npm info *)",
+      "Bash(node -e \"const d = JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); console.log\\(d.exports || d.main || d.types || 'N/A'\\)\")",
+      "Bash(npm pack *)",
+      "Bash(node -e \"const m = require\\('msedge-tts'\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(node -e \"const { MsEdgeTTS, OUTPUT_FORMAT } = require\\('msedge-tts'\\); console.log\\(Object.getOwnPropertyNames\\(MsEdgeTTS.prototype\\)\\)\")",
+      "Bash(node -e \"const { OUTPUT_FORMAT } = require\\('msedge-tts'\\); const mp3Keys = Object.keys\\(OUTPUT_FORMAT\\).filter\\(k => k.includes\\('MP3'\\)\\); console.log\\(mp3Keys\\)\")"
     ],
     "deny": [
       "Bash(git push --force *)",

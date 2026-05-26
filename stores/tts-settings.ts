@@ -36,7 +36,7 @@ export const useTTSSettingsStore = create<TTSSettingsState>()(
   devtools(
     persist(
       (set) => ({
-        engine: 'web-speech',
+        engine: 'openai',
         webSpeechRate: 1,
         webSpeechPitch: 1,
         webSpeechVoiceURI: null,

@@ -30,7 +30,16 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
 
   return (
     <Popover onOpenChange={handleOpenChange}>
-      <PopoverTrigger render={<span />}>{children}</PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            className="inline border-0 bg-transparent p-0 font-[inherit] text-[inherit]"
+          />
+        }
+      >
+        {children}
+      </PopoverTrigger>
       <PopoverContent
         className="w-72 p-3"
         style={{
@@ -49,6 +58,7 @@ export function WordInfoPopup({ word, children }: WordInfoPopupProps) {
               {detail?.wordType && <WordTypeBadge value={detail.wordType} />}
             </div>
             <button
+              type="button"
               onClick={tts.speak}
               className={cn(
                 'shrink-0 rounded p-0.5 transition-colors',

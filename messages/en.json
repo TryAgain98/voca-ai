@@ -151,6 +151,7 @@
     "forecastTomorrow": "Tomorrow",
     "forecastInDays": "{count, plural, =1 {In 1 day} other {In # days}}",
     "forecastWordsCount": "{count, plural, =0 {no words} =1 {1 word} other {# words}}",
+    "forecastNext7Days": "Next 7 days",
     "forecastNext14Days": "Next 14 days",
     "forecastTotalUpcoming": "{count} total",
     "forecastLegendLess": "Less",

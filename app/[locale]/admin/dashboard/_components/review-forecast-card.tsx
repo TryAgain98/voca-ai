@@ -20,6 +20,8 @@ interface ReviewForecastCardProps {
 
 type IntensityStyle = { bg: string; text: string }
 
+const MOBILE_FORECAST_DAYS = 7
+
 function intensityStyle(count: number, max: number): IntensityStyle {
   if (count === 0 || max <= 0) {
     return { bg: 'bg-muted/30', text: 'text-transparent' }
@@ -53,7 +55,13 @@ export function ReviewForecastCard({
         <Skeleton className="mt-2 h-3 w-44" />
         <div className="mt-5 flex gap-1.5">
           {Array.from({ length: 14 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-square flex-1 rounded-md" />
+            <Skeleton
+              key={i}
+              className={cn(
+                'aspect-square flex-1 rounded-md',
+                i >= MOBILE_FORECAST_DAYS && 'hidden sm:block',
+              )}
+            />
           ))}
         </div>
       </div>
@@ -62,6 +70,9 @@ export function ReviewForecastCard({
 
   const days = (forecast?.forecast ?? []).slice(1)
   const maxCount = days.reduce((m, d) => Math.max(m, d.count), 0)
+  const mobileTotalUpcoming = days
+    .slice(0, MOBILE_FORECAST_DAYS)
+    .reduce((sum, d) => sum + d.count, 0)
 
   const nextDate = forecast?.nextFutureDate ?? null
   const nextCount = forecast?.nextFutureCount ?? 0
@@ -124,12 +135,20 @@ export function ReviewForecastCard({
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between">
           <span className="text-muted-foreground text-[10px] font-[510] tracking-wide uppercase">
-            {t('forecastNext14Days')}
+            <span className="sm:hidden">{t('forecastNext7Days')}</span>
+            <span className="hidden sm:inline">{t('forecastNext14Days')}</span>
           </span>
           <span className="text-muted-foreground/70 text-[10px]">
-            {totalUpcoming > 0
-              ? t('forecastTotalUpcoming', { count: totalUpcoming })
-              : ''}
+            <span className="sm:hidden">
+              {mobileTotalUpcoming > 0
+                ? t('forecastTotalUpcoming', { count: mobileTotalUpcoming })
+                : ''}
+            </span>
+            <span className="hidden sm:inline">
+              {totalUpcoming > 0
+                ? t('forecastTotalUpcoming', { count: totalUpcoming })
+                : ''}
+            </span>
           </span>
         </div>
 
@@ -158,6 +177,7 @@ export function ReviewForecastCard({
                 }
                 className={cn(
                   'group flex flex-1 flex-col items-center gap-1.5 transition',
+                  index >= MOBILE_FORECAST_DAYS && 'hidden sm:flex',
                   hasReviews ? 'cursor-pointer' : 'cursor-default',
                 )}
               >
@@ -204,8 +224,24 @@ export function ReviewForecastCard({
           })}
         </div>
 
+        {mobileTotalUpcoming > 0 && (
+          <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
+            <p className="text-muted-foreground/50 text-[10px] leading-tight">
+              {t('forecastCountHint')}
+            </p>
+            <div className="text-muted-foreground/60 flex shrink-0 items-center gap-1.5 text-[10px]">
+              <span>{t('forecastLegendLess')}</span>
+              <span className="bg-muted/30 size-2.5 rounded-sm" />
+              <span className="bg-primary/25 size-2.5 rounded-sm" />
+              <span className="bg-primary/45 size-2.5 rounded-sm" />
+              <span className="bg-primary/65 size-2.5 rounded-sm" />
+              <span className="bg-primary/90 size-2.5 rounded-sm" />
+              <span>{t('forecastLegendMore')}</span>
+            </div>
+          </div>
+        )}
         {totalUpcoming > 0 && (
-          <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="mt-3 hidden items-center justify-between gap-2 sm:flex">
             <p className="text-muted-foreground/50 text-[10px] leading-tight">
               {t('forecastCountHint')}
             </p>

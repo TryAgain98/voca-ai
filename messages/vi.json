@@ -151,6 +151,7 @@
     "forecastTomorrow": "Ngày mai",
     "forecastInDays": "{count, plural, =1 {1 ngày nữa} other {# ngày nữa}}",
     "forecastWordsCount": "{count, plural, =0 {không có từ} =1 {1 từ} other {# từ}}",
+    "forecastNext7Days": "7 ngày tới",
     "forecastNext14Days": "14 ngày tới",
     "forecastTotalUpcoming": "Tổng {count}",
     "forecastLegendLess": "Ít",

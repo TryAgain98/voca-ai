@@ -92,7 +92,7 @@ function SegmentBlock({
   wordResults,
   resultOffset,
 }: SegmentBlockProps) {
-  const tts = useTTS(segment.text)
+  const tts = useTTS(segment.text, { prefetch: true })
   const tokens = useMemo(() => tokenizeSegment(segment.text), [segment.text])
 
   return (
