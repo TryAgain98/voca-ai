@@ -11,7 +11,7 @@ import { useLatestExamsByUser } from '~/hooks/use-passage-sessions'
 import { useDeletePassage, usePassages } from '~/hooks/use-passages'
 
 import { PassageDeleteDialog } from './_components/passage-delete-dialog'
-import { PassageRow } from './_components/passage-row'
+import { PassageCard, PassageRow } from './_components/passage-row'
 
 import type { Passage } from '~/types'
 
@@ -44,18 +44,18 @@ export default function PassagesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl leading-7 font-semibold tracking-tight">
             {t('title')}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground mt-0.5 text-sm leading-5">
             {t('description')}
           </p>
         </div>
         <Link href={`/${locale}/admin/passages/new`}>
-          <Button className="gap-2">
+          <Button className="h-8 w-full gap-2 sm:h-auto sm:w-auto">
             <Plus size={16} />
             {t('new')}
           </Button>
@@ -85,7 +85,18 @@ export default function PassagesPage() {
 
       {!isLoading && passages.length > 0 && (
         <div className="border-border overflow-hidden rounded-xl border">
-          <table className="w-full">
+          <div className="divide-y md:hidden">
+            {passages.map((p) => (
+              <PassageCard
+                key={p.id}
+                passage={p}
+                lastExam={examByPassageId[p.id]}
+                onDelete={() => setDeletingPassage(p)}
+              />
+            ))}
+          </div>
+
+          <table className="hidden w-full md:table">
             <thead>
               <tr className="border-border bg-muted/40 text-muted-foreground border-b text-xs">
                 <th className="w-14 py-2.5 pr-3 pl-4 text-center font-medium">

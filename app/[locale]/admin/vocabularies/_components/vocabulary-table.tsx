@@ -5,11 +5,16 @@ import {
   ArrowUp,
   ArrowUpDown,
   BookMarked,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { SpeakButton } from '~/components/layout/speak-button'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
   Table,
@@ -24,8 +29,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { WordTypeBadge } from '~/components/word-type-badge'
 
-import { VocabularyTableRow } from './vocabulary-table-row'
+import {
+  formatDue,
+  highlight,
+  STATUS_STYLES,
+  VocabularyTableRow,
+} from './vocabulary-table-row'
 
 import type { Lesson, VocabWithMastery } from '~/types'
 
@@ -81,6 +92,40 @@ export function VocabularyTable({
     onSortByDueChange(next)
   }
 
+  const renderActions = (voca: VocabWithMastery) => {
+    if (!showActions) return null
+
+    return renderRowActions ? (
+      renderRowActions(voca)
+    ) : (
+      <div className="inline-flex cursor-pointer items-center rounded-md border border-white/8 bg-white/2">
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title={tCommon('edit')}
+            className="rounded-r-none"
+            onClick={() => onEdit(voca)}
+          >
+            <Pencil size={13} />
+          </Button>
+        )}
+        {onEdit && onDelete && <div className="h-4 w-px bg-white/8" />}
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="text-destructive hover:text-destructive rounded-l-none"
+            title={tCommon('delete')}
+            onClick={() => onDelete(voca)}
+          >
+            <Trash2 size={13} />
+          </Button>
+        )}
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="text-muted-foreground flex items-center justify-center py-20 text-sm">
@@ -107,66 +152,178 @@ export function VocabularyTable({
 
   return (
     <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-10 px-4 text-center">
-              {t('colNo')}
-            </TableHead>
-            <TableHead className="px-5">{t('colWord')}</TableHead>
-            <TableHead className="px-4">{t('colMeaning')}</TableHead>
-            <TableHead className="px-4">{t('colLesson')}</TableHead>
-            <TableHead className="w-32 px-4">{t('colStatus')}</TableHead>
-            <TableHead className="w-28 px-4">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="cursor-default">
-                    {t('colLevel')}
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs">
-                    {t('colLevelTooltip')}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </TableHead>
-            <TableHead
-              className="w-28 cursor-pointer px-4 select-none"
+      <div className="hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10 px-4 text-center">
+                {t('colNo')}
+              </TableHead>
+              <TableHead className="px-5">{t('colWord')}</TableHead>
+              <TableHead className="px-4">{t('colMeaning')}</TableHead>
+              <TableHead className="px-4">{t('colLesson')}</TableHead>
+              <TableHead className="w-32 px-4">{t('colStatus')}</TableHead>
+              <TableHead className="w-28 px-4">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-default">
+                      {t('colLevel')}
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      {t('colLevelTooltip')}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
+              <TableHead
+                className="w-28 cursor-pointer px-4 select-none"
+                onClick={handleDueSort}
+              >
+                <div className="flex items-center gap-1">
+                  {t('colDue')}
+                  {sortByDue === 'asc' ? (
+                    <ArrowUp size={12} className="text-foreground" />
+                  ) : sortByDue === 'desc' ? (
+                    <ArrowDown size={12} className="text-foreground" />
+                  ) : (
+                    <ArrowUpDown
+                      size={12}
+                      className="text-muted-foreground/40"
+                    />
+                  )}
+                </div>
+              </TableHead>
+              {showActions && <TableHead className="w-24 px-4" />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginated.map((voca, i) => (
+              <VocabularyTableRow
+                key={voca.id}
+                voca={voca}
+                rowNumber={pageStart + i + 1}
+                searchQuery={searchQuery}
+                lessonName={lessonName(voca.lesson_id)}
+                showActions={showActions}
+                onRowClick={onRowClick}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                renderRowActions={renderRowActions}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="divide-y md:hidden">
+        <div className="bg-muted/20 flex items-center justify-between gap-2 border-b px-3 py-1.5">
+          <span className="text-muted-foreground text-xs font-medium">
+            {t('pageOf', { current: page, total: totalPages })}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
               onClick={handleDueSort}
+              className="text-muted-foreground hover:text-foreground inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors"
             >
-              <div className="flex items-center gap-1">
-                {t('colDue')}
-                {sortByDue === 'asc' ? (
-                  <ArrowUp size={12} className="text-foreground" />
-                ) : sortByDue === 'desc' ? (
-                  <ArrowDown size={12} className="text-foreground" />
-                ) : (
-                  <ArrowUpDown size={12} className="text-muted-foreground/40" />
-                )}
-              </div>
-            </TableHead>
-            {showActions && <TableHead className="w-24 px-4" />}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginated.map((voca, i) => (
-            <VocabularyTableRow
+              {t('colDue')}
+              {sortByDue === 'asc' ? (
+                <ArrowUp size={12} className="text-foreground" />
+              ) : sortByDue === 'desc' ? (
+                <ArrowDown size={12} className="text-foreground" />
+              ) : (
+                <ArrowUpDown size={12} className="text-muted-foreground/50" />
+              )}
+            </button>
+            {totalPages > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={page === 1}
+                  onClick={() => onPageChange(page - 1)}
+                >
+                  <ChevronLeft size={14} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={page === totalPages}
+                  onClick={() => onPageChange(page + 1)}
+                >
+                  <ChevronRight size={14} />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {paginated.map((voca) => {
+          const statusStyle = STATUS_STYLES[voca.masteryStatus]
+
+          return (
+            <div
               key={voca.id}
-              voca={voca}
-              rowNumber={pageStart + i + 1}
-              searchQuery={searchQuery}
-              lessonName={lessonName(voca.lesson_id)}
-              showActions={showActions}
-              onRowClick={onRowClick}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              renderRowActions={renderRowActions}
-            />
-          ))}
-        </TableBody>
-      </Table>
+              role="button"
+              tabIndex={0}
+              onClick={() => onRowClick(voca)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onRowClick(voca)
+                }
+              }}
+              className="hover:bg-muted/40 focus-visible:ring-ring/50 block w-full px-3 py-3 text-left transition-colors outline-none focus-visible:ring-3"
+            >
+              <div className="flex items-start gap-2.5">
+                <div
+                  className="-mt-0.5 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <SpeakButton text={voca.word} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span className="truncate text-[15px] leading-5 font-semibold">
+                      {highlight(voca.word, searchQuery)}
+                    </span>
+                    {voca.word_type && <WordTypeBadge value={voca.word_type} />}
+                  </div>
+
+                  <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm leading-5 break-words">
+                    {highlight(voca.meaning, searchQuery)}
+                  </p>
+
+                  <div className="mt-1.5 flex min-w-0 items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={`text-[11px] font-normal ${statusStyle.className}`}
+                    >
+                      {t(statusStyle.label as Parameters<typeof t>[0])}
+                    </Badge>
+                    <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
+                      <CalendarClock size={12} />
+                      {formatDue(voca.mastery?.due_at)}
+                    </span>
+                    {showActions && (
+                      <span
+                        className="ml-auto shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {renderActions(voca)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t px-5 py-3">
+        <div className="flex items-center justify-between border-t px-4 py-3 sm:px-5">
           <span className="text-muted-foreground text-xs">
             {t('pageOf', { current: page, total: totalPages })}
           </span>

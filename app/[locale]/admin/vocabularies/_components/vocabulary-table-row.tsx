@@ -14,7 +14,7 @@ import { LevelDots } from './level-dots'
 
 import type { MasteryStatus, VocabWithMastery } from '~/types'
 
-const STATUS_STYLES: Record<
+export const STATUS_STYLES: Record<
   MasteryStatus,
   { label: string; className: string }
 > = {
@@ -35,14 +35,14 @@ const STATUS_STYLES: Record<
   },
 }
 
-function formatDue(dueAt: string | null | undefined): string {
+export function formatDue(dueAt: string | null | undefined): string {
   if (!dueAt) return '—'
   const d = dayjs(dueAt)
   if (!d.isValid()) return '—'
   return d.format('DD/MM/YYYY')
 }
 
-function highlight(text: string, query: string) {
+export function highlight(text: string, query: string) {
   if (!query.trim()) return <>{text}</>
   const regex = new RegExp(
     `(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,

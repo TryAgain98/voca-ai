@@ -108,21 +108,21 @@ export default function LessonsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl leading-7 font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm leading-5">
             {t('lessonCount', { count: lessons.length })}
           </p>
         </div>
-        <Button onClick={openAdd}>
+        <Button className="h-8 sm:h-auto" onClick={openAdd}>
           <Plus />
           {t('addButton')}
         </Button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="relative max-w-xs flex-1">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="relative min-w-0 flex-1 sm:max-w-xs">
           <Search
             size={14}
             className="text-muted-foreground absolute top-1/2 left-2.5 -translate-y-1/2"
@@ -131,19 +131,23 @@ export default function LessonsPage() {
             placeholder={t('filterPlaceholder')}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="pl-8"
+            className="h-8 pl-8 sm:h-9"
           />
         </div>
         <Button
           variant="outline"
+          size="sm"
+          className="h-8 shrink-0"
           onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}
         >
           {sort === 'asc' ? <ArrowDownAZ size={15} /> : <ArrowUpAZ size={15} />}
-          {sort === 'asc' ? t('sortAZ') : t('sortZA')}
+          <span className="hidden sm:inline">
+            {sort === 'asc' ? t('sortAZ') : t('sortZA')}
+          </span>
         </Button>
       </div>
 
-      <div className="rounded-xl border">
+      <div className="overflow-hidden rounded-xl border">
         {isLoading ? (
           <div className="text-muted-foreground flex items-center justify-center py-20 text-sm">
             {tCommon('loading')}
@@ -156,52 +160,99 @@ export default function LessonsPage() {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="px-5">{t('colName')}</TableHead>
-                <TableHead className="px-5">{t('colDescription')}</TableHead>
-                <TableHead className="w-20 px-5" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="divide-y md:hidden">
               {filtered.map((lesson) => (
-                <TableRow key={lesson.id} className="group">
-                  <TableCell className="px-5 font-medium">
-                    {lesson.name}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground px-5">
-                    {lesson.description ?? (
-                      <span className="italic opacity-40">
-                        {t('noDescription')}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-5">
-                    <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        title={tCommon('edit')}
-                        onClick={() => openEdit(lesson)}
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-destructive hover:text-destructive"
-                        title={tCommon('delete')}
-                        onClick={() => setDeletingId(lesson.id)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <div
+                  key={lesson.id}
+                  className="flex items-start gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground truncate text-sm font-medium">
+                      {lesson.name}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">
+                      {lesson.description ?? (
+                        <span className="italic opacity-50">
+                          {t('noDescription')}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      title={tCommon('edit')}
+                      onClick={() => openEdit(lesson)}
+                    >
+                      <Pencil size={14} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-destructive hover:text-destructive"
+                      title={tCommon('delete')}
+                      onClick={() => setDeletingId(lesson.id)}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="px-5">{t('colName')}</TableHead>
+                    <TableHead className="px-5">
+                      {t('colDescription')}
+                    </TableHead>
+                    <TableHead className="w-20 px-5" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((lesson) => (
+                    <TableRow key={lesson.id} className="group">
+                      <TableCell className="px-5 font-medium">
+                        {lesson.name}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-5">
+                        {lesson.description ?? (
+                          <span className="italic opacity-40">
+                            {t('noDescription')}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="px-5">
+                        <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            title={tCommon('edit')}
+                            onClick={() => openEdit(lesson)}
+                          >
+                            <Pencil size={14} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-destructive hover:text-destructive"
+                            title={tCommon('delete')}
+                            onClick={() => setDeletingId(lesson.id)}
+                          >
+                            <Trash2 size={14} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 

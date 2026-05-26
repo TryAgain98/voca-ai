@@ -42,6 +42,12 @@ function formatBenchmark(good: number | null): string | null {
   return `${good}s`
 }
 
+interface PassageItemProps {
+  passage: Passage
+  lastExam: PassageSession | undefined
+  onDelete: (id: string) => void
+}
+
 export function PassageRow({
   index,
   passage,
@@ -153,5 +159,100 @@ export function PassageRow({
         </div>
       </td>
     </tr>
+  )
+}
+
+export function PassageCard({ passage, lastExam, onDelete }: PassageItemProps) {
+  const t = useTranslations('Passages')
+  const locale = useLocale()
+  const wordCount = passage.content.trim().split(/\s+/).length
+  const benchmark = formatBenchmark(passage.time_good)
+  const hasExam = !!lastExam
+  const examOutcome = lastExam
+    ? evaluatePassageExamOutcome(
+        lastExam.word_results,
+        lastExam.duration_seconds,
+        passage.time_good,
+      )
+    : null
+  const examScore = lastExam?.overall_score ?? lastExam?.pronunciation_score
+
+  return (
+    <div className="px-4 py-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-foreground line-clamp-2 text-sm leading-5 font-medium">
+            {passage.title}
+          </h2>
+          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            <span>{t('wordsCount', { count: wordCount })}</span>
+            {benchmark && (
+              <span className="flex items-center gap-1">
+                <Clock size={10} />
+                {benchmark}
+              </span>
+            )}
+            <span>{formatDate(passage.created_at, locale)}</span>
+          </div>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground hover:text-destructive shrink-0"
+          onClick={() => onDelete(passage.id)}
+          title={t('deleteButton')}
+        >
+          <Trash2 size={13} />
+        </Button>
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {hasExam && examOutcome ? (
+          <span
+            className={cn(
+              'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold',
+              examOutcome.passed
+                ? 'bg-emerald-400/10 text-emerald-400'
+                : 'bg-red-400/10 text-red-400',
+            )}
+          >
+            {examOutcome.passed ? t('passed') : t('notPassed')}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-xs">
+            {t('notExamined')}
+          </span>
+        )}
+
+        {typeof examScore === 'number' && (
+          <span className={cn('text-xs font-semibold', scoreColor(examScore))}>
+            {t('tableColScore')}: {examScore}
+          </span>
+        )}
+
+        <span className="text-muted-foreground text-xs">
+          {t('tableColLastExam')}:{' '}
+          {lastExam ? relativeDate(lastExam.created_at, locale) : '—'}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Link href={`/${locale}/admin/passages/${passage.id}/practice`}>
+          <Button variant="outline" size="sm" className="h-8 w-full text-xs">
+            {t('practiceButton')}
+          </Button>
+        </Link>
+        <Link href={`/${locale}/admin/passages/${passage.id}/exam`}>
+          <Button
+            variant={examOutcome?.passed ? 'outline' : 'default'}
+            size="sm"
+            className="h-8 w-full text-xs"
+          >
+            {examOutcome?.passed ? t('retakeExamButton') : t('examButton')}
+          </Button>
+        </Link>
+      </div>
+    </div>
   )
 }

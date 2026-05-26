@@ -112,6 +112,41 @@ function ProgressCell({
   )
 }
 
+function ProgressSummary({
+  masteredCount,
+  totalWords,
+}: {
+  masteredCount: number
+  totalWords: number
+}) {
+  const t = useTranslations('Users')
+  const percent =
+    totalWords > 0 ? Math.round((masteredCount / totalWords) * 100) : 0
+
+  return (
+    <div className="min-w-0 flex-1">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-xs">
+          {totalWords > 0
+            ? t('masteredWords', { mastered: masteredCount, total: totalWords })
+            : t('notStarted')}
+        </span>
+        {totalWords > 0 && (
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {percent}%
+          </span>
+        )}
+      </div>
+      <div className="bg-muted h-1 overflow-hidden rounded-full">
+        <div
+          className="h-full rounded-full bg-[#5e6ad2] transition-all duration-500"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
 function DueTodayCell({
   count,
   practicedToday,
@@ -280,8 +315,8 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
   const firstMasteredCount = users[0]?.masteredCount ?? 0
 
   return (
-    <div className="space-y-4">
-      <div className="relative max-w-sm">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="relative sm:max-w-sm">
         <Search
           size={14}
           className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2"
@@ -290,7 +325,7 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('searchPlaceholder')}
-          className="pl-9"
+          className="h-8 pl-9 sm:h-9"
         />
       </div>
 
@@ -302,7 +337,74 @@ export function UsersTable({ users, isLoading }: UsersTableProps) {
         </div>
       ) : (
         <div className="border-border overflow-hidden rounded-xl border">
-          <table className="w-full">
+          <div className="divide-y md:hidden">
+            {filtered.map((user) => (
+              <div
+                key={user.id}
+                role="button"
+                tabIndex={0}
+                onClick={() =>
+                  router.push(`/${locale}/admin/dashboard?viewAs=${user.id}`)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    router.push(`/${locale}/admin/dashboard?viewAs=${user.id}`)
+                  }
+                }}
+                className="hover:bg-muted/40 focus-visible:ring-ring/50 px-4 py-3 transition-colors outline-none focus-visible:ring-3"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-7 shrink-0 pt-1">
+                    <RankCell rank={user.rank} />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <UserCell user={user} />
+                      <div className="shrink-0">
+                        <UserScoreBadge
+                          score={user.score}
+                          breakdown={user.scoreBreakdown}
+                        />
+                      </div>
+                    </div>
+
+                    <ProgressSummary
+                      masteredCount={user.masteredCount}
+                      totalWords={user.totalWords}
+                    />
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1.5">
+                        <Flame
+                          size={13}
+                          className={cn(
+                            user.streakDays > 0 && !user.practicedToday
+                              ? 'text-amber-400'
+                              : 'text-orange-400',
+                          )}
+                        />
+                        <span className="text-muted-foreground text-xs tabular-nums">
+                          {user.streakDays > 0
+                            ? t('streakDays', { days: user.streakDays })
+                            : '—'}
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground text-xs">
+                        {t('colDueToday')}: {user.dueCount}
+                      </span>
+                      <ChevronRight
+                        size={16}
+                        className="text-muted-foreground/40 ml-auto shrink-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <table className="hidden w-full md:table">
             <thead>
               <tr className="border-border border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-[510] tracking-wider uppercase">
