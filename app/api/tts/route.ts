@@ -18,13 +18,26 @@ const VOICE_MAP: Record<string, string> = {
   nova: 'en-US-AriaNeural',
   alloy: 'en-US-JennyNeural',
   echo: 'en-US-GuyNeural',
-  fable: 'en-US-DavisNeural',
-  onyx: 'en-US-TonyNeural',
-  shimmer: 'en-US-MonicaNeural',
+  fable: 'en-US-BrianNeural',
+  onyx: 'en-US-ChristopherNeural',
+  shimmer: 'en-US-EmmaNeural',
 }
 
-// Cache for 7 days — vocabulary audio is static content
 const CACHE_CONTROL = 'public, max-age=604800, stale-while-revalidate=86400'
+
+function collectStream(readable: Readable): Promise<Uint8Array<ArrayBuffer>> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    readable.on('data', (chunk: Buffer) => chunks.push(chunk))
+    readable.on('error', reject)
+    readable.on('end', () => {
+      const merged = Buffer.concat(chunks)
+      const result = new Uint8Array(merged.byteLength)
+      result.set(merged)
+      resolve(result as Uint8Array<ArrayBuffer>)
+    })
+  })
+}
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
@@ -47,12 +60,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3,
     )
     const { audioStream } = tts.toStream(text, { rate: speed })
+    const audio = await collectStream(audioStream)
+    tts.close()
 
-    const webStream = Readable.toWeb(audioStream) as ReadableStream<Uint8Array>
-
-    return new NextResponse(webStream, {
+    return new NextResponse(audio.buffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
+        'Content-Length': String(audio.byteLength),
         'Cache-Control': CACHE_CONTROL,
       },
     })
