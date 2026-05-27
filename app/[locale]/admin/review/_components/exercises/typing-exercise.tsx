@@ -158,6 +158,7 @@ export function TypingExerciseCard({
       setTimeout(() => onAnswer(true, meta), CORRECT_ADVANCE_DELAY_MS)
     } else {
       playWrongSound()
+      speak()
     }
   }
 
@@ -281,6 +282,7 @@ export function TypingExerciseCard({
             correctAnswer={exercise.vocab.word}
             correctWordType={exercise.vocab.word_type}
             synonyms={exercise.vocab.synonyms}
+            userAnswer={submitted && !isCorrect ? value.trim() : undefined}
           />
         )}
 

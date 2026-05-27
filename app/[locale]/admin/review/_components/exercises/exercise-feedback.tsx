@@ -6,6 +6,10 @@ import { useEffect } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { WordTypeBadge } from '~/components/word-type-badge'
+import { cn } from '~/lib/cn'
+import { diffQuizAnswer } from '~/lib/quiz-answer-diff'
+
+import type { QuizAnswerDiffOp } from '~/types'
 
 interface ExerciseFeedbackProps {
   show: boolean
@@ -14,6 +18,39 @@ interface ExerciseFeedbackProps {
   correctAnswer?: string
   correctWordType?: string | null
   synonyms?: string[]
+  userAnswer?: string
+}
+
+function formatDiffChar(char: string): string {
+  return char === ' ' ? '·' : char
+}
+
+function DiffHighlight({
+  expected,
+  actual,
+}: {
+  expected: string
+  actual: string
+}) {
+  const ops = diffQuizAnswer(expected, actual)
+  return (
+    <span className="font-mono text-sm font-[510] wrap-break-word">
+      {ops.map((op: QuizAnswerDiffOp, i: number) => (
+        <span
+          key={`${op.type}-${i}`}
+          className={cn(
+            op.type === 'match' && 'text-foreground',
+            op.type === 'wrong' && 'text-rose-500',
+            op.type === 'missing' && 'text-muted-foreground/45',
+            op.type === 'extra' &&
+              'rounded bg-rose-500/10 px-0.5 text-rose-500',
+          )}
+        >
+          {formatDiffChar(op.char)}
+        </span>
+      ))}
+    </span>
+  )
 }
 
 export function ExerciseFeedback({
@@ -23,6 +60,7 @@ export function ExerciseFeedback({
   correctAnswer,
   correctWordType,
   synonyms,
+  userAnswer,
 }: ExerciseFeedbackProps) {
   const t = useTranslations('Review')
   const showContinue = show && !isCorrect
@@ -32,7 +70,6 @@ export function ExerciseFeedback({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') onContinue()
     }
-    // Delay to avoid catching the same Enter keydown that triggered submission
     const timer = setTimeout(() => {
       window.addEventListener('keydown', handleKeyDown)
     }, 300)
@@ -62,22 +99,28 @@ export function ExerciseFeedback({
           className="flex flex-col gap-3"
         >
           {correctAnswer && (
-            <p className="text-sm">
-              <span className="text-muted-foreground">
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-xs">
+              <span className="text-muted-foreground/70">
                 {t('correctAnswer')}:{' '}
-              </span>
-              <span className="inline-flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold text-green-400">
-                  {correctAnswer}
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="font-[510] text-emerald-500">
+                    {correctAnswer}
+                  </span>
+                  {correctWordType && (
+                    <WordTypeBadge
+                      value={correctWordType}
+                      className="h-5 text-xs"
+                    />
+                  )}
                 </span>
-                {correctWordType && (
-                  <WordTypeBadge
-                    value={correctWordType}
-                    className="h-5 text-xs"
-                  />
-                )}
               </span>
-            </p>
+              {userAnswer && (
+                <span className="text-muted-foreground/70">
+                  {t('youTyped')}:{' '}
+                  <DiffHighlight expected={correctAnswer} actual={userAnswer} />
+                </span>
+              )}
+            </div>
           )}
           {synonyms && synonyms.length > 0 && (
             <p className="text-sm">

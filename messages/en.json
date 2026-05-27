@@ -274,6 +274,7 @@
     "quizHintConfirm": "Reveal hint",
     "quizHintPenaltyActive": "Hint used. This question will not add to your score.",
     "synonymAccepted": "Accepted as a synonym. Card answer: {expected}",
+    "youTyped": "You typed",
     "correctAnswer": "Correct answer",
     "alsoAccepted": "Also accepted",
     "resultsTitle": "Session complete!",
