@@ -525,7 +525,9 @@
     "filterSlippedToday": "Slipped today",
     "slippedTodayBannerTitle": "{count, plural, =1 {1 word slipped today} other {# words slipped today}}",
     "slippedTodayBannerDesc": "Review these words before practicing to lock them in.",
-    "slippedTodayPractice": "Practice now"
+    "slippedTodayPractice": "Practice now",
+    "slippedTodayPracticeModalTitle": "Practice slipped words",
+    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 word slipped today — choose a mode to start} other {# words slipped today — choose a mode to start}}"
   },
   "Users": {
     "title": "Learners",

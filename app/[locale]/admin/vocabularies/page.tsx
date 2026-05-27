@@ -15,6 +15,7 @@ import {
 } from '~/hooks/use-vocabularies'
 import { useVocabulariesWithMastery } from '~/hooks/use-vocabularies-with-mastery'
 
+import { SlippedTodayPracticeModal } from './_components/slipped-today-practice-modal'
 import { VocabularyDeleteDialog } from './_components/vocabulary-delete-dialog'
 import { VocabularyDetailSheet } from './_components/vocabulary-detail-sheet'
 import { VocabularyFilter } from './_components/vocabulary-filter'
@@ -40,6 +41,7 @@ export default function VocabulariesPage() {
     () => searchParams.get('filter') === 'slipped-today',
   )
   const [page, setPage] = useState(1)
+  const [practiceModalOpen, setPracticeModalOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Vocabulary | null>(null)
   const [deletingVoca, setDeletingVoca] = useState<VocabWithMastery | null>(
@@ -53,7 +55,7 @@ export default function VocabulariesPage() {
     lessonId,
   )
 
-  const { wrongTodayIds, wrongTodayCount, onPracticeNow } =
+  const { wrongTodayIds, wrongTodayCount, wrongTodayVocab } =
     useSlippedTodayFilter(slippedTodayFilter)
 
   const createVocabulary = useCreateVocabulary()
@@ -176,7 +178,7 @@ export default function VocabulariesPage() {
             {slippedTodayFilter && wrongTodayCount > 0 && (
               <button
                 type="button"
-                onClick={onPracticeNow}
+                onClick={() => setPracticeModalOpen(true)}
                 className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-[510] text-amber-600 transition-colors hover:bg-amber-500/15 sm:flex-none dark:text-amber-400"
               >
                 <Dumbbell size={13} strokeWidth={1.8} />
@@ -230,6 +232,12 @@ export default function VocabulariesPage() {
           onClearFilters={handleClearFilters}
         />
       </div>
+
+      <SlippedTodayPracticeModal
+        open={practiceModalOpen}
+        vocab={wrongTodayVocab}
+        onClose={() => setPracticeModalOpen(false)}
+      />
 
       <VocabularyDetailSheet
         voca={viewingVoca}

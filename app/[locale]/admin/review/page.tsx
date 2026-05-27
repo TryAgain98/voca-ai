@@ -13,7 +13,7 @@ import type {
   ReviewVocab,
 } from './_types/review.types'
 
-const ALL_EXERCISE_TYPES = ['word-to-meaning', 'meaning-to-word'] as const
+const DEFAULT_EXERCISE_TYPES = ['word-to-meaning', 'meaning-to-word'] as const
 
 export default function ReviewPage() {
   const { user } = useUser()
@@ -23,6 +23,9 @@ export default function ReviewPage() {
 
   const [quickStartVocab, setQuickStartVocab] = useState<ReviewVocab[] | null>(
     () => useReviewQuickStartStore.getState().pendingVocab,
+  )
+  const [quickStartExerciseTypes, setQuickStartExerciseTypes] = useState(
+    () => useReviewQuickStartStore.getState().pendingExerciseTypes,
   )
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export default function ReviewPage() {
       ? {
           userId: user.id,
           lessonIds: [],
-          exerciseTypes: [...ALL_EXERCISE_TYPES],
+          exerciseTypes: quickStartExerciseTypes ?? [...DEFAULT_EXERCISE_TYPES],
           vocab: quickStartVocab,
         }
       : null
@@ -46,6 +49,7 @@ export default function ReviewPage() {
   const handleExit = () => {
     setManualSetup(null)
     setQuickStartVocab(null)
+    setQuickStartExerciseTypes(null)
     setSessionKey((k) => k + 1)
   }
 

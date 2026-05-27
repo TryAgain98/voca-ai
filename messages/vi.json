@@ -525,7 +525,9 @@
     "filterSlippedToday": "Từ sai hôm nay",
     "slippedTodayBannerTitle": "{count, plural, =1 {1 từ bị sai hôm nay} other {# từ bị sai hôm nay}}",
     "slippedTodayBannerDesc": "Xem lại các từ này trước khi luyện tập để ghi nhớ lâu hơn.",
-    "slippedTodayPractice": "Luyện tập ngay"
+    "slippedTodayPractice": "Luyện tập ngay",
+    "slippedTodayPracticeModalTitle": "Luyện tập từ bị sai",
+    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu} other {# từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu}}"
   },
   "Users": {
     "title": "Học viên",
