@@ -123,7 +123,9 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 
   Example: for the passage "The new office complex offers state-of-the-art facilities for tenants", ALL of these must be included: new, office, complex, offers, state-of-the-art, facilities, tenants.
 
-  Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"short Vietnamese usage note, especially for easily confused words"}
+  Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"1 short Vietnamese sentence: key nuance or common collocation"}
+
+Fill every field. Never leave any field empty.
 
 Return ONLY valid JSON, no markdown fences, no explanation.`
 
