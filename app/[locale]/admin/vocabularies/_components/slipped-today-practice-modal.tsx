@@ -90,7 +90,7 @@ export function SlippedTodayPracticeModal({
         if (!isOpen) onClose()
       }}
     >
-      <DialogContent className="max-w-sm">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{tVoca('slippedTodayPracticeModalTitle')}</DialogTitle>
           <DialogDescription>
