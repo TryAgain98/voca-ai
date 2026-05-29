@@ -133,6 +133,7 @@ export default function VocabulariesPage() {
     meaning: string
     phonetic: string
     example?: string
+    description?: string
   }) => {
     if (editing) {
       await updateVocabulary.mutateAsync({
@@ -143,6 +144,7 @@ export default function VocabulariesPage() {
         meaning: data.meaning,
         example: data.example,
         phonetic: data.phonetic,
+        description: data.description,
       })
     } else {
       await createVocabulary.mutateAsync(data)

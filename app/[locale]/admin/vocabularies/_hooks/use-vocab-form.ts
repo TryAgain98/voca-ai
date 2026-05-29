@@ -16,6 +16,7 @@ interface FormState {
   meaning: string
   example: string
   phonetic: string
+  description: string
 }
 
 type FieldError = Partial<Record<keyof FormState, string>>
@@ -53,6 +54,7 @@ export function useVocabForm(
     meaning: editing?.meaning ?? '',
     example: editing?.example ?? '',
     phonetic: editing?.phonetic ?? '',
+    description: editing?.description ?? '',
   })
   const [errors, setErrors] = useState<FieldError>({})
 

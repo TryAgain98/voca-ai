@@ -49,6 +49,7 @@ export function useCreateVocabulary() {
       meaning: string
       example?: string
       phonetic?: string
+      description?: string
     }) => vocabulariesService.create(payload),
     onSuccess: (vocab, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lesson_id] })
@@ -74,6 +75,7 @@ export function useUpdateVocabulary() {
       meaning: string
       example?: string
       phonetic?: string
+      description?: string
     }) =>
       vocabulariesService.update(vars.id, {
         word: vars.word,
@@ -81,6 +83,7 @@ export function useUpdateVocabulary() {
         meaning: vars.meaning,
         example: vars.example,
         phonetic: vars.phonetic,
+        description: vars.description,
       }),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['vocabularies', vars.lessonId] })

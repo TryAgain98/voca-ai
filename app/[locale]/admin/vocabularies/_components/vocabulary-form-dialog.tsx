@@ -23,6 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '~/components/ui/select'
+import { Textarea } from '~/components/ui/textarea'
 
 import type { Lesson, Vocabulary } from '~/types'
 
@@ -79,6 +80,7 @@ interface VocabularyFormDialogProps {
     meaning: string
     phonetic: string
     example?: string
+    description?: string
   }) => void
 }
 
@@ -114,6 +116,7 @@ export function VocabularyFormDialog({
       meaning: form.meaning.trim(),
       phonetic: form.phonetic.trim(),
       example: form.example.trim() || undefined,
+      description: form.description.trim() || undefined,
     })
   }
 
@@ -227,6 +230,17 @@ export function VocabularyFormDialog({
             suggestion={suggestions.example}
             onChange={(v) => set('example', v)}
           />
+
+          <div className="space-y-1.5">
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
+              placeholder={t('descriptionPlaceholder')}
+              rows={2}
+            />
+          </div>
 
           {hasAnySuggestion && (
             <button

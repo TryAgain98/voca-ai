@@ -477,6 +477,8 @@
     "wordTypeLabel": "Word Type",
     "wordTypePlaceholder": "Select type (optional)",
     "exampleLabel": "Example",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Enter description or notes (optional)",
     "phoneticLabel": "Phonetic (IPA)",
     "phoneticRequired": "Phonetic is required",
     "ipaPickerOpen": "Open IPA keyboard",

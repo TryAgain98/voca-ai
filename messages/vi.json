@@ -477,6 +477,8 @@
     "wordTypeLabel": "Loại từ",
     "wordTypePlaceholder": "Chọn loại từ (tùy chọn)",
     "exampleLabel": "Ví dụ",
+    "descriptionLabel": "Mô tả",
+    "descriptionPlaceholder": "Nhập mô tả hoặc ghi chú (tùy chọn)",
     "phoneticLabel": "Phiên âm (IPA)",
     "phoneticRequired": "Phiên âm là bắt buộc",
     "ipaPickerOpen": "Mở bàn phím IPA",
