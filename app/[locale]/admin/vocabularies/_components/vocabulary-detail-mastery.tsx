@@ -4,16 +4,16 @@ import { useTranslations } from 'next-intl'
 
 import { Badge } from '~/components/ui/badge'
 import { dayjs } from '~/lib/dayjs'
-import {
-  GRADE_AGAIN,
-  GRADE_EASY,
-  GRADE_GOOD,
-  GRADE_HARD,
-} from '~/lib/mastery-scheduler'
+import { intervalDays, MAX_LEVEL } from '~/lib/mastery-scheduler'
 
 import { LevelDots } from './level-dots'
 
 import type { MasteryStatus, WordMastery } from '~/types'
+
+const GRADE_AGAIN = 1
+const GRADE_HARD = 2
+const GRADE_GOOD = 3
+const GRADE_EASY = 4
 
 const STATUS_BADGE: Record<
   MasteryStatus,
@@ -131,7 +131,7 @@ export function VocabularyDetailMastery({
         <LevelDots level={mastery.level} size="md" />
       </div>
 
-      <div className="grid grid-cols-4 gap-3 border-t border-white/6 pt-3">
+      <div className="grid grid-cols-3 gap-3 border-t border-white/6 pt-3">
         <StatCell
           label={t('detailCorrectCount')}
           value={mastery.correct_count}
@@ -142,7 +142,6 @@ export function VocabularyDetailMastery({
           value={mastery.wrong_count}
           valueClass="text-red-400"
         />
-        <StatCell label={t('detailLapses')} value={mastery.lapse_count} />
         <StatCell
           label={t('detailLastGrade')}
           value={
@@ -152,18 +151,14 @@ export function VocabularyDetailMastery({
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-3 border-t border-white/6 pt-3">
+      <div className="grid grid-cols-2 gap-3 border-t border-white/6 pt-3">
         <StatCell
-          label={t('detailStability')}
-          value={`${mastery.stability.toFixed(1)}d`}
+          label={t('detailBestLevel')}
+          value={`${mastery.max_level} / ${MAX_LEVEL}`}
         />
         <StatCell
-          label={t('detailDifficulty')}
-          value={`${mastery.difficulty.toFixed(1)} / 10`}
-        />
-        <StatCell
-          label={t('detailEase')}
-          value={mastery.ease_factor.toFixed(2)}
+          label={t('detailCurrentInterval')}
+          value={`${intervalDays(mastery.level)}d`}
         />
       </div>
 

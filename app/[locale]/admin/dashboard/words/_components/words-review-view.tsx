@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { useLessons } from '~/hooks/use-lessons'
 import { useSoftDemoteMastery } from '~/hooks/use-word-mastery'
+import { MASTERED_THRESHOLD } from '~/lib/mastery-scheduler'
 import { useQuizQuickStartStore } from '~/stores/quiz-quick-start'
 import { useReviewQuickStartStore } from '~/stores/review-quick-start'
 import { VocabularyDetailSheet } from '~admin/vocabularies/_components/vocabulary-detail-sheet'
@@ -128,7 +129,7 @@ export function WordsReviewView({
       mastery: voca.progress,
       masteryStatus: !voca.progress
         ? 'untested'
-        : voca.progress.level >= 5
+        : voca.progress.level >= MASTERED_THRESHOLD
           ? 'mastered'
           : 'practicing',
     })

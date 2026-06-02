@@ -1,6 +1,8 @@
 import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 
-export const MAX_MASTERY_LEVEL = 5
+export const LEVEL_INTERVAL_DAYS = [1, 3, 4, 7, 20, 30, 50, 100]
+export const MAX_LEVEL = LEVEL_INTERVAL_DAYS.length - 1
+
 export const MASTERED_THRESHOLD = 3
 
 export const GRADE_AGAIN = 1
@@ -14,93 +16,42 @@ export type Grade =
   | typeof GRADE_GOOD
   | typeof GRADE_EASY
 
-const MIN_EASE = 1.3
-const MAX_EASE = 3.0
-const DEFAULT_EASE = 2.5
+const FAST_ANSWER_MS = 5000
 
-const MIN_DIFFICULTY = 1
-const MAX_DIFFICULTY = 10
-const DEFAULT_DIFFICULTY = 5
-
-const TARGET_RETENTION = 0.9
-const RETRIEVABILITY_DECAY = -Math.log(TARGET_RETENTION)
-
-const MAX_STABILITY_DAYS = 180
-
-const LAPSE_GRACE_MS = 5 * 60 * 60 * 1000
-
-const FAST_GOOD_THRESHOLD_MS = 5000
-const SLOW_GOOD_THRESHOLD_MS = 10000
-const NO_PROGRESS_TIMEOUT_MS = 20000
-const LONG_WORD_LETTER_THRESHOLD = 8
-
-const EASE_DELTA: Record<Grade, number> = {
-  [GRADE_AGAIN]: -0.2,
-  [GRADE_HARD]: -0.05,
-  [GRADE_GOOD]: 0.05,
-  [GRADE_EASY]: 0.15,
-}
-
-const DIFFICULTY_DELTA: Record<Grade, number> = {
-  [GRADE_AGAIN]: 1.0,
-  [GRADE_HARD]: 0.4,
-  [GRADE_GOOD]: -0.1,
-  [GRADE_EASY]: -0.4,
-}
-
-const INTERVAL_MULTIPLIER: Record<Grade, number> = {
+const GRADE_STEP: Record<Grade, number> = {
   [GRADE_AGAIN]: 0,
-  [GRADE_HARD]: 1.1,
-  [GRADE_GOOD]: 2.0,
-  [GRADE_EASY]: 2.8,
+  [GRADE_HARD]: 0,
+  [GRADE_GOOD]: 1,
+  [GRADE_EASY]: 2,
 }
 
 export interface SchedulerInput {
-  prevMastery: number
-  prevEase: number
-  prevStability: number
-  prevDifficulty: number
-  prevIsRelearning: boolean
-  prevRelearningStep: number
+  prevLevel: number
+  prevMaxLevel: number
   grade: Grade
   now?: Date
 }
 
 export interface SchedulerOutput {
-  mastery: number
-  ease: number
-  stability: number
-  difficulty: number
-  isRelearning: boolean
-  relearningStep: number
+  level: number
+  maxLevel: number
   dueAt: Date
-  isLapse: boolean
 }
 
 interface DeriveGradeInput {
   isCorrect: boolean
   responseMs?: number | null
   usedHint?: boolean | null
-  word?: string | null
 }
 
 export function deriveGrade({
   isCorrect,
   responseMs,
   usedHint,
-  word,
 }: DeriveGradeInput): Grade {
   if (!isCorrect) return GRADE_AGAIN
   if (usedHint) return GRADE_HARD
-  if (responseMs == null) return GRADE_GOOD
-  if (responseMs >= NO_PROGRESS_TIMEOUT_MS) return GRADE_HARD
-  if (responseMs <= FAST_GOOD_THRESHOLD_MS) return GRADE_EASY
-  const letterCount = word ? word.replace(/\s/g, '').length : 0
-  if (
-    letterCount <= LONG_WORD_LETTER_THRESHOLD &&
-    responseMs >= SLOW_GOOD_THRESHOLD_MS
-  )
-    return GRADE_HARD
+  if (responseMs != null && responseMs <= FAST_ANSWER_MS) return GRADE_EASY
   return GRADE_GOOD
 }
 
@@ -108,128 +59,75 @@ export function isMastered(level: number): boolean {
   return level >= MASTERED_THRESHOLD
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value))
+export function intervalDays(level: number): number {
+  const clamped = Math.max(0, Math.min(MAX_LEVEL, level))
+  return LEVEL_INTERVAL_DAYS[clamped]
 }
 
-function addMs(date: Date, ms: number): Date {
-  return dayjs(date).add(ms, 'millisecond').toDate()
+function dueFromLevel(now: Date, level: number): Date {
+  // Add the interval in whole days, then snap to the start of that day (VN
+  // time) so the word is reviewable any time during its due day.
+  return dayjs(now)
+    .tz(APP_TIMEZONE)
+    .add(intervalDays(level), 'day')
+    .startOf('day')
+    .toDate()
 }
 
-function nextStability(
-  prevStability: number,
-  difficulty: number,
-  ease: number,
-  grade: Grade,
+function nextLevelOnPass(
+  prevLevel: number,
+  prevMaxLevel: number,
+  step: number,
 ): number {
-  if (grade === GRADE_AGAIN) {
-    return Math.max(0.5, prevStability * 0.2)
+  if (prevLevel >= prevMaxLevel) {
+    return Math.min(MAX_LEVEL, prevLevel + step)
   }
-  const base = Math.max(prevStability, 1)
-  const easeBoost = ease / DEFAULT_EASE
-  const difficultyPenalty = 1 - (difficulty - DEFAULT_DIFFICULTY) * 0.05
-  const raw = base * INTERVAL_MULTIPLIER[grade] * easeBoost * difficultyPenalty
-  return Math.min(raw, MAX_STABILITY_DAYS)
-}
-
-function intervalDaysFromStability(stability: number): number {
-  if (stability <= 0) return 1
-  return Math.max(1, Math.round(stability))
-}
-
-function nextMasteryLevel(prevMastery: number, grade: Grade): number {
-  if (grade === GRADE_AGAIN) {
-    if (prevMastery >= MASTERED_THRESHOLD) {
-      return Math.max(prevMastery - 2, 0)
-    }
-    return Math.max(prevMastery - 1, 0)
-  }
-  if (grade === GRADE_HARD) return prevMastery
-  const inc = grade === GRADE_EASY ? 2 : 1
-  return Math.min(prevMastery + inc, MAX_MASTERY_LEVEL)
-}
-
-function startOfDayAfter(now: Date, days: number): Date {
-  return dayjs(now).tz(APP_TIMEZONE).add(days, 'day').startOf('day').toDate()
-}
-
-function lapseDueAt(now: Date): Date {
-  const graceEnd = addMs(now, LAPSE_GRACE_MS)
-  const tomorrow = startOfDayAfter(now, 1)
-  return graceEnd < tomorrow ? tomorrow : graceEnd
+  const recovery = Math.max(step, Math.ceil((prevMaxLevel - prevLevel) / 2))
+  return Math.min(prevMaxLevel, prevLevel + recovery)
 }
 
 export function nextSchedule(input: SchedulerInput): SchedulerOutput {
   const now = input.now ?? dayjs().toDate()
-  const grade = input.grade
-  const wasMastered = input.prevMastery >= MASTERED_THRESHOLD
 
-  const nextEase = clamp(input.prevEase + EASE_DELTA[grade], MIN_EASE, MAX_EASE)
-  const nextDifficulty = clamp(
-    input.prevDifficulty + DIFFICULTY_DELTA[grade],
-    MIN_DIFFICULTY,
-    MAX_DIFFICULTY,
-  )
-  const newMastery = nextMasteryLevel(input.prevMastery, grade)
-  const isLapse = grade === GRADE_AGAIN && wasMastered
-
-  if (grade === GRADE_AGAIN) {
+  // Wrong: drop to the bottom, review tomorrow.
+  if (input.grade === GRADE_AGAIN) {
     return {
-      mastery: newMastery,
-      ease: nextEase,
-      stability: Math.max(0.5, input.prevStability * 0.2),
-      difficulty: nextDifficulty,
-      isRelearning: false,
-      relearningStep: 0,
-      dueAt: lapseDueAt(now),
-      isLapse,
+      level: 0,
+      maxLevel: input.prevMaxLevel,
+      dueAt: dueFromLevel(now, 0),
     }
   }
 
-  const stability = nextStability(
-    input.prevStability,
-    nextDifficulty,
-    nextEase,
-    grade,
+  // Needed a hint: no progress, review again tomorrow.
+  if (input.grade === GRADE_HARD) {
+    return {
+      level: input.prevLevel,
+      maxLevel: input.prevMaxLevel,
+      dueAt: dueFromLevel(now, 0),
+    }
+  }
+
+  const level = nextLevelOnPass(
+    input.prevLevel,
+    input.prevMaxLevel,
+    GRADE_STEP[input.grade],
   )
   return {
-    mastery: newMastery,
-    ease: nextEase,
-    stability,
-    difficulty: nextDifficulty,
-    isRelearning: false,
-    relearningStep: 0,
-    dueAt: startOfDayAfter(now, intervalDaysFromStability(stability)),
-    isLapse: false,
+    level,
+    maxLevel: Math.max(input.prevMaxLevel, level),
+    dueAt: dueFromLevel(now, level),
   }
 }
 
-export function pronunciationFailedSchedule(
-  input: SchedulerInput,
-): SchedulerOutput {
+export function pronunciationFailedSchedule(input: {
+  prevLevel: number
+  prevMaxLevel: number
+  now?: Date
+}): SchedulerOutput {
   const now = input.now ?? dayjs().toDate()
   return {
-    mastery: input.prevMastery,
-    ease: input.prevEase,
-    stability: input.prevStability,
-    difficulty: input.prevDifficulty,
-    isRelearning: false,
-    relearningStep: 0,
-    dueAt: startOfDayAfter(now, 1),
-    isLapse: false,
+    level: input.prevLevel,
+    maxLevel: input.prevMaxLevel,
+    dueAt: dueFromLevel(now, 0),
   }
-}
-
-export function retrievability(
-  stability: number,
-  daysSinceReview: number,
-): number {
-  if (stability <= 0) return 0
-  return Math.exp(-RETRIEVABILITY_DECAY * (daysSinceReview / stability))
-}
-
-export const DEFAULTS = {
-  ease: DEFAULT_EASE,
-  difficulty: DEFAULT_DIFFICULTY,
-  stability: 0,
 }

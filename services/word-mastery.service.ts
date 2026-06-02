@@ -1,18 +1,16 @@
 import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 import {
-  DEFAULTS,
   deriveGrade,
   GRADE_AGAIN,
   GRADE_HARD,
   isMastered,
   MASTERED_THRESHOLD,
+  MAX_LEVEL,
   nextSchedule,
   pronunciationFailedSchedule,
-  retrievability,
 } from '~/lib/mastery-scheduler'
 import { supabase } from '~/lib/supabase'
 
-import type { Grade } from '~/lib/mastery-scheduler'
 import type { ReviewWord, WordMastery } from '~/types'
 
 export interface DashboardStats {
@@ -35,7 +33,7 @@ export interface DashboardStats {
 
 const NEEDS_TESTING_PREVIEW_LIMIT = 50
 const FADING_PREVIEW_LIMIT = 20
-const FADING_RETENTION_THRESHOLD = 0.85
+const FADING_DUE_WINDOW_DAYS = 2
 const RECENT_TEST_COOLDOWN_MS = 60 * 60 * 1000
 const UNTESTED_PRIORITY = 50
 
@@ -75,22 +73,27 @@ export interface ReviewForecast {
 
 const FORECAST_DAYS = 14
 
-function daysBetween(a: Date, b: Date): number {
-  return Math.max(0, dayjs(b).diff(dayjs(a), 'day'))
+function masteryRatio(progress: WordMastery): number {
+  return Math.min(1, progress.level / MAX_LEVEL)
 }
 
-function progressRetention(progress: WordMastery, now: Date): number {
-  if (!progress.tested_at || progress.stability <= 0) return 1
-  const elapsed = daysBetween(dayjs(progress.tested_at).toDate(), now)
-  return retrievability(progress.stability, elapsed)
+function msUntilDue(progress: WordMastery, now: Date): number {
+  if (!progress.due_at) return Number.POSITIVE_INFINITY
+  return dayjs(progress.due_at).diff(now, 'millisecond')
+}
+
+function isFading(progress: WordMastery, now: Date): boolean {
+  if (!isMastered(progress.level)) return false
+  if (!progress.due_at) return false
+  return dayjs(progress.due_at).diff(now, 'day') <= FADING_DUE_WINDOW_DAYS
 }
 
 function computePracticeScore(progress: WordMastery | null): number {
   if (!progress) return 100
-  const retention = progressRetention(progress, dayjs().toDate())
-  const masteryGap = (5 - progress.level) * 8
-  const difficultyBoost = (progress.difficulty - 5) * 4
-  return masteryGap + difficultyBoost + (1 - retention) * 30
+  const levelGap = (MAX_LEVEL - progress.level) * 12
+  const overdueMs = -msUntilDue(progress, dayjs().toDate())
+  const overdueBoost = overdueMs > 0 ? Math.min(30, overdueMs / 86_400_000) : 0
+  return levelGap + overdueBoost
 }
 
 function computeQuizPriority(progress: WordMastery | null, now: Date): number {
@@ -100,8 +103,8 @@ function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   }
   if (!progress.due_at) return 35
   const dueDate = dayjs(progress.due_at)
-  const overdueDays = dayjs(now).diff(dueDate, 'day')
   if (!dueDate.isAfter(now)) {
+    const overdueDays = dayjs(now).diff(dueDate, 'day')
     return 70 + Math.min(30, overdueDays * 4) - progress.level * 3
   }
   if (isMastered(progress.level)) return -1
@@ -109,8 +112,7 @@ function computeQuizPriority(progress: WordMastery | null, now: Date): number {
   if (msSinceTest < RECENT_TEST_COOLDOWN_MS) {
     return msSinceTest / RECENT_TEST_COOLDOWN_MS
   }
-  const retention = progressRetention(progress, now)
-  return 40 - progress.level * 4 + (1 - retention) * 30
+  return 40 - progress.level * 4
 }
 
 function isDueForDashboard(progress: WordMastery, now: Date): boolean {
@@ -233,7 +235,7 @@ class WordMasteryService {
       []
     const practicingList: ReviewWord[] = []
     const masteredList: ReviewWord[] = []
-    const fadingPriorityList: { word: ReviewWord; retention: number }[] = []
+    const fadingPriorityList: { word: ReviewWord; dueMs: number }[] = []
     let wrongTodayCount = 0
     const wrongTodayList: ReviewWord[] = []
 
@@ -255,17 +257,16 @@ class WordMasteryService {
         practicingList.push(reviewWord)
       }
 
-      const retention = progressRetention(progress, now)
-      if (progress.tested_at && progress.stability > 0) {
-        retentionSum += retention
+      if (progress.tested_at) {
+        retentionSum += masteryRatio(progress)
         retentionN += 1
       }
-      if (
-        retention < FADING_RETENTION_THRESHOLD &&
-        isMastered(progress.level)
-      ) {
+      if (isFading(progress, now)) {
         fadingCount += 1
-        fadingPriorityList.push({ word: reviewWord, retention })
+        fadingPriorityList.push({
+          word: reviewWord,
+          dueMs: msUntilDue(progress, now),
+        })
       }
 
       if (wasWrongToday(progress, now)) {
@@ -281,7 +282,7 @@ class WordMasteryService {
     }
 
     needsTestingPriorityList.sort((a, b) => b.priority - a.priority)
-    fadingPriorityList.sort((a, b) => a.retention - b.retention)
+    fadingPriorityList.sort((a, b) => a.dueMs - b.dueMs)
 
     return {
       totalWords: vocabs.length,
@@ -468,65 +469,44 @@ class WordMasteryService {
     const payload = results.map((r) => {
       const prev = existingMap.get(r.wordId)
       const schedulerInput = {
-        prevMastery: prev?.level ?? 0,
-        prevEase: prev?.ease_factor ?? DEFAULTS.ease,
-        prevStability: prev?.stability ?? DEFAULTS.stability,
-        prevDifficulty: prev?.difficulty ?? DEFAULTS.difficulty,
-        prevIsRelearning: prev?.is_relearning ?? false,
-        prevRelearningStep: prev?.relearning_step ?? 0,
+        prevLevel: prev?.level ?? 0,
+        prevMaxLevel: prev?.max_level ?? 0,
         now,
       }
 
       if (r.pronunciationFailed) {
-        const schedule = pronunciationFailedSchedule({
-          ...schedulerInput,
-          grade: GRADE_HARD,
-        })
+        const schedule = pronunciationFailedSchedule(schedulerInput)
         return {
           user_id: userId,
           word_id: r.wordId,
-          level: schedule.mastery,
-          correct_count: (prev?.correct_count ?? 0) + 1,
+          level: schedule.level,
+          max_level: schedule.maxLevel,
+          correct_count: prev?.correct_count ?? 0,
           wrong_count: prev?.wrong_count ?? 0,
           tested_at: now.toISOString(),
           due_at: schedule.dueAt.toISOString(),
-          ease_factor: schedule.ease,
-          stability: schedule.stability,
-          difficulty: schedule.difficulty,
-          lapse_count: prev?.lapse_count ?? 0,
-          is_relearning: schedule.isRelearning,
-          relearning_step: schedule.relearningStep,
           last_grade: GRADE_HARD,
-          last_response_ms: r.responseMs ?? null,
           updated_at: now.toISOString(),
         }
       }
 
-      const grade: Grade = deriveGrade({
+      const grade = deriveGrade({
         isCorrect: r.isCorrect,
         responseMs: r.responseMs,
         usedHint: r.usedHint,
-        word: r.word,
       })
-
       const schedule = nextSchedule({ ...schedulerInput, grade })
 
       return {
         user_id: userId,
         word_id: r.wordId,
-        level: schedule.mastery,
+        level: schedule.level,
+        max_level: schedule.maxLevel,
         correct_count: (prev?.correct_count ?? 0) + (r.isCorrect ? 1 : 0),
         wrong_count: (prev?.wrong_count ?? 0) + (r.isCorrect ? 0 : 1),
         tested_at: now.toISOString(),
         due_at: schedule.dueAt.toISOString(),
-        ease_factor: schedule.ease,
-        stability: schedule.stability,
-        difficulty: schedule.difficulty,
-        lapse_count: (prev?.lapse_count ?? 0) + (schedule.isLapse ? 1 : 0),
-        is_relearning: schedule.isRelearning,
-        relearning_step: schedule.relearningStep,
         last_grade: grade,
-        last_response_ms: r.responseMs ?? null,
         updated_at: now.toISOString(),
       }
     })
@@ -551,15 +531,11 @@ class WordMasteryService {
     if (!existing) return
 
     const demotedLevel = Math.min(existing.level, MASTERED_THRESHOLD - 1)
-    const demotedStability = Math.max(0.5, (existing.stability ?? 0) * 0.2)
 
     const { error: updateError } = await supabase
       .from('word_mastery')
       .update({
         level: demotedLevel,
-        is_relearning: false,
-        relearning_step: 0,
-        stability: demotedStability,
         due_at: now.toISOString(),
         updated_at: now.toISOString(),
       })

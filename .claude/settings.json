@@ -16,7 +16,11 @@
       "Bash(npm pack *)",
       "Bash(node -e \"const m = require\\('msedge-tts'\\); console.log\\(Object.keys\\(m\\)\\)\")",
       "Bash(node -e \"const { MsEdgeTTS, OUTPUT_FORMAT } = require\\('msedge-tts'\\); console.log\\(Object.getOwnPropertyNames\\(MsEdgeTTS.prototype\\)\\)\")",
-      "Bash(node -e \"const { OUTPUT_FORMAT } = require\\('msedge-tts'\\); const mp3Keys = Object.keys\\(OUTPUT_FORMAT\\).filter\\(k => k.includes\\('MP3'\\)\\); console.log\\(mp3Keys\\)\")"
+      "Bash(node -e \"const { OUTPUT_FORMAT } = require\\('msedge-tts'\\); const mp3Keys = Object.keys\\(OUTPUT_FORMAT\\).filter\\(k => k.includes\\('MP3'\\)\\); console.log\\(mp3Keys\\)\")",
+      "Bash(node -e ' *)",
+      "WebFetch(domain:super-memory.com)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('messages/en.json'\\)\\); JSON.parse\\(require\\('fs'\\).readFileSync\\('messages/vi.json'\\)\\); console.log\\('JSON OK'\\)\")",
+      "Bash(node /tmp/sc.mjs)"
     ],
     "deny": [
       "Bash(git push --force *)",

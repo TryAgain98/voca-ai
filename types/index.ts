@@ -33,18 +33,12 @@ export interface WordMastery {
   user_id: string
   word_id: string
   level: number
+  max_level: number
   correct_count: number
   wrong_count: number
   tested_at: string | null
   due_at: string | null
-  ease_factor: number
-  stability: number
-  difficulty: number
-  lapse_count: number
-  is_relearning: boolean
-  relearning_step: number
   last_grade: number | null
-  last_response_ms: number | null
   created_at: string
   updated_at: string
 }

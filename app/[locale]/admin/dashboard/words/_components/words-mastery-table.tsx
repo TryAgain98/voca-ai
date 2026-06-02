@@ -16,18 +16,13 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { dayjs } from '~/lib/dayjs'
+import { LevelDots } from '~admin/vocabularies/_components/level-dots'
 
 import type { Lesson, ReviewWord } from '~/types'
 
 const PAGE_SIZE = 20
 
 type SortDir = 'asc' | 'desc'
-
-function getDifficultyTier(d: number): 'easy' | 'medium' | 'hard' {
-  if (d < 4) return 'easy'
-  if (d <= 6) return 'medium'
-  return 'hard'
-}
 
 function getNextReviewMs(dueAt: string | null | undefined): number {
   if (!dueAt) return Infinity
@@ -51,28 +46,6 @@ function NextReviewLabel({ dueAt }: { dueAt: string | null | undefined }) {
   return (
     <span className="text-muted-foreground tabular-nums">
       {dayjs(dueAt).format('DD/MM/YYYY')}
-    </span>
-  )
-}
-
-const DIFFICULTY_STYLES: Record<string, string> = {
-  easy: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-  medium: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
-  hard: 'bg-red-500/20 text-red-300 border-red-500/40',
-}
-
-function DifficultyBadge({ difficulty }: { difficulty: number | undefined }) {
-  const t = useTranslations('DashboardWords.table.difficulty')
-  if (difficulty === undefined)
-    return <span className="text-muted-foreground">—</span>
-
-  const tier = getDifficultyTier(difficulty)
-
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] leading-none font-[510] ${DIFFICULTY_STYLES[tier]}`}
-    >
-      {t(tier)}
     </span>
   )
 }
@@ -136,7 +109,7 @@ export function WordsMasteryTable({
             <TableHead className="px-5">{t('colWord')}</TableHead>
             <TableHead className="px-4">{t('colMeaning')}</TableHead>
             <TableHead className="px-4">{t('colLesson')}</TableHead>
-            <TableHead className="w-24 px-4">{t('colDifficulty')}</TableHead>
+            <TableHead className="w-24 px-4">{t('colLevel')}</TableHead>
             <TableHead className="w-36 px-4">
               <button
                 className="hover:text-foreground flex items-center gap-1 transition-colors"
@@ -200,7 +173,11 @@ export function WordsMasteryTable({
               </TableCell>
 
               <TableCell className="px-4">
-                <DifficultyBadge difficulty={word.progress?.difficulty} />
+                {word.progress ? (
+                  <LevelDots level={word.progress.level} />
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
               </TableCell>
 
               <TableCell className="px-4 text-xs whitespace-nowrap">

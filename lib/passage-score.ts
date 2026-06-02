@@ -310,12 +310,21 @@ function alignWords(expected: string[], transcript: string[]): WordResult[] {
   return results
 }
 
+// ASR fuses clock times and meridiems ("4.30pm", "4:30 pm") while passages are
+// written "4:30 p.m." The word tokenizer splits "p.m." into ["p","m"], so
+// expand any digit-anchored am/pm in the transcript into the same two-letter
+// form to keep alignment exact. The leading-digit requirement avoids touching
+// the verb "am" ("I am ...").
+function normalizeTranscriptText(transcript: string): string {
+  return transcript.replace(/(\d)\s*([ap])\.?\s*m\b\.?/gi, '$1 $2 m')
+}
+
 export function scorePassage(
   transcript: string,
   expected: string,
 ): WordResult[] {
   const expectedWords = tokenizeWords(expected)
-  const transcriptWords = tokenizeWords(transcript)
+  const transcriptWords = tokenizeWords(normalizeTranscriptText(transcript))
   return alignWords(expectedWords, transcriptWords)
 }
 

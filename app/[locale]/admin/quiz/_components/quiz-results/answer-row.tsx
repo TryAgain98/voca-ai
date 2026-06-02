@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import { SpeakButton } from '~/components/layout/speak-button'
 import { WordTypeBadge } from '~/components/word-type-badge'
 import { cn } from '~/lib/cn'
-import { GRADE_EASY, GRADE_GOOD, deriveGrade } from '~/lib/mastery-scheduler'
+import { deriveGrade, GRADE_EASY, GRADE_HARD } from '~/lib/mastery-scheduler'
 
 import { diffChars } from './diff-chars'
 
@@ -24,17 +24,16 @@ function getExpectedAnswer(exercise: Exercise): string {
 
 function getGradeLevel(
   isCorrect: boolean,
-  word: string,
   responseMs?: number,
   usedHint?: boolean,
   pronunciationFailed?: boolean,
 ): GradeLevel {
   if (!isCorrect) return 'again'
   if (pronunciationFailed) return 'hard'
-  const grade = deriveGrade({ isCorrect, responseMs, usedHint, word })
-  if (grade >= GRADE_EASY) return 'easy'
-  if (grade >= GRADE_GOOD) return 'good'
-  return 'hard'
+  const grade = deriveGrade({ isCorrect, responseMs, usedHint })
+  if (grade === GRADE_EASY) return 'easy'
+  if (grade === GRADE_HARD) return 'hard'
+  return 'good'
 }
 
 function formatResponseTime(ms?: number): string {
@@ -58,7 +57,7 @@ const GRADE_CONFIG: Record<GradeLevel, { style: string; delta: string }> = {
   },
   again: {
     style: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-    delta: '−1',
+    delta: '↺',
   },
 }
 
@@ -126,7 +125,6 @@ export function AnswerRow({ result, index }: AnswerRowProps) {
   const isHintCorrect = answerCorrect && usedHint && !isCorrect
   const gradeLevel = getGradeLevel(
     answerCorrect,
-    result.exercise.vocab.word,
     responseMs,
     usedHint,
     pronunciationFailed,
