@@ -307,7 +307,12 @@
     "pronGateInstruction": "Read the word aloud to finish",
     "pronGatePass": "Nice pronunciation!",
     "pronGateRetry": "Wrong — {remaining} attempt(s) left",
-    "pronGateFinalFail": "We'll review this word again tomorrow"
+    "pronGateFinalFail": "We'll review this word again tomorrow",
+    "storyOfferTitle": "Review with a story",
+    "storyOfferDesc": "You missed {count} words. Practice them in context — it sticks better.",
+    "storyOfferBtn": "Create a story",
+    "storyGenerating": "Generating...",
+    "storyCreate": "Start the journey"
   },
   "Quiz": {
     "setupTitle": "Test Mode",
@@ -687,5 +692,46 @@
     "lookingUp": "Looking up...",
     "wordNotFound": "No definition found",
     "speakingTime": "Speaking time"
+  },
+  "Story": {
+    "activity": {
+      "read": "Read",
+      "quiz": "Quiz",
+      "type": "Type"
+    },
+    "pageSubtitle": "Practice {count} missed words through context",
+    "sessionNotFound": "Session not found.",
+    "readInstruction": "Read the passage",
+    "readHoverHint": "Hover over highlighted words to see their meaning.",
+    "readDoneBtn": "Got it — next",
+    "quizInstruction": "Choose the correct meaning",
+    "quizProgress": "{current} / {total}",
+    "quizScore": "{score} correct",
+    "quizNextBtn": "Next",
+    "quizFinishBtn": "Finish",
+    "typeInstruction": "Type the English word",
+    "typeProgress": "{current} / {total}",
+    "typeScore": "{score} correct",
+    "typePlaceholder": "Type here...",
+    "typeCheckBtn": "Check",
+    "typeNextBtn": "Next",
+    "typeFinishBtn": "Finish",
+    "typeCorrect": "Correct!",
+    "typeCorrectAnswer": "Correct answer",
+    "completeTitle": "Well done!",
+    "completeDesc": "You have practiced all missed words in context.",
+    "completePoints": "+{points} leaderboard points earned",
+    "completeDashboardBtn": "Back to dashboard",
+    "dashboardCTATitle": "Practice missed words with AI",
+    "dashboardCTADesc": "You missed {count} words today — train them in a story.",
+    "dashboardActiveTitle": "Continue your story journey",
+    "dashboardActiveDesc": "{done} / {total} activities done",
+    "dashboardCompleteTitle": "Story journey complete!",
+    "dashboardCompleteDesc": "All missed words practiced in context.",
+    "dashboardCompleteBadge": "Done",
+    "regenerateBtn": "Change genre",
+    "readShowTranslation": "Show translation",
+    "readHideTranslation": "Hide translation",
+    "regenerateTitle": "Pick a new genre"
   }
 }

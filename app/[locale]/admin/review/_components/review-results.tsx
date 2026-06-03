@@ -1,18 +1,32 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Loader2, RefreshCw, Volume2, VolumeX, XCircle } from 'lucide-react'
+import {
+  BookOpen,
+  Loader2,
+  RefreshCw,
+  Volume2,
+  VolumeX,
+  XCircle,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { useTTS } from '~/hooks/use-tts'
 import { cn } from '~/lib/cn'
 
+import { StoryGenrePicker } from './story-genre-picker'
+
 import type { ExerciseResult } from '../_types/review.types'
+import type { StoryWord } from '~/types'
+
+const STORY_MISTAKE_THRESHOLD = 5
 
 interface ReviewResultsProps {
   results: ExerciseResult[]
   elapsedSeconds: number
+  userId: string
   onRestart: () => void
   onChangeSetup: () => void
 }
@@ -60,14 +74,24 @@ function MistakeItem({ word, meaning }: MistakeItemProps) {
 export function ReviewResults({
   results,
   elapsedSeconds,
+  userId,
   onRestart,
   onChangeSetup,
 }: ReviewResultsProps) {
   const t = useTranslations('Review')
+  const [showGenrePicker, setShowGenrePicker] = useState(false)
 
   const originals = results.filter((r) => !r.exercise.isReinforcement)
   const correct = originals.filter((r) => r.isCorrect)
   const mistakes = originals.filter((r) => !r.isCorrect)
+
+  const wrongWords: StoryWord[] = mistakes.map((r) => ({
+    id: r.exercise.vocab.id,
+    word: r.exercise.vocab.word,
+    meaning: r.exercise.vocab.meaning,
+  }))
+
+  const showStoryOffer = mistakes.length >= STORY_MISTAKE_THRESHOLD
 
   return (
     <motion.div
@@ -98,6 +122,39 @@ export function ReviewResults({
             />
           ))}
         </div>
+      )}
+
+      {showStoryOffer && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card flex flex-col gap-4 rounded-2xl border px-6 py-5"
+        >
+          <div className="flex items-start gap-3">
+            <div className="bg-primary/10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+              <BookOpen size={15} className="text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-[510]">{t('storyOfferTitle')}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                {t('storyOfferDesc', { count: mistakes.length })}
+              </p>
+            </div>
+          </div>
+
+          {showGenrePicker ? (
+            <StoryGenrePicker userId={userId} wrongWords={wrongWords} />
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => setShowGenrePicker(true)}
+            >
+              <BookOpen size={14} />
+              {t('storyOfferBtn')}
+            </Button>
+          )}
+        </motion.div>
       )}
 
       <div className="flex gap-3">

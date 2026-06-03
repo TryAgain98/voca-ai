@@ -307,7 +307,12 @@
     "pronGateInstruction": "Đọc to từ này để hoàn tất",
     "pronGatePass": "Phát âm chuẩn!",
     "pronGateRetry": "Sai phát âm — còn {remaining} lần thử",
-    "pronGateFinalFail": "Sẽ ôn lại từ này vào mai"
+    "pronGateFinalFail": "Sẽ ôn lại từ này vào mai",
+    "storyOfferTitle": "Ôn lại qua đoạn văn",
+    "storyOfferDesc": "Bạn sai {count} từ. Luyện chúng trong ngữ cảnh — nhớ lâu hơn nhiều.",
+    "storyOfferBtn": "Tạo đoạn văn",
+    "storyGenerating": "Đang tạo...",
+    "storyCreate": "Bắt đầu luyện"
   },
   "Quiz": {
     "setupTitle": "Chế độ Kiểm tra",
@@ -687,5 +692,46 @@
     "lookingUp": "Đang tra từ điển...",
     "wordNotFound": "Không tìm thấy nghĩa",
     "speakingTime": "Thời gian đọc"
+  },
+  "Story": {
+    "activity": {
+      "read": "Đọc",
+      "quiz": "Trắc nghiệm",
+      "type": "Gõ từ"
+    },
+    "pageSubtitle": "Luyện {count} từ sai qua ngữ cảnh",
+    "sessionNotFound": "Không tìm thấy phiên luyện.",
+    "readInstruction": "Đọc đoạn văn",
+    "readHoverHint": "Hover vào từ được highlight để xem nghĩa.",
+    "readDoneBtn": "Đã đọc xong — tiếp theo",
+    "quizInstruction": "Chọn nghĩa đúng",
+    "quizProgress": "{current} / {total}",
+    "quizScore": "{score} đúng",
+    "quizNextBtn": "Tiếp",
+    "quizFinishBtn": "Hoàn thành",
+    "typeInstruction": "Gõ từ tiếng Anh",
+    "typeProgress": "{current} / {total}",
+    "typeScore": "{score} đúng",
+    "typePlaceholder": "Gõ vào đây...",
+    "typeCheckBtn": "Kiểm tra",
+    "typeNextBtn": "Tiếp",
+    "typeFinishBtn": "Hoàn thành",
+    "typeCorrect": "Chính xác!",
+    "typeCorrectAnswer": "Đáp án đúng",
+    "completeTitle": "Tuyệt vời!",
+    "completeDesc": "Bạn đã luyện tất cả các từ sai qua ngữ cảnh.",
+    "completePoints": "+{points} điểm bảng xếp hạng",
+    "completeDashboardBtn": "Về trang chủ",
+    "dashboardCTATitle": "Luyện từ sai với đoạn văn AI",
+    "dashboardCTADesc": "Hôm nay bạn sai {count} từ — ôn lại qua câu chuyện.",
+    "dashboardActiveTitle": "Tiếp tục hành trình đoạn văn",
+    "dashboardActiveDesc": "{done} / {total} hoạt động hoàn thành",
+    "dashboardCompleteTitle": "Hoàn thành hành trình!",
+    "dashboardCompleteDesc": "Đã luyện tất cả từ sai qua ngữ cảnh.",
+    "dashboardCompleteBadge": "Xong",
+    "regenerateBtn": "Đổi thể loại",
+    "readShowTranslation": "Xem bản dịch",
+    "readHideTranslation": "Ẩn bản dịch",
+    "regenerateTitle": "Chọn thể loại mới"
   }
 }

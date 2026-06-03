@@ -90,6 +90,25 @@ function recoverTruncatedVocabularyJson(raw: string): ExtractedVocabulary[] {
   return JSON.parse(recovered) as ExtractedVocabulary[]
 }
 
+export function buildStoryPassagePrompt(
+  genre: string,
+  words: { word: string; meaning: string }[],
+): string {
+  const wordList = words.map((w) => `- ${w.word} (${w.meaning})`).join('\n')
+  return `You are a creative English writing assistant for Vietnamese learners.
+
+Write EXACTLY 3-4 sentences (~60-70 words) in the "${genre}" genre. Naturally use ALL of these words:
+${wordList}
+
+Rules:
+- Use only simple everyday English for everything else.
+- Each target word must appear exactly once, used naturally.
+- Make it fun and match the genre tone.
+
+Return ONLY valid JSON (no markdown, no explanation):
+{"passage": "<English passage>", "translation": "<Full Vietnamese translation of the passage, natural and fluent>"}`
+}
+
 export function buildPassageLookupPrompt(passageText: string): string {
   return `You are a vocabulary assistant for Vietnamese English learners.
 
@@ -123,7 +142,8 @@ export const ANALYZE_PASSAGE_PROMPT = `You are an English language teacher. Anal
 
   Example: for the passage "The new office complex offers state-of-the-art facilities for tenants", ALL of these must be included: new, office, complex, offers, state-of-the-art, facilities, tenants.
 
-  Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"1 short Vietnamese sentence: key nuance or common collocation"}
+  Each entry: {"word":"...","word_type":"<n|v|adj|adv|prep|...>","phonetic":"/IPA/","meaning":"Vietnamese meaning (1-6 words)","example":"natural English sentence","description":"Exactly 1 Vietnamese sentence (10–20 words) explaining what the word means conceptually. ZERO English words. Must NOT repeat the meaning field. Describe the action (verbs), quality (adjectives), manner (adverbs), or thing (nouns) in plain Vietnamese."}
+  Good description examples: "welcome" → "Hành động đón tiếp người khác với thái độ thân thiện, khiến họ cảm thấy thoải mái khi đến." | "office" → "Nơi làm việc trong tòa nhà, dùng để xử lý công việc hành chính hoặc chuyên môn." | "excited" → "Trạng thái phấn khích, háo hức khi mong chờ điều gì đó vui sắp xảy ra." | "hesitate" → "Cảm giác do dự, lưỡng lự khi chưa dám quyết định thực hiện điều gì đó."
 
 Fill every field. Never leave any field empty.
 

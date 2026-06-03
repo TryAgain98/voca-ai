@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { dayjs } from '~/lib/dayjs'
 import { MASTERED_THRESHOLD } from '~/lib/mastery-scheduler'
-import { STREAK_FACTOR } from '~/lib/score-config'
+import { STORY_COMPLETION_POINTS, STREAK_FACTOR } from '~/lib/score-config'
 import { supabase } from '~/lib/supabase'
 
 import type { ScoreBreakdown } from '~/lib/score-config'
@@ -35,11 +35,13 @@ export interface AdminUser {
 function calculateScore(
   masteredCount: number,
   currentStreak: number,
+  completedStories: number,
 ): { score: number; breakdown: ScoreBreakdown } {
   const multiplier = 1 + currentStreak * STREAK_FACTOR
+  const storyPoints = completedStories * STORY_COMPLETION_POINTS
   return {
-    score: Math.round(masteredCount * multiplier),
-    breakdown: { masteredCount, streakDays: currentStreak },
+    score: Math.round(masteredCount * multiplier) + storyPoints,
+    breakdown: { masteredCount, streakDays: currentStreak, storyPoints },
   }
 }
 
@@ -51,7 +53,7 @@ export async function GET(): Promise<NextResponse> {
     const today = dayjs().format('YYYY-MM-DD')
     const now = dayjs()
 
-    const [progressResult, vocabResult, quizResult, streakResult] =
+    const [progressResult, vocabResult, quizResult, streakResult, storyResult] =
       await Promise.all([
         supabase.from('word_mastery').select('user_id, due_at, level'),
         supabase
@@ -61,6 +63,10 @@ export async function GET(): Promise<NextResponse> {
         supabase
           .from('user_streaks')
           .select('user_id, current_streak, last_active_date'),
+        supabase
+          .from('story_sessions')
+          .select('user_id')
+          .eq('status', 'complete'),
       ])
 
     const totalWords = vocabResult.count ?? 0
@@ -86,6 +92,11 @@ export async function GET(): Promise<NextResponse> {
       quizMap.set(row.user_id, (quizMap.get(row.user_id) ?? 0) + 1)
     }
 
+    const storyMap = new Map<string, number>()
+    for (const row of storyResult.data ?? []) {
+      storyMap.set(row.user_id, (storyMap.get(row.user_id) ?? 0) + 1)
+    }
+
     const streakMap = new Map<
       string,
       { current_streak: number; last_active_date: string | null }
@@ -109,9 +120,11 @@ export async function GET(): Promise<NextResponse> {
       }
       const streakDays = streakData.current_streak
       const practicedToday = streakData.last_active_date === today
+      const completedStories = storyMap.get(u.id) ?? 0
       const { score, breakdown } = calculateScore(
         stats.masteredCount,
         streakDays,
+        completedStories,
       )
       return {
         id: u.id,

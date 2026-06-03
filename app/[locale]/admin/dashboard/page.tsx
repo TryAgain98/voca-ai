@@ -17,6 +17,7 @@ import { dayjs } from '~/lib/dayjs'
 import { MasteryCard } from './_components/mastery-card'
 import { ReviewForecastCard } from './_components/review-forecast-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
+import { StorySessionCard } from './_components/story-session-card'
 import { StreakCard } from './_components/streak-card'
 import { TestPerformanceCard } from './_components/test-performance-card'
 import { TrickyWordsCard } from './_components/tricky-words-card'
@@ -120,6 +121,15 @@ export default function DashboardPage() {
       />
 
       <ReviewForecastCard forecast={forecast} isLoading={isForecastLoading} />
+
+      {!isViewMode && (
+        <StorySessionCard
+          userId={userId}
+          wrongTodayCount={stats?.wrongTodayCount ?? 0}
+          wrongTodayWords={stats?.wrongTodayWords ?? []}
+          isLoading={isLoading}
+        />
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TestPerformanceCard

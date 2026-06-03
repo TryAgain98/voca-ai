@@ -153,6 +153,50 @@ export interface PassageSession {
 
 export type PassageSessionInsert = Omit<PassageSession, 'id' | 'created_at'>
 
+export type StoryGenre =
+  | 'horror'
+  | 'romance'
+  | 'anime'
+  | 'comedy'
+  | 'drama'
+  | 'scifi'
+  | 'detective'
+  | 'adventure'
+
+export type StoryActivityType = 'read' | 'quiz' | 'type'
+
+export interface StoryWord {
+  id: string
+  word: string
+  meaning: string
+}
+
+export interface StorySession {
+  id: string
+  user_id: string
+  session_date: string
+  genre: StoryGenre
+  passage_text: string
+  translation: string
+  wrong_words: StoryWord[]
+  status: 'active' | 'complete'
+  created_at: string
+}
+
+export type StorySessionInsert = Omit<StorySession, 'id' | 'created_at'>
+
+export interface StoryActivityProgress {
+  id: string
+  story_session_id: string
+  activity_type: StoryActivityType
+  is_complete: boolean
+  completed_at: string | null
+}
+
+export interface StorySessionWithProgress extends StorySession {
+  activities: StoryActivityProgress[]
+}
+
 export interface AppErrorLog {
   id: string
   user_id: string | null

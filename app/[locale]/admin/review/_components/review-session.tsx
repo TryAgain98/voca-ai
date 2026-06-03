@@ -89,6 +89,7 @@ export function ReviewSessionView({ setup, onExit }: ReviewSessionViewProps) {
       <ReviewResults
         results={results}
         elapsedSeconds={elapsedSeconds}
+        userId={setup.userId}
         onRestart={onExit}
         onChangeSetup={onExit}
       />
