@@ -169,6 +169,11 @@ export interface StoryWord {
   id: string
   word: string
   meaning: string
+  phonetic?: string | null
+  word_type?: string | null
+  example?: string | null
+  synonyms?: string[]
+  description?: string | null
 }
 
 export interface StorySession {

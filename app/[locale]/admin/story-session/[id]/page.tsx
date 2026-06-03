@@ -90,7 +90,7 @@ export default function StorySessionPage() {
     return <StoryComplete />
   }
 
-  const canRegenerate = completedActivities.length === 0
+  const canRegenerate = true
 
   const wrongWords: StoryWord[] = session.wrong_words
 
@@ -169,6 +169,7 @@ export default function StorySessionPage() {
 
       {currentActivity === 'read' && (
         <StoryRead
+          sessionId={sessionId}
           passageText={session.passage_text}
           translation={session.translation}
           targetWords={session.wrong_words}

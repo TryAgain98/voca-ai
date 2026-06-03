@@ -89,6 +89,11 @@ export function ReviewResults({
     id: r.exercise.vocab.id,
     word: r.exercise.vocab.word,
     meaning: r.exercise.vocab.meaning,
+    phonetic: r.exercise.vocab.phonetic,
+    word_type: r.exercise.vocab.word_type,
+    example: r.exercise.vocab.example,
+    synonyms: r.exercise.vocab.synonyms,
+    description: r.exercise.vocab.description,
   }))
 
   const showStoryOffer = mistakes.length >= STORY_MISTAKE_THRESHOLD
