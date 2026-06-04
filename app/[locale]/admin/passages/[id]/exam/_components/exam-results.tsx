@@ -8,6 +8,7 @@ import { useTTS } from '~/hooks/use-tts'
 import {
   calculatePassageExamScore,
   evaluatePassageExamOutcome,
+  normalizePunctuation,
   scoreBg,
   scoreColor,
 } from '~/lib/passage-score'
@@ -32,7 +33,8 @@ interface SegmentToken {
   key: string
 }
 
-function tokenizeSegment(text: string): SegmentToken[] {
+function tokenizeSegment(rawText: string): SegmentToken[] {
+  const text = normalizePunctuation(rawText)
   const tokens: SegmentToken[] = []
   const regex = /\b[\w']+\b/g
   let lastIdx = 0
@@ -229,7 +231,8 @@ export function ExamResults({
 
   const segmentOffsets = useMemo(() => {
     const counts = segments.map(
-      (seg) => (seg.text.match(/\b[\w']+\b/g) ?? []).length,
+      (seg) =>
+        (normalizePunctuation(seg.text).match(/\b[\w']+\b/g) ?? []).length,
     )
     return counts.map((_, i) => counts.slice(0, i).reduce((s, c) => s + c, 0))
   }, [segments])

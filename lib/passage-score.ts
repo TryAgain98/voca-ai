@@ -20,8 +20,14 @@ function levenshtein(a: string, b: string): number {
   return dp[m][n]
 }
 
+export function normalizePunctuation(text: string): string {
+  return text.replace(/[‘’ʼʻ]/g, "'")
+}
+
 function normalizeWord(w: string): string {
-  return w.toLowerCase().replace(/[^a-z0-9']/g, '')
+  return normalizePunctuation(w)
+    .toLowerCase()
+    .replace(/[^a-z0-9']/g, '')
 }
 
 function normalizeDictionaryPronunciation(value: string): string {
@@ -133,7 +139,7 @@ function scoreWord(expected: string, got: string): number {
 }
 
 function tokenizeWords(text: string): string[] {
-  return text.match(/\b[\w']+\b/g) ?? []
+  return normalizePunctuation(text).match(/\b[\w']+\b/g) ?? []
 }
 
 const CONTRACTION_EXPANSIONS: Record<string, string> = {

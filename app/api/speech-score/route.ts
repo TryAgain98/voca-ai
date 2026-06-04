@@ -51,6 +51,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     const transcript = await groq.transcribeAudio(audio)
     const wordResults = scorePassage(transcript, expected)
     const pronunciationScore = overallScore(wordResults)
+
     const score = wordResults.length
       ? pronunciationScore
       : scoreTranscript(transcript, expected)

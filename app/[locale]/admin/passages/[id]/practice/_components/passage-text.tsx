@@ -4,6 +4,7 @@ import { Volume2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTTS } from '~/hooks/use-tts'
+import { normalizePunctuation } from '~/lib/passage-score'
 import { segmentsFromContent } from '~/lib/passage-segments'
 import { cn } from '~/lib/utils'
 
@@ -26,7 +27,8 @@ interface SegmentToken {
   key: string
 }
 
-function tokenizeSegment(text: string): SegmentToken[] {
+function tokenizeSegment(rawText: string): SegmentToken[] {
+  const text = normalizePunctuation(rawText)
   const tokens: SegmentToken[] = []
   let pos = 0
   let wordIdx = 0
@@ -164,7 +166,8 @@ export function PassageText({
   // speech-score indices (one per spoken word) stay correctly aligned.
   const segmentOffsets = useMemo(() => {
     const counts = segments.map(
-      (seg) => (seg.text.match(/\b[\w']+\b/g) ?? []).length,
+      (seg) =>
+        (normalizePunctuation(seg.text).match(/\b[\w']+\b/g) ?? []).length,
     )
     return counts.map((_, i) => counts.slice(0, i).reduce((s, c) => s + c, 0))
   }, [segments])
