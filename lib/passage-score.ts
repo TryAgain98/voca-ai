@@ -329,7 +329,7 @@ export function scorePassage(
   transcript: string,
   expected: string,
 ): WordResult[] {
-  const expectedWords = tokenizeWords(expected)
+  const expectedWords = tokenizeWords(normalizeTranscriptText(expected))
   const transcriptWords = tokenizeWords(normalizeTranscriptText(transcript))
   return alignWords(expectedWords, transcriptWords)
 }
