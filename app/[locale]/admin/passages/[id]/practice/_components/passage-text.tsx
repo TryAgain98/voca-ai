@@ -182,41 +182,67 @@ export function PassageText({
 
     const doFetch = async (): Promise<void> => {
       try {
-        const res = await fetch('/api/word-lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ passageText: content }),
-        })
-        if (!res.ok) throw new Error(`word-lookup ${res.status}`)
-        const aiData = (await res.json()) as Record<string, WordLookup>
+        const allWords = [
+          ...new Set(
+            (content.match(/\b[a-zA-Z']+\b/g) ?? []).map((w) =>
+              w.toLowerCase(),
+            ),
+          ),
+        ]
 
-        const words = Object.keys(aiData)
-        let dbData: WordDetailsBatchResponse = {}
-        try {
-          const dbRes = await fetch('/api/word-details-batch', {
+        const [dbData, aiData] = await Promise.all([
+          fetch('/api/word-details-batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ words }),
+            body: JSON.stringify({ words: allWords }),
           })
-          if (dbRes.ok)
-            dbData = (await dbRes.json()) as WordDetailsBatchResponse
-        } catch {
-          // non-fatal: fall back to AI data only
-        }
+            .then((r) =>
+              r.ok ? (r.json() as Promise<WordDetailsBatchResponse>) : {},
+            )
+            .catch(() => ({}) as WordDetailsBatchResponse),
+
+          fetch('/api/word-lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passageText: content }),
+          })
+            .then((r) =>
+              r.ok ? (r.json() as Promise<Record<string, WordLookup>>) : {},
+            )
+            .catch(() => ({}) as Record<string, WordLookup>),
+        ])
 
         const detailMap = new Map<string, PassageWordDetail>()
-        for (const [word, ai] of Object.entries(aiData)) {
-          const key = word.toLowerCase()
-          const db = dbData[key]
-          detailMap.set(key, {
-            meaning: db?.meaning ?? ai.meaning,
-            ipa: db?.ipa ?? ai.ipa,
-            wordType: db?.wordType ?? null,
-            example: db?.example ?? null,
-            synonyms: db?.synonyms ?? [],
-            description: db?.description ?? null,
-            source: db ? 'db' : 'ai',
+
+        for (const [word, db] of Object.entries(
+          dbData as WordDetailsBatchResponse,
+        )) {
+          detailMap.set(word.toLowerCase(), {
+            meaning: db.meaning,
+            ipa: db.ipa,
+            wordType: db.wordType,
+            example: db.example,
+            synonyms: db.synonyms ?? [],
+            description: db.description,
+            source: 'db',
           })
+        }
+
+        for (const [word, ai] of Object.entries(
+          aiData as Record<string, WordLookup>,
+        )) {
+          const key = word.toLowerCase()
+          if (!detailMap.has(key)) {
+            detailMap.set(key, {
+              meaning: ai.meaning,
+              ipa: ai.ipa,
+              wordType: null,
+              example: null,
+              synonyms: [],
+              description: null,
+              source: 'ai',
+            })
+          }
         }
 
         passageCache.set(passageId, detailMap)
