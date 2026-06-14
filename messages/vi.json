@@ -675,6 +675,8 @@
     "playback": "Nghe lại",
     "bestScore": "Tốt nhất",
     "meaningToggle": "Nghĩa",
+    "readAloud": "Nghe",
+    "stopReading": "Dừng",
     "examNow": "Thi ngay",
     "browserNotSupported": "Trình duyệt không hỗ trợ ghi âm",
     "browserHint": "Hãy dùng trình duyệt có hỗ trợ microphone và cấp quyền ghi âm.",

@@ -1,10 +1,10 @@
 'use client'
 
-import { ArrowLeft, Globe, Play } from 'lucide-react'
+import { ArrowLeft, Globe, Play, Volume2, VolumeX } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import { usePassageSessions } from '~/hooks/use-passage-sessions'
@@ -35,6 +35,30 @@ export default function PracticePage() {
     return Math.max(...practiceSessions.map((s) => s.overall_score ?? 0))
   }, [sessions])
 
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel()
+    }
+  }, [])
+
+  const handleSpeak = (): void => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+      return
+    }
+    const utterance = new SpeechSynthesisUtterance(passage?.content ?? '')
+    utterance.lang = 'en-US'
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+    utteranceRef.current = utterance
+    window.speechSynthesis.speak(utterance)
+    setIsSpeaking(true)
+  }
+
   if (isLoading || !passage) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -63,6 +87,20 @@ export default function PracticePage() {
                 {t('bestScore')}: {bestScore}
               </span>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'gap-1.5 text-xs',
+                isSpeaking
+                  ? 'text-[#7170ff]'
+                  : 'text-[#8a8f98] hover:text-[#d0d6e0]',
+              )}
+              onClick={handleSpeak}
+            >
+              {isSpeaking ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              {isSpeaking ? t('stopReading') : t('readAloud')}
+            </Button>
             <Button
               variant="ghost"
               size="sm"

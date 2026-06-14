@@ -675,6 +675,8 @@
     "playback": "Listen back",
     "bestScore": "Best",
     "meaningToggle": "Meaning",
+    "readAloud": "Listen",
+    "stopReading": "Stop",
     "examNow": "Exam now",
     "browserNotSupported": "Recording is not supported",
     "browserHint": "Use a browser with microphone support and allow recording permission.",
