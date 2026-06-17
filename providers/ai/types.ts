@@ -34,6 +34,21 @@ export interface PassageAnalysis {
   suggested_vocabulary: SuggestedPassageVocab[]
 }
 
+export interface WritingLocalizedText {
+  en: string
+  vi: string
+}
+
+export interface WritingScoreResult {
+  grammar_score: number
+  grammar_feedback: WritingLocalizedText
+  relevance_score: number
+  relevance_feedback: WritingLocalizedText
+  improved_sentence: string
+  ideal_sentence: string
+  ideal_sentence_vi: string
+}
+
 export interface WordLookup {
   meaning: string | null
   ipa: string | null

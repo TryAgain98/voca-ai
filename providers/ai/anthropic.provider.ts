@@ -14,6 +14,7 @@ import type {
   ExtractedVocabulary,
   PassageAnalysis,
   PassageWordMap,
+  WritingScoreResult,
 } from './types'
 
 const SUPPORTED_MIME_TYPES = [
@@ -124,6 +125,80 @@ export class AnthropicProvider extends BaseAIProvider {
     })
     const text = res.content[0].type === 'text' ? res.content[0].text : ''
     return text.trim().toLowerCase().startsWith('yes')
+  }
+
+  async scoreWriting(
+    imageUrl: string,
+    keywords: string[],
+    userSentence: string,
+  ): Promise<WritingScoreResult> {
+    const prompt = `You are an English writing evaluator.
+
+Given an image and keywords: [${keywords.join(', ')}]
+The user wrote: "${userSentence}"
+
+Evaluate on two criteria and respond ONLY with valid JSON (no markdown, no explanation):
+{
+  "grammar_score": <0-100>,
+  "grammar_feedback": { "en": "<one sentence in English: grammar error or praise>", "vi": "<same sentence in Vietnamese>" },
+  "relevance_score": <0-100>,
+  "relevance_feedback": { "en": "<one sentence in English: how well it matches the image and keywords>", "vi": "<same sentence in Vietnamese>" },
+  "improved_sentence": "<user's sentence with grammar fixed in English, keeping their style>",
+  "ideal_sentence": "<an ideal English sentence using the keywords that perfectly describes the image>",
+  "ideal_sentence_vi": "<Vietnamese translation of the ideal_sentence>"
+}`
+
+    const res = await this.client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'url', url: imageUrl },
+            },
+            { type: 'text', text: prompt },
+          ],
+        },
+      ],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : '{}'
+    const cleaned = text
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim()
+    return JSON.parse(cleaned) as WritingScoreResult
+  }
+
+  async generateWritingTitle(
+    imageUrl: string,
+    keywords: string[],
+  ): Promise<string> {
+    const prompt = `Look at this image and keywords: [${keywords.join(', ')}].
+Generate a short, descriptive English title (5-8 words) for a writing exercise about this image.
+Respond with ONLY the title text, nothing else.`
+
+    const res = await this.client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 50,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'url', url: imageUrl },
+            },
+            { type: 'text', text: prompt },
+          ],
+        },
+      ],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : ''
+    return text.trim().replace(/^["']|["']$/g, '')
   }
 
   async lookupPassageWords(passageText: string): Promise<PassageWordMap> {

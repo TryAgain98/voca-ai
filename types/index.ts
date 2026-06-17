@@ -202,6 +202,43 @@ export interface StorySessionWithProgress extends StorySession {
   activities: StoryActivityProgress[]
 }
 
+export interface WritingExercise {
+  id: string
+  created_by: string
+  title: string
+  image_url: string
+  keywords: string[]
+  created_at: string
+  updated_at: string
+}
+
+export type WritingExerciseInsert = Omit<
+  WritingExercise,
+  'id' | 'created_at' | 'updated_at'
+>
+export type WritingExerciseUpdate = Partial<
+  Omit<WritingExercise, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+>
+
+export interface WritingAttempt {
+  id: string
+  exercise_id: string
+  user_id: string
+  user_sentence: string
+  grammar_score: number
+  relevance_score: number
+  grammar_feedback: string
+  grammar_feedback_vi: string | null
+  relevance_feedback: string
+  relevance_feedback_vi: string | null
+  improved_sentence: string
+  ideal_sentence: string
+  ideal_sentence_vi: string | null
+  created_at: string
+}
+
+export type WritingAttemptInsert = Omit<WritingAttempt, 'id' | 'created_at'>
+
 export interface AppErrorLog {
   id: string
   user_id: string | null

@@ -4,6 +4,7 @@ import type {
   PassageWordMap,
   TranslationDirection,
   VocabularyFill,
+  WritingScoreResult,
 } from './types'
 
 export abstract class BaseAIProvider {
@@ -53,6 +54,25 @@ export abstract class BaseAIProvider {
   lookupPassageWords(_passageText: string): Promise<PassageWordMap> {
     return Promise.reject(
       new Error(`${this.name} does not support lookupPassageWords`),
+    )
+  }
+
+  scoreWriting(
+    _imageUrl: string,
+    _keywords: string[],
+    _userSentence: string,
+  ): Promise<WritingScoreResult> {
+    return Promise.reject(
+      new Error(`${this.name} does not support scoreWriting`),
+    )
+  }
+
+  generateWritingTitle(
+    _imageUrl: string,
+    _keywords: string[],
+  ): Promise<string> {
+    return Promise.reject(
+      new Error(`${this.name} does not support generateWritingTitle`),
     )
   }
 }
