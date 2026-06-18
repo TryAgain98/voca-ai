@@ -106,7 +106,7 @@ export function ExerciseComposeForm({
         className="w-full"
       >
         {isSaving && <Loader2 size={16} className="mr-2 animate-spin" />}
-        {isSaving ? t('generating') : t('createButton')}
+        {isSaving ? t('saving') : t('createButton')}
       </Button>
     </div>
   )

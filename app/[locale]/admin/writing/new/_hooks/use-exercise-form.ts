@@ -10,18 +10,15 @@ import {
   useUploadWritingImage,
 } from '~/hooks/use-writing-exercises'
 
-type FormStep = 'compose' | 'generating'
-
 export function useExerciseForm(userId: string) {
   const locale = useLocale()
   const router = useRouter()
 
-  const [step, setStep] = useState<FormStep>('compose')
+  const [isSaving, setIsSaving] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
   const [keywords, setKeywords] = useState<string[]>([])
   const [keywordInput, setKeywordInput] = useState('')
-  const [generatedTitle, setGeneratedTitle] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -32,7 +29,6 @@ export function useExerciseForm(userId: string) {
     if (!file) return
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
-    setGeneratedTitle('')
   }
 
   function addKeyword(): void {
@@ -49,36 +45,23 @@ export function useExerciseForm(userId: string) {
     setKeywords((prev) => prev.filter((k) => k !== kw))
   }
 
-  async function generateTitle(imageUrl: string): Promise<string> {
-    const res = await fetch('/api/writing-title', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageUrl, keywords }),
-    })
-    if (!res.ok) throw new Error('Title generation failed')
-    const { title } = (await res.json()) as { title: string }
-    return title
-  }
-
   async function handleSubmit(): Promise<void> {
     if (!imageFile || keywords.length === 0) {
       toast.error('Cần có ảnh và ít nhất 1 từ khoá')
       return
     }
 
-    setStep('generating')
+    setIsSaving(true)
 
     try {
       const imageUrl = await uploadImage.mutateAsync({
         file: imageFile,
         userId,
       })
-      const title = await generateTitle(imageUrl)
-      setGeneratedTitle(title)
 
       await createExercise.mutateAsync({
         created_by: userId,
-        title,
+        title: keywords.join(' / '),
         image_url: imageUrl,
         keywords,
       })
@@ -87,18 +70,17 @@ export function useExerciseForm(userId: string) {
       router.push(`/${locale}/admin/writing`)
     } catch {
       toast.error('Không thể tạo bài viết, thử lại sau')
-      setStep('compose')
+    } finally {
+      setIsSaving(false)
     }
   }
 
   return {
-    step,
     imageFile,
     imagePreview,
     keywords,
     keywordInput,
-    generatedTitle,
-    isSaving: step === 'generating',
+    isSaving,
     fileInputRef,
     setKeywordInput,
     handleImageChange,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { Loader2, Plus, RefreshCw, X } from 'lucide-react'
+import { Loader2, Plus, X } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useRef } from 'react'
@@ -85,43 +85,10 @@ function EditForm({ exercise, userId }: EditFormProps) {
         )}
       </div>
 
-      <div>
-        <label className="text-foreground mb-2 block text-sm font-medium">
-          {t('formTitle')}
-        </label>
-        <div className="flex gap-2">
-          <Input
-            value={form.title}
-            onChange={(e) => form.setTitle(e.target.value)}
-            placeholder={t('titlePlaceholder')}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => form.regenerateTitle(form.imagePreview)}
-            disabled={
-              form.isRegenerating ||
-              !form.imagePreview ||
-              form.keywords.length === 0
-            }
-          >
-            <RefreshCw
-              size={15}
-              className={form.isRegenerating ? 'animate-spin' : ''}
-            />
-          </Button>
-        </div>
-      </div>
-
       <Button
         onClick={form.handleSave}
         disabled={
-          !form.imagePreview ||
-          form.keywords.length === 0 ||
-          !form.title ||
-          form.isSaving
+          !form.imagePreview || form.keywords.length === 0 || form.isSaving
         }
         className="w-full"
       >

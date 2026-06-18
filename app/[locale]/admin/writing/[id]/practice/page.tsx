@@ -24,6 +24,7 @@ import type { WritingAttempt } from '~/types'
 function attemptToScoreResult(attempt: WritingAttempt): WritingScoreResult {
   return {
     grammar_score: attempt.grammar_score,
+    grammar_errors: [],
     grammar_feedback: {
       en: attempt.grammar_feedback,
       vi: attempt.grammar_feedback_vi ?? attempt.grammar_feedback,
