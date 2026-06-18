@@ -15,6 +15,7 @@ import {
 } from '~/hooks/use-writing-attempts'
 import { useWritingExercise } from '~/hooks/use-writing-exercises'
 
+import { WritingChatBot } from './_components/writing-chat-bot'
 import { WritingInput } from './_components/writing-input'
 import { WritingResult } from './_components/writing-result'
 
@@ -111,65 +112,76 @@ export default function WritingPracticePage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Link href={`/${locale}/admin/writing`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground size-8"
-          >
-            <ArrowLeft size={16} />
-          </Button>
-        </Link>
-        <div className="min-w-0">
-          <h1 className="truncate text-lg leading-6 font-semibold tracking-tight">
-            {exercise.title}
-          </h1>
-          {lastAttempt && (
-            <p className="text-muted-foreground text-xs">
-              {t('previousScore', {
-                score: Math.round(
-                  (lastAttempt.grammar_score + lastAttempt.relevance_score) / 2,
-                ),
-              })}
-            </p>
+    <>
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <div className="flex items-center gap-3">
+          <Link href={`/${locale}/admin/writing`}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground size-8"
+            >
+              <ArrowLeft size={16} />
+            </Button>
+          </Link>
+          <div className="min-w-0">
+            <h1 className="truncate text-lg leading-6 font-semibold tracking-tight">
+              {exercise.title}
+            </h1>
+            {lastAttempt && (
+              <p className="text-muted-foreground text-xs">
+                {t('previousScore', {
+                  score: Math.round(
+                    (lastAttempt.grammar_score + lastAttempt.relevance_score) /
+                      2,
+                  ),
+                })}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="relative h-64 w-full overflow-hidden rounded-2xl sm:h-80">
+          <Image
+            src={exercise.image_url}
+            alt={exercise.title}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        <div className="border-border bg-card rounded-2xl border p-5">
+          <p className="text-muted-foreground mb-4 text-sm">
+            {t('practiceInstruction')}
+          </p>
+
+          {displayResult ? (
+            <WritingResult
+              result={displayResult}
+              userSentence={displaySentence}
+              isViewingPrevious={isViewingPrevious}
+              onRetry={handleRetry}
+            />
+          ) : (
+            <WritingInput
+              sentence={sentence}
+              keywords={exercise.keywords}
+              isSubmitting={submitAttempt.isPending}
+              onChange={setSentence}
+              onSubmit={handleSubmit}
+            />
           )}
         </div>
       </div>
 
-      <div className="relative h-64 w-full overflow-hidden rounded-2xl sm:h-80">
-        <Image
-          src={exercise.image_url}
-          alt={exercise.title}
-          fill
-          className="object-cover"
-          priority
+      {displayResult && (
+        <WritingChatBot
+          exercise={exercise}
+          result={displayResult}
+          userSentence={displaySentence}
         />
-      </div>
-
-      <div className="border-border bg-card rounded-2xl border p-5">
-        <p className="text-muted-foreground mb-4 text-sm">
-          {t('practiceInstruction')}
-        </p>
-
-        {displayResult ? (
-          <WritingResult
-            result={displayResult}
-            userSentence={displaySentence}
-            isViewingPrevious={isViewingPrevious}
-            onRetry={handleRetry}
-          />
-        ) : (
-          <WritingInput
-            sentence={sentence}
-            keywords={exercise.keywords}
-            isSubmitting={submitAttempt.isPending}
-            onChange={setSentence}
-            onSubmit={handleSubmit}
-          />
-        )}
-      </div>
-    </div>
+      )}
+    </>
   )
 }

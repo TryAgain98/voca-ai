@@ -800,5 +800,12 @@
     "backToList": "Quay lại danh sách",
     "previousScore": "Điểm lần trước: {score}",
     "removeImage": "Xoá ảnh"
+  },
+  "WritingChat": {
+    "title": "Gia sư AI",
+    "open": "Mở gia sư AI",
+    "placeholder": "Hỏi về bài làm của bạn...",
+    "suggestedLabel": "Câu hỏi gợi ý",
+    "send": "Gửi"
   }
 }

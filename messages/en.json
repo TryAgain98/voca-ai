@@ -800,5 +800,12 @@
     "backToList": "Back to list",
     "previousScore": "Previous score: {score}",
     "removeImage": "Remove image"
+  },
+  "WritingChat": {
+    "title": "AI Tutor",
+    "open": "Open AI Tutor",
+    "placeholder": "Ask about your answer...",
+    "suggestedLabel": "Suggested questions",
+    "send": "Send"
   }
 }
