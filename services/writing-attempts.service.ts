@@ -32,6 +32,22 @@ class WritingAttemptsService extends BaseService<
     return data as WritingAttempt[]
   }
 
+  async findByExerciseAndUser(
+    exerciseId: string,
+    userId: string,
+  ): Promise<WritingAttempt | null> {
+    const { data, error } = await supabase
+      .from('writing_attempts')
+      .select('*')
+      .eq('exercise_id', exerciseId)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) throw error
+    return data as WritingAttempt | null
+  }
+
   async upsert(attempt: WritingAttemptInsert): Promise<void> {
     const { error } = await supabase
       .from('writing_attempts')

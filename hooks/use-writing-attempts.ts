@@ -24,6 +24,15 @@ export function useLatestWritingAttemptsByUser(userId: string) {
   })
 }
 
+export function useUserWritingAttempt(exerciseId: string, userId: string) {
+  return useQuery({
+    queryKey: ['writing-attempts', 'user', exerciseId, userId],
+    queryFn: () =>
+      writingAttemptsService.findByExerciseAndUser(exerciseId, userId),
+    enabled: !!exerciseId && !!userId,
+  })
+}
+
 export function useSubmitWritingAttempt() {
   const qc = useQueryClient()
   return useMutation({
@@ -72,6 +81,9 @@ export function useSubmitWritingAttempt() {
       })
       qc.invalidateQueries({
         queryKey: ['writing-attempts', 'latest', vars.userId],
+      })
+      qc.invalidateQueries({
+        queryKey: ['writing-attempts', 'user', vars.exerciseId, vars.userId],
       })
     },
     onError: () => toast.error('Không thể chấm bài, thử lại sau'),

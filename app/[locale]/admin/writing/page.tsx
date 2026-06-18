@@ -27,7 +27,7 @@ export default function WritingPage() {
   const { user } = useUser()
   const userId = user?.id ?? ''
 
-  const { data: exercises = [], isLoading } = useWritingExercises(userId)
+  const { data: exercises = [], isLoading } = useWritingExercises()
   const { data: latestAttempts = [] } = useLatestWritingAttemptsByUser(userId)
   const deleteExercise = useDeleteWritingExercise()
   const [deletingExercise, setDeletingExercise] =

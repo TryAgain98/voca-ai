@@ -10,7 +10,7 @@ import { useState } from 'react'
 
 import { Button } from '~/components/ui/button'
 import {
-  useWritingAttempts,
+  useUserWritingAttempt,
   useSubmitWritingAttempt,
 } from '~/hooks/use-writing-attempts'
 import { useWritingExercise } from '~/hooks/use-writing-exercises'
@@ -49,7 +49,7 @@ export default function WritingPracticePage() {
   const { data: exercise, isLoading: exerciseLoading } = useWritingExercise(
     params.id,
   )
-  const { data: attempts = [] } = useWritingAttempts(params.id)
+  const { data: lastAttempt } = useUserWritingAttempt(params.id, userId)
   const submitAttempt = useSubmitWritingAttempt()
 
   const [sentence, setSentence] = useState('')
@@ -57,7 +57,6 @@ export default function WritingPracticePage() {
   const [submittedSentence, setSubmittedSentence] = useState('')
   const [isRedoing, setIsRedoing] = useState(false)
 
-  const lastAttempt = attempts[0]
   const isViewingPrevious = !isRedoing && !!lastAttempt && !newResult
   const displayResult =
     newResult ?? (isViewingPrevious ? attemptToScoreResult(lastAttempt) : null)
