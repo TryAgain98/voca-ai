@@ -15,6 +15,7 @@ export interface VocabularyFill {
   meaning: string
   phonetic: string
   example: string
+  description?: string
 }
 
 export interface SuggestedPassageVocab {

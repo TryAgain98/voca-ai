@@ -72,7 +72,7 @@ export class GroqProvider extends BaseAIProvider {
   async suggestVocabularyFill(word: string): Promise<VocabularyFill> {
     const res = await this.client.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 128,
+      max_tokens: 256,
       temperature: 0.2,
       messages: [{ role: 'user', content: buildVocabularyFillPrompt(word) }],
     })
@@ -87,6 +87,7 @@ export class GroqProvider extends BaseAIProvider {
       meaning: String(fill.meaning ?? ''),
       phonetic: String(fill.phonetic ?? ''),
       example: String(fill.example ?? ''),
+      description: fill.description ? String(fill.description) : undefined,
     }
   }
 

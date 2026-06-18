@@ -27,6 +27,7 @@ export interface VocabFormSuggestions {
   meaning: UseSuggestionReturn
   phonetic: UseSuggestionReturn
   example: UseSuggestionReturn
+  description: UseSuggestionReturn
 }
 
 export interface UseVocabFormReturn {
@@ -110,6 +111,11 @@ export function useVocabForm(
       isLoading: form.example.trim() ? false : fill.isLoading,
       clear: clearFill,
     },
+    description: {
+      suggestion: form.description.trim() ? null : fill.description,
+      isLoading: form.description.trim() ? false : fill.isLoading,
+      clear: clearFill,
+    },
   }
 
   const hasAnySuggestion =
@@ -117,7 +123,8 @@ export function useVocabForm(
     !!suggestions.word_type.suggestion ||
     !!suggestions.meaning.suggestion ||
     !!suggestions.phonetic.suggestion ||
-    !!suggestions.example.suggestion
+    !!suggestions.example.suggestion ||
+    !!suggestions.description.suggestion
 
   const applyAll = () => {
     setForm((f) => ({
@@ -132,6 +139,10 @@ export function useVocabForm(
       phonetic:
         !f.phonetic.trim() && fill.phonetic ? fill.phonetic : f.phonetic,
       example: !f.example.trim() && fill.example ? fill.example : f.example,
+      description:
+        !f.description.trim() && fill.description
+          ? fill.description
+          : f.description,
     }))
     setErrors({})
     clearFill()

@@ -13,6 +13,7 @@ export interface WordFillData {
   meaning: string | null
   phonetic: string | null
   example: string | null
+  description: string | null
   isLoading: boolean
 }
 
@@ -69,6 +70,7 @@ export function useWordFill(word: string): UseWordFillReturn {
       meaning: wordIsValid ? state.data?.meaning || null : null,
       phonetic: wordIsValid ? state.data?.phonetic || null : null,
       example: wordIsValid ? state.data?.example || null : null,
+      description: wordIsValid ? state.data?.description || null : null,
       isLoading: isActive ? state.isLoading : false,
     },
     clear: () => setState(RESET),
