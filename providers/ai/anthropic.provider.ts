@@ -132,21 +132,42 @@ export class AnthropicProvider extends BaseAIProvider {
     keywords: string[],
     userSentence: string,
   ): Promise<WritingScoreResult> {
-    const prompt = `You are an English writing evaluator.
+    const prompt = `You are an English writing coach for Vietnamese learners (A2-B1 level).
 
-Given an image and keywords: [${keywords.join(', ')}]
-The user wrote: "${userSentence}"
+Image keywords: [${keywords.join(', ')}]
+Student's sentence: "${userSentence}"
 
-Evaluate on two criteria and respond ONLY with valid JSON (no markdown, no explanation):
+Respond ONLY with valid JSON (no markdown, no extra text):
 {
   "grammar_score": <0-100>,
-  "grammar_feedback": { "en": "<one sentence in English: grammar error or praise>", "vi": "<same sentence in Vietnamese>" },
+  "grammar_errors": [
+    {
+      "wrong": "<exact wrong word or short phrase from the sentence>",
+      "fix": "<corrected word or phrase>",
+      "reason": {
+        "en": "<one short reason, e.g. 'subject-verb agreement: 3rd person singular needs -s'>",
+        "vi": "<same reason in Vietnamese>"
+      }
+    }
+  ],
+  "grammar_feedback": {
+    "en": "<if no errors: one praise sentence. If errors: brief overall summary in one sentence>",
+    "vi": "<same in Vietnamese>"
+  },
   "relevance_score": <0-100>,
-  "relevance_feedback": { "en": "<one sentence in English: how well it matches the image and keywords>", "vi": "<same sentence in Vietnamese>" },
-  "improved_sentence": "<user's sentence with grammar fixed in English, keeping their style>",
-  "ideal_sentence": "<an ideal English sentence using the keywords that perfectly describes the image>",
-  "ideal_sentence_vi": "<Vietnamese translation of the ideal_sentence>"
-}`
+  "relevance_feedback": {
+    "en": "<one sentence: name which keywords were used and what specific image detail is missing or well described>",
+    "vi": "<same in Vietnamese>"
+  },
+  "improved_sentence": "<student's sentence with only grammar fixed, keeping their vocabulary and style>",
+  "ideal_sentence": "<8-12 words, use only simple A1-B1 everyday words like go/walk/read/sit/happy/eat, naturally describes the image using the keywords>",
+  "ideal_sentence_vi": "<Vietnamese translation of ideal_sentence>"
+}
+
+Rules:
+- grammar_errors: MUST be [] if the sentence is grammatically correct
+- ideal_sentence: NO rare words. Prefer: go, walk, sit, eat, read, talk, look, feel, happy, busy, together
+- relevance_feedback: always name at least one keyword and one specific visual detail from the image`
 
     const res = await this.client.messages.create({
       model: 'claude-haiku-4-5-20251001',

@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 
-import type { WritingScoreResult } from '~/providers/ai/types'
+import type { GrammarError, WritingScoreResult } from '~/providers/ai/types'
 
 interface WritingResultProps {
   result: WritingScoreResult
@@ -78,7 +78,70 @@ function ScoreRing({ score, label }: { score: number; label: string }) {
   )
 }
 
-function FeedbackRow({
+function GrammarErrorItem({
+  error,
+  locale,
+}: {
+  error: GrammarError
+  locale: string
+}) {
+  const reason = locale === 'vi' ? error.reason.vi : error.reason.en
+
+  return (
+    <div className="flex flex-col gap-0.5 rounded-lg bg-red-500/5 px-3 py-2">
+      <div className="flex items-center gap-2 text-sm">
+        <span className="rounded bg-red-500/15 px-1.5 py-0.5 font-mono text-xs font-medium text-red-400 line-through">
+          {error.wrong}
+        </span>
+        <span className="text-muted-foreground">→</span>
+        <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-xs font-medium text-emerald-400">
+          {error.fix}
+        </span>
+      </div>
+      <span className="text-muted-foreground text-xs leading-relaxed">
+        {reason}
+      </span>
+    </div>
+  )
+}
+
+function GrammarFeedback({
+  errors,
+  feedback,
+  isGood,
+  label,
+  locale,
+}: {
+  errors: GrammarError[]
+  feedback: string
+  isGood: boolean
+  label: string
+  locale: string
+}) {
+  return (
+    <div className="flex gap-3">
+      {isGood ? (
+        <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-400" />
+      ) : (
+        <XCircle size={18} className="mt-0.5 shrink-0 text-red-400" />
+      )}
+      <div className="flex flex-1 flex-col gap-2">
+        <span className="text-foreground text-sm font-medium">{label}</span>
+        {errors.length > 0 ? (
+          <div className="flex flex-col gap-1.5">
+            {errors.map((err, i) => (
+              <GrammarErrorItem key={i} error={err} locale={locale} />
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-sm">{feedback}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function RelevanceFeedback({
   isGood,
   label,
   feedback,
@@ -96,7 +159,9 @@ function FeedbackRow({
       )}
       <div className="flex flex-col gap-0.5">
         <span className="text-foreground text-sm font-medium">{label}</span>
-        <span className="text-muted-foreground text-sm">{feedback}</span>
+        <span className="text-muted-foreground text-sm leading-relaxed">
+          {feedback}
+        </span>
       </div>
     </div>
   )
@@ -116,6 +181,7 @@ export function WritingResult({
 
   const isGoodGrammar = result.grammar_score >= SCORE_THRESHOLDS.good
   const isGoodRelevance = result.relevance_score >= SCORE_THRESHOLDS.good
+  const grammarErrors = result.grammar_errors ?? []
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 flex flex-col gap-5 duration-500">
@@ -141,16 +207,19 @@ export function WritingResult({
         <h3 className="text-foreground text-sm font-semibold">
           {t('feedbackTitle')}
         </h3>
-        <FeedbackRow
-          isGood={isGoodGrammar}
-          label={t('grammar')}
+        <GrammarFeedback
+          errors={grammarErrors}
           feedback={
             locale === 'vi'
               ? result.grammar_feedback.vi
               : result.grammar_feedback.en
           }
+          isGood={isGoodGrammar}
+          label={t('grammar')}
+          locale={locale}
         />
-        <FeedbackRow
+        <div className="border-border border-t" />
+        <RelevanceFeedback
           isGood={isGoodRelevance}
           label={t('relevance')}
           feedback={

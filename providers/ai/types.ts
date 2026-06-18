@@ -39,8 +39,15 @@ export interface WritingLocalizedText {
   vi: string
 }
 
+export interface GrammarError {
+  wrong: string
+  fix: string
+  reason: WritingLocalizedText
+}
+
 export interface WritingScoreResult {
   grammar_score: number
+  grammar_errors: GrammarError[]
   grammar_feedback: WritingLocalizedText
   relevance_score: number
   relevance_feedback: WritingLocalizedText
