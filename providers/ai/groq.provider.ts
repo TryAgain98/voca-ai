@@ -185,9 +185,9 @@ Respond ONLY with valid JSON (no markdown, no extra text):
     "en": "<if no errors: one praise sentence. If errors: brief overall summary in one sentence>",
     "vi": "<same in Vietnamese>"
   },
-  "relevance_score": <0-100>,
+  "relevance_score": <0-100, based ONLY on keyword usage: all keywords used = 100, missing keywords reduce the score proportionally>,
   "relevance_feedback": {
-    "en": "<one sentence: name which keywords were used and what specific image detail is missing or well described>",
+    "en": "<one sentence: list which keywords were used and which (if any) were missing>",
     "vi": "<same in Vietnamese>"
   },
   "improved_sentence": "<student's sentence with only grammar fixed, keeping their vocabulary and style>",
@@ -197,8 +197,12 @@ Respond ONLY with valid JSON (no markdown, no extra text):
 
 Rules:
 - grammar_errors: MUST be [] if the sentence is grammatically correct
+- CRITICAL: Before adding any grammar error, verify that "wrong" and "fix" are actually DIFFERENT strings. If they would be identical, do NOT add that error — it means there is no real error.
+- CRITICAL: A sentence that already starts with "A", "An", or "The" has an article — never flag it as "missing article/determiner".
+- CRITICAL: Do not invent errors. Only flag real grammatical mistakes visible in the student's sentence.
 - ideal_sentence: NO rare words. Prefer: go, walk, sit, eat, read, talk, look, feel, happy, busy, together
-- relevance_feedback: always name at least one keyword and one specific visual detail from the image`
+- relevance_score: score based ONLY on whether the student used all the given keywords (or their verb forms, e.g. "drawing" counts for "draw"). 100 = all used, deduct proportionally for each missing keyword. Do NOT penalize for inaccurate image description.
+- relevance_feedback: state clearly which keywords were used and which were missing. Do not comment on image accuracy.`
 
     const res = await this.client.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
