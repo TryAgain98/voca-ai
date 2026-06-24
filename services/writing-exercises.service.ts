@@ -17,6 +17,15 @@ class WritingExercisesService extends BaseService<
     super('writing_exercises')
   }
 
+  override async findAll(): Promise<WritingExercise[]> {
+    const { data, error } = await supabase
+      .from('writing_exercises')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data as WritingExercise[]
+  }
+
   async findByUser(userId: string): Promise<WritingExercise[]> {
     const { data, error } = await supabase
       .from('writing_exercises')
