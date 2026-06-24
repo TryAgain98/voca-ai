@@ -196,13 +196,19 @@ Respond ONLY with valid JSON (no markdown, no extra text):
 }
 
 Rules:
-- grammar_errors: MUST be [] if the sentence is grammatically correct
-- CRITICAL: "wrong" must be the EXACT phrase from the student's sentence. "fix" must be ONLY a replacement for what's already there — never add new words that were not in the original sentence. Short and clean.
+- grammar_errors: MUST be [] if the sentence is grammatically correct.
+- CRITICAL: "wrong" must be the EXACT substring from the student's sentence (copy it verbatim). "fix" must be the minimum correct replacement — you may add a word only when it is grammatically required (e.g. a missing article or auxiliary verb). Never rewrite more than the smallest broken unit.
 - CRITICAL: Before adding any grammar error, verify that "wrong" and "fix" are actually DIFFERENT strings. If they would be identical, do NOT add that error.
 - CRITICAL: A sentence that already starts with "A", "An", or "The" has an article — never flag it as "missing article/determiner".
-- CRITICAL: Do NOT flag preposition style preferences (e.g. "on a chair" vs "at a chair", "on the table" vs "at the table") — these are NOT grammar errors for A2-B1 level.
+- CRITICAL: Do NOT flag preposition style preferences (e.g. "on a chair" vs "at a chair") — these are NOT grammar errors for A2-B1 level.
 - CRITICAL: Do NOT flag missing vocabulary, missing details, or incomplete descriptions. Grammar scoring is about sentence structure only — not about whether the student described the image fully.
-- CRITICAL: Only flag these specific grammar error types: wrong verb tense, wrong verb form (e.g. "eats" vs "eating"), broken subject-verb agreement, clearly wrong word (e.g. wrong part of speech). Nothing else counts as a grammar error.
+- CRITICAL: Only flag these specific grammar error types:
+  1. Wrong verb tense (e.g. "she go yesterday" → "she went")
+  2. Wrong verb form (e.g. "she is eat" → "she is eating")
+  3. Broken subject-verb agreement (e.g. "she see" → "she sees")
+  4. Wrong verb choice that breaks grammar (e.g. "sees out" → "looks out" — "look out" is the correct phrasal verb; "see out" is not standard English)
+  5. Missing required article before a countable noun (e.g. "out door" → "out the door")
+  6. Clearly wrong part of speech (e.g. noun used as verb)
 - CRITICAL: Do not invent errors. Only flag real grammatical mistakes visible in the student's sentence.
 - reason: must be SHORT (under 10 words in English). Simple language — no linguistic jargon. Target A2-B1 Vietnamese learners.
 - ideal_sentence: NO rare words. Prefer: go, walk, sit, eat, read, talk, look, feel, happy, busy, together
@@ -226,12 +232,9 @@ Rules:
     const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
     const result = JSON.parse(raw) as WritingScoreResult
     if (Array.isArray(result.grammar_errors)) {
-      result.grammar_errors = result.grammar_errors.filter((e) => {
-        if (!e.wrong || !e.fix || e.wrong === e.fix) return false
-        const wrongWords = e.wrong.trim().split(/\s+/).length
-        const fixWords = e.fix.trim().split(/\s+/).length
-        return fixWords <= wrongWords
-      })
+      result.grammar_errors = result.grammar_errors.filter(
+        (e) => !!e.wrong && !!e.fix && e.wrong.trim() !== e.fix.trim(),
+      )
     }
     return result
   }
