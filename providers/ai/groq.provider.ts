@@ -209,6 +209,7 @@ Rules:
   4. Wrong verb choice that breaks grammar (e.g. "sees out" → "looks out" — "look out" is the correct phrasal verb; "see out" is not standard English)
   5. Missing required article before a countable noun (e.g. "out door" → "out the door")
   6. Clearly wrong part of speech (e.g. noun used as verb)
+- CRITICAL: Passive voice constructions ("is/are/was/were + past participle", e.g. "is opened by", "was eaten by") are CORRECT grammar. NEVER flag them as wrong verb form.
 - CRITICAL: Do not invent errors. Only flag real grammatical mistakes visible in the student's sentence.
 - reason: must be SHORT (under 10 words in English). Simple language — no linguistic jargon. Target A2-B1 Vietnamese learners.
 - ideal_sentence: NO rare words. Prefer: go, walk, sit, eat, read, talk, look, feel, happy, busy, together
