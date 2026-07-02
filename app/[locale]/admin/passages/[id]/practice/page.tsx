@@ -15,6 +15,7 @@ import { cn } from '~/lib/utils'
 import { ExamResults } from '../exam/_components/exam-results'
 
 import { PassageText } from './_components/passage-text'
+import { PassageTranslation } from './_components/passage-translation'
 import { PracticeRecorder } from './_components/practice-recorder'
 import { usePracticeSession } from './_hooks/use-practice-session'
 
@@ -36,6 +37,7 @@ export default function PracticePage() {
   }, [sessions])
 
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [hoveredSentence, setHoveredSentence] = useState<number | null>(null)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
@@ -164,6 +166,8 @@ export default function PracticePage() {
             content={passage.content}
             passageId={passageId}
             wordResults={null}
+            hoveredSentence={hoveredSentence}
+            onSentenceHover={setHoveredSentence}
           />
         </div>
       )}
@@ -176,7 +180,11 @@ export default function PracticePage() {
             borderColor: 'rgba(255,255,255,0.08)',
           }}
         >
-          <p className="text-sm text-[#8a8f98] italic">{passage.translation}</p>
+          <PassageTranslation
+            translation={passage.translation}
+            hoveredSentence={hoveredSentence}
+            onSentenceHover={setHoveredSentence}
+          />
         </div>
       )}
 

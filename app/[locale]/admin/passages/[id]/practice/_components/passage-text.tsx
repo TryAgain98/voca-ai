@@ -87,18 +87,31 @@ interface SegmentBlockProps {
   segment: PassageSegment
   wordResults: WordResult[] | null
   resultOffset: number
+  isHighlighted: boolean
+  onSentenceEnter: () => void
+  onSentenceLeave: () => void
 }
 
 function SegmentBlock({
   segment,
   wordResults,
   resultOffset,
+  isHighlighted,
+  onSentenceEnter,
+  onSentenceLeave,
 }: SegmentBlockProps) {
   const tts = useTTS(segment.text, { prefetch: true })
   const tokens = useMemo(() => tokenizeSegment(segment.text), [segment.text])
 
   return (
-    <>
+    <span
+      onMouseEnter={onSentenceEnter}
+      onMouseLeave={onSentenceLeave}
+      className={cn(
+        'rounded transition-colors',
+        isHighlighted && 'bg-primary/10',
+      )}
+    >
       <button
         onClick={tts.speak}
         className={cn(
@@ -145,7 +158,7 @@ function SegmentBlock({
           </WordInfoPopup>
         )
       })}{' '}
-    </>
+    </span>
   )
 }
 
@@ -153,12 +166,16 @@ interface PassageTextProps {
   content: string
   passageId: string
   wordResults: WordResult[] | null
+  hoveredSentence?: number | null
+  onSentenceHover?: (index: number | null) => void
 }
 
 export function PassageText({
   content,
   passageId,
   wordResults,
+  hoveredSentence = null,
+  onSentenceHover,
 }: PassageTextProps) {
   const segments = useMemo(() => segmentsFromContent(content), [content])
 
@@ -279,6 +296,9 @@ export function PassageText({
             segment={segment}
             wordResults={wordResults}
             resultOffset={segmentOffsets[i] ?? 0}
+            isHighlighted={hoveredSentence === i}
+            onSentenceEnter={() => onSentenceHover?.(i)}
+            onSentenceLeave={() => onSentenceHover?.(null)}
           />
         ))}
       </p>
