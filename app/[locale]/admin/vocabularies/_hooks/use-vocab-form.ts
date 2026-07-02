@@ -9,7 +9,7 @@ import { useWordFill } from '~/app/[locale]/admin/vocabularies/_hooks/use-word-f
 import type { UseSuggestionReturn } from '~/app/[locale]/admin/vocabularies/_hooks/use-translation-suggestion'
 import type { Lesson, Vocabulary } from '~/types'
 
-interface FormState {
+export interface VocabFormState {
   lesson_id: string
   word: string
   word_type: string
@@ -18,6 +18,8 @@ interface FormState {
   phonetic: string
   description: string
 }
+
+type FormState = VocabFormState
 
 type FieldError = Partial<Record<keyof FormState, string>>
 
@@ -45,17 +47,18 @@ export interface UseVocabFormReturn {
 export function useVocabForm(
   editing: Vocabulary | null,
   lessons: Lesson[],
+  initialValues?: Partial<FormState>,
 ): UseVocabFormReturn {
   const t = useTranslations('Vocabularies')
 
   const [form, setForm] = useState<FormState>({
-    lesson_id: editing?.lesson_id ?? '',
-    word: editing?.word ?? '',
-    word_type: editing?.word_type ?? '',
-    meaning: editing?.meaning ?? '',
-    example: editing?.example ?? '',
-    phonetic: editing?.phonetic ?? '',
-    description: editing?.description ?? '',
+    lesson_id: editing?.lesson_id ?? initialValues?.lesson_id ?? '',
+    word: editing?.word ?? initialValues?.word ?? '',
+    word_type: editing?.word_type ?? initialValues?.word_type ?? '',
+    meaning: editing?.meaning ?? initialValues?.meaning ?? '',
+    example: editing?.example ?? initialValues?.example ?? '',
+    phonetic: editing?.phonetic ?? initialValues?.phonetic ?? '',
+    description: editing?.description ?? initialValues?.description ?? '',
   })
   const [errors, setErrors] = useState<FieldError>({})
 

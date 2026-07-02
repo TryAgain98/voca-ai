@@ -25,6 +25,7 @@ import {
 } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
 
+import type { VocabFormState } from '~/app/[locale]/admin/vocabularies/_hooks/use-vocab-form'
 import type { Lesson, Vocabulary } from '~/types'
 
 const WORD_TYPES = [
@@ -71,6 +72,7 @@ interface VocabularyFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   editing: Vocabulary | null
+  initialValues?: Partial<VocabFormState>
   lessons: Lesson[]
   isPending: boolean
   onSubmit: (data: {
@@ -88,6 +90,7 @@ export function VocabularyFormDialog({
   open,
   onOpenChange,
   editing,
+  initialValues,
   lessons,
   isPending,
   onSubmit,
@@ -104,7 +107,7 @@ export function VocabularyFormDialog({
     set,
     validate,
     applyAll,
-  } = useVocabForm(editing, lessons)
+  } = useVocabForm(editing, lessons, initialValues)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

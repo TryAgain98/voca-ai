@@ -534,7 +534,9 @@
     "slippedTodayBannerDesc": "Xem lại các từ này trước khi luyện tập để ghi nhớ lâu hơn.",
     "slippedTodayPractice": "Luyện tập ngay",
     "slippedTodayPracticeModalTitle": "Luyện tập từ bị sai",
-    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu} other {# từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu}}"
+    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu} other {# từ bị sai hôm nay — chọn kiểu luyện tập để bắt đầu}}",
+    "addToVocab": "Thêm vào từ vựng",
+    "inVocab": "Đã có trong từ vựng"
   },
   "Users": {
     "title": "Học viên",

@@ -534,7 +534,9 @@
     "slippedTodayBannerDesc": "Review these words before practicing to lock them in.",
     "slippedTodayPractice": "Practice now",
     "slippedTodayPracticeModalTitle": "Practice slipped words",
-    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 word slipped today — choose a mode to start} other {# words slipped today — choose a mode to start}}"
+    "slippedTodayPracticeModalDesc": "{count, plural, =1 {1 word slipped today — choose a mode to start} other {# words slipped today — choose a mode to start}}",
+    "addToVocab": "Add to vocabulary",
+    "inVocab": "In vocabulary"
   },
   "Users": {
     "title": "Learners",
