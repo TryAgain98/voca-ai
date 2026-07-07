@@ -341,6 +341,7 @@ export function overallScore(results: WordResult[]): number {
 }
 
 export const PASSING_WORD_SCORE = 85
+export const PASSING_OVERALL_SCORE = 90
 
 export interface PassageExamScore {
   overallScore: number
@@ -407,8 +408,7 @@ export function evaluatePassageExamOutcome(
   return {
     passed:
       wordResults.length > 0 &&
-      missingCount === 0 &&
-      incorrectCount === 0 &&
+      overallScore(wordResults) >= PASSING_OVERALL_SCORE &&
       !overTime,
     missingCount,
     incorrectCount,
