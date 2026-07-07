@@ -8,8 +8,10 @@ import {
   buildSynonymCheckPrompt,
   buildTranslationPrompt,
   buildVocabularyFillPrompt,
+  guessSingularForm,
   parsePassageAnalysis,
   parsePassageWordMap,
+  parseVocabularyFillJson,
   parseVocabularyJson,
 } from './utils'
 
@@ -70,14 +72,25 @@ export class GroqProvider extends BaseAIProvider {
   }
 
   async suggestVocabularyFill(word: string): Promise<VocabularyFill> {
+    const fill = await this.requestVocabularyFill(word)
+    if (fill.valid) return fill
+
+    const singular = guessSingularForm(word)
+    if (!singular) return fill
+
+    return this.requestVocabularyFill(singular)
+  }
+
+  private async requestVocabularyFill(word: string): Promise<VocabularyFill> {
     const res = await this.client.chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       max_tokens: 256,
       temperature: 0.2,
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: buildVocabularyFillPrompt(word) }],
     })
     const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
-    const fill = JSON.parse(raw) as Partial<VocabularyFill>
+    const fill = parseVocabularyFillJson(raw) as Partial<VocabularyFill>
     if (fill.valid === false) {
       return { valid: false, meaning: '', phonetic: '', example: '' }
     }

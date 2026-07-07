@@ -150,6 +150,10 @@ Fill every field. Never leave any field empty.
 Return ONLY valid JSON, no markdown fences, no explanation.`
 
 export function parsePassageWordMap(raw: string): PassageWordMap {
+  return extractJsonObject(raw) as PassageWordMap
+}
+
+function extractJsonObject(raw: string): Record<string, unknown> {
   const stripped = raw
     .trim()
     .replace(/^```(?:json)?\s*/i, '')
@@ -162,7 +166,25 @@ export function parsePassageWordMap(raw: string): PassageWordMap {
   if (end === -1 || end < start)
     throw new Error('Malformed JSON in AI response')
 
-  return JSON.parse(stripped.slice(start, end + 1)) as PassageWordMap
+  return JSON.parse(stripped.slice(start, end + 1)) as Record<string, unknown>
+}
+
+export function parseVocabularyFillJson(raw: string): Record<string, unknown> {
+  return extractJsonObject(raw)
+}
+
+export function guessSingularForm(word: string): string | null {
+  const trimmed = word.trim()
+  if (/ies$/i.test(trimmed) && trimmed.length > 4) {
+    return `${trimmed.slice(0, -3)}y`
+  }
+  if (/(ses|xes|zes|ches|shes)$/i.test(trimmed)) {
+    return trimmed.slice(0, -2)
+  }
+  if (/s$/i.test(trimmed) && !/ss$/i.test(trimmed) && trimmed.length > 3) {
+    return trimmed.slice(0, -1)
+  }
+  return null
 }
 
 function cleanJson(raw: string): string {
