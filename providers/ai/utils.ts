@@ -4,6 +4,7 @@ import type {
   PassageWordMap,
   SuggestedPassageVocab,
   TranslationDirection,
+  WritingScoreResult,
 } from './types'
 
 export const EXTRACT_VOCABULARY_PROMPT = `You are an English–Vietnamese dictionary. Extract all vocabulary words from this image.
@@ -193,6 +194,81 @@ function cleanJson(raw: string): string {
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```$/, '')
     .trim()
+}
+
+export function buildWritingScorePrompt(
+  keywords: string[],
+  userSentence: string,
+): string {
+  return `You are an English writing coach for Vietnamese learners (A2-B1 level).
+
+Image keywords: [${keywords.join(', ')}]
+Student's sentence: "${userSentence}"
+
+Respond ONLY with valid JSON (no markdown, no extra text):
+{
+  "grammar_score": <0-100>,
+  "grammar_errors": [
+    {
+      "wrong": "<exact wrong word or short phrase from the sentence>",
+      "fix": "<corrected word or phrase>",
+      "reason": {
+        "en": "<one short reason, e.g. 'subject-verb agreement: 3rd person singular needs -s'>",
+        "vi": "<same reason in Vietnamese>"
+      }
+    }
+  ],
+  "grammar_feedback": {
+    "en": "<if no errors: one praise sentence. If errors: brief overall summary in one sentence>",
+    "vi": "<same in Vietnamese>"
+  },
+  "relevance_score": <0-100, based ONLY on keyword usage: all keywords used = 100, missing keywords reduce the score proportionally>,
+  "relevance_feedback": {
+    "en": "<one sentence: list which keywords were used and which (if any) were missing>",
+    "vi": "<same in Vietnamese>"
+  },
+  "improved_sentence": "<student's sentence with only grammar fixed, keeping their vocabulary and style>",
+  "ideal_sentence": "<8-12 words, use only simple A1-B1 everyday words like go/walk/read/sit/happy/eat, naturally describes the image using the keywords>",
+  "ideal_sentence_vi": "<Vietnamese translation of ideal_sentence>"
+}
+
+Rules:
+- grammar_errors: MUST be [] if the sentence is grammatically correct.
+- CRITICAL: "wrong" must be the EXACT substring from the student's sentence (copy it verbatim). "fix" must be the minimum correct replacement — you may add a word only when it is grammatically required (e.g. a missing article or auxiliary verb). Never rewrite more than the smallest broken unit.
+- CRITICAL: Before adding any grammar error, verify that "wrong" and "fix" are actually DIFFERENT strings. If they would be identical, do NOT add that error.
+- CRITICAL: A sentence that already starts with "A", "An", or "The" has an article — never flag it as "missing article/determiner".
+- CRITICAL: Do NOT flag preposition style preferences (e.g. "on a chair" vs "at a chair") — these are NOT grammar errors for A2-B1 level.
+- CRITICAL: Do NOT flag missing vocabulary, missing details, or incomplete descriptions. Grammar scoring is about sentence structure only — not about whether the student described the image fully.
+- CRITICAL: Only flag these specific grammar error types:
+  1. Wrong verb tense (e.g. "she go yesterday" → "she went")
+  2. Wrong verb form (e.g. "she is eat" → "she is eating")
+  3. Broken subject-verb agreement (e.g. "she see" → "she sees")
+  4. Wrong verb choice that breaks grammar (e.g. "sees out" → "looks out" — "look out" is the correct phrasal verb; "see out" is not standard English)
+  5. Missing required article before a countable noun (e.g. "out door" → "out the door")
+  6. Clearly wrong part of speech (e.g. noun used as verb)
+- CRITICAL: Passive voice constructions ("is/are/was/were + past participle", e.g. "is opened by", "was eaten by") are CORRECT grammar. NEVER flag them as wrong verb form. Example: "The window is opened by a girl" is correct passive voice — do NOT suggest "The window is open".
+- CRITICAL: Do NOT change "a" or "an" to "the". Using "a/an" (indefinite article) for a non-specific or first-mention noun is always correct. Only flag a missing article when there is NO article at all before a countable noun.
+- CRITICAL: Do not invent errors. Only flag real grammatical mistakes visible in the student's sentence.
+- reason: must be SHORT (under 10 words in English). Simple language — no linguistic jargon. Target A2-B1 Vietnamese learners.
+- ideal_sentence: NO rare words. Prefer: go, walk, sit, eat, read, talk, look, feel, happy, busy, together
+- relevance_score: score based ONLY on whether the student used all the given keywords (or their verb forms, e.g. "drawing" counts for "draw"). 100 = all used, deduct proportionally for each missing keyword. Do NOT penalize for inaccurate image description.
+- relevance_feedback: state clearly which keywords were used and which were missing. Do not comment on image accuracy.`
+}
+
+export function parseWritingScoreResult(raw: string): WritingScoreResult {
+  const result = JSON.parse(cleanJson(raw)) as WritingScoreResult
+  if (Array.isArray(result.grammar_errors)) {
+    result.grammar_errors = result.grammar_errors.filter(
+      (e) => !!e.wrong && !!e.fix && e.wrong.trim() !== e.fix.trim(),
+    )
+  }
+  return result
+}
+
+export function buildWritingTitlePrompt(keywords: string[]): string {
+  return `Look at this image and keywords: [${keywords.join(', ')}].
+Generate a short, descriptive English title (5-8 words) for a writing exercise about this image.
+Respond with ONLY the title text, nothing else.`
 }
 
 export function parsePassageAnalysis(raw: string): PassageAnalysis {

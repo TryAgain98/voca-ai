@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
 
-import { AnthropicProvider, GroqProvider } from '~/providers/ai'
+import { AnthropicProvider, GeminiProvider, GroqProvider } from '~/providers/ai'
 
 import type { PassageAnalysis } from '~/providers/ai/types'
 
-const providers = [new GroqProvider(), new AnthropicProvider()]
+const providers = [
+  new GroqProvider(),
+  new GeminiProvider(),
+  new AnthropicProvider(),
+]
 
 export async function POST(req: Request): Promise<NextResponse> {
   try {
