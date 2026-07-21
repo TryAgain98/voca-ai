@@ -47,7 +47,7 @@ export class GeminiProvider extends BaseAIProvider {
     mimeType: string,
   ): Promise<ExtractedVocabulary[]> {
     const model = this.client.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: {
         maxOutputTokens: 8192,
         responseMimeType: 'application/json',
@@ -62,7 +62,7 @@ export class GeminiProvider extends BaseAIProvider {
 
   async lookupPassageWords(passageText: string): Promise<PassageWordMap> {
     const model = this.client.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: {
         maxOutputTokens: 8192,
         responseMimeType: 'application/json',
@@ -78,7 +78,7 @@ export class GeminiProvider extends BaseAIProvider {
     input: { text: string } | { base64: string; mimeType: string },
   ): Promise<PassageAnalysis> {
     const model = this.client.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: {
         maxOutputTokens: 8192,
         responseMimeType: 'application/json',
@@ -104,7 +104,7 @@ export class GeminiProvider extends BaseAIProvider {
   ): Promise<WritingScoreResult> {
     const { base64, mimeType } = await fetchImageAsBase64(imageUrl)
     const model = this.client.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: {
         maxOutputTokens: 1024,
         responseMimeType: 'application/json',
@@ -123,7 +123,7 @@ export class GeminiProvider extends BaseAIProvider {
   ): Promise<string> {
     const { base64, mimeType } = await fetchImageAsBase64(imageUrl)
     const model = this.client.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: { maxOutputTokens: 50 },
     })
     const result = await model.generateContent([

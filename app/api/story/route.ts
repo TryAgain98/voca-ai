@@ -20,7 +20,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     }
 
     const res = await groq.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'openai/gpt-oss-120b',
       max_tokens: 1024,
       temperature: 0.8,
       response_format: { type: 'json_object' },

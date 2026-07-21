@@ -41,8 +41,8 @@ export class GroqProvider extends BaseAIProvider {
     mimeType: string,
   ): Promise<ExtractedVocabulary[]> {
     const res = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 8192,
+      model: 'qwen/qwen3.6-27b',
+      max_tokens: 4000,
       messages: [
         {
           role: 'user',
@@ -121,8 +121,8 @@ export class GroqProvider extends BaseAIProvider {
     input: { text: string } | { base64: string; mimeType: string },
   ): Promise<PassageAnalysis> {
     const res = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      max_tokens: 8192,
+      model: 'text' in input ? 'llama-3.3-70b-versatile' : 'qwen/qwen3.6-27b',
+      max_tokens: 'text' in input ? 8192 : 4000,
       messages: [
         {
           role: 'user',
@@ -182,7 +182,7 @@ export class GroqProvider extends BaseAIProvider {
     const prompt = buildWritingScorePrompt(keywords, userSentence)
 
     const res = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'qwen/qwen3.6-27b',
       max_tokens: 1024,
       response_format: { type: 'json_object' },
       messages: [
@@ -206,7 +206,7 @@ export class GroqProvider extends BaseAIProvider {
     const prompt = buildWritingTitlePrompt(keywords)
 
     const res = await this.client.chat.completions.create({
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'qwen/qwen3.6-27b',
       max_tokens: 50,
       messages: [
         {

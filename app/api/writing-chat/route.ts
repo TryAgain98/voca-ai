@@ -62,7 +62,7 @@ async function streamWithGroq(
 ): Promise<ReadableStream<Uint8Array>> {
   const client = new Groq({ apiKey: process.env.GROQ_API_KEY })
   const stream = await client.chat.completions.create({
-    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    model: 'openai/gpt-oss-120b',
     max_tokens: 1024,
     stream: true,
     messages: [{ role: 'system', content: systemPrompt }, ...messages],

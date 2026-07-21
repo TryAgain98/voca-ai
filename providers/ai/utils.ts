@@ -63,11 +63,7 @@ export function buildSynonymCheckPrompt(
 }
 
 export function parseVocabularyJson(raw: string): ExtractedVocabulary[] {
-  const cleaned = raw
-    .trim()
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/, '')
-    .trim()
+  const cleaned = cleanJson(raw)
     // Fix single-quoted JSON values (e.g. "phonetic": '/riːd/' → "phonetic": "/riːd/")
     .replace(/: '([^']*)'/g, ': "$1"')
 
@@ -155,11 +151,7 @@ export function parsePassageWordMap(raw: string): PassageWordMap {
 }
 
 function extractJsonObject(raw: string): Record<string, unknown> {
-  const stripped = raw
-    .trim()
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/, '')
-    .trim()
+  const stripped = cleanJson(raw)
 
   const start = stripped.indexOf('{')
   if (start === -1) throw new Error('No JSON object in AI response')
@@ -190,6 +182,7 @@ export function guessSingularForm(word: string): string | null {
 
 function cleanJson(raw: string): string {
   return raw
+    .replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '')
     .trim()
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```$/, '')
