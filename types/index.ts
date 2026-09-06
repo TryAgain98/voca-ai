@@ -291,6 +291,33 @@ export interface PlanWithMilestones extends Plan {
   milestones: PlanMilestone[]
 }
 
+export type RecurrenceKind = 'weekday' | 'weekend' | 'special_date'
+export type DailyTaskOriginKind = RecurrenceKind | 'custom'
+
+export interface TaskTemplate {
+  id: string
+  user_id: string
+  recurrence_kind: RecurrenceKind
+  special_dates: string[] | null
+  special_date_start: string | null
+  special_date_end: string | null
+  plan_id: string | null
+  milestone_id: string | null
+  title: string
+  note: string | null
+  start_time: string
+  end_time: string
+  needs_check: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+export type TaskTemplateInsert = Omit<
+  TaskTemplate,
+  'id' | 'created_at' | 'updated_at'
+>
+export type TaskTemplateUpdate = Partial<Omit<TaskTemplateInsert, 'user_id'>>
+
 export interface DailyTask {
   id: string
   user_id: string
@@ -302,6 +329,10 @@ export interface DailyTask {
   title: string
   note: string | null
   status: DailyTaskStatus
+  origin_template_id: string | null
+  origin_kind: DailyTaskOriginKind
+  needs_review: boolean
+  needs_check: boolean
   started_at: string | null
   completed_at: string | null
   created_at: string

@@ -43,6 +43,7 @@ class DailyTasksService extends BaseService<
       .select('*')
       .lt('task_date', date)
       .in('status', OPEN_STATUSES)
+      .eq('needs_check', true)
     if (error) throw error
     return data as DailyTask[]
   }
@@ -123,8 +124,17 @@ class DailyTasksService extends BaseService<
       title: task.title,
       note: task.note,
       status: 'pending',
+      origin_template_id: null,
+      origin_kind: 'custom',
+      needs_review: false,
+      needs_check: task.needs_check,
     }))
 
+    return this.createMany(payload)
+  }
+
+  async createMany(payload: DailyTaskInsert[]): Promise<DailyTask[]> {
+    if (payload.length === 0) return []
     const { data, error } = await supabase
       .from('daily_tasks')
       .insert(payload)

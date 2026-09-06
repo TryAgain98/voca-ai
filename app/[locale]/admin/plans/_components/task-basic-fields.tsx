@@ -3,12 +3,14 @@
 import { useTranslations } from 'next-intl'
 
 import { Input } from '~/components/ui/input'
+import { Switch } from '~/components/ui/switch'
 
 interface TaskBasicFieldsValues {
   title: string
   note: string
   start_time: string
   end_time: string
+  needs_check: boolean
 }
 
 interface TaskBasicFieldsProps {
@@ -25,7 +27,7 @@ export function TaskBasicFields({
   hasInvalidRange,
   onChange,
 }: TaskBasicFieldsProps) {
-  const t = useTranslations('Today')
+  const t = useTranslations('Daily')
 
   return (
     <>
@@ -73,6 +75,21 @@ export function TaskBasicFields({
         <Input
           value={values.note}
           onChange={(e) => onChange('note', e.target.value)}
+        />
+      </div>
+
+      <div className="border-border flex items-start justify-between gap-3 rounded-md border p-3">
+        <div>
+          <p className="text-foreground text-sm font-medium">
+            {t('fieldNeedsCheck')}
+          </p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            {t('fieldNeedsCheckHint')}
+          </p>
+        </div>
+        <Switch
+          checked={values.needs_check}
+          onCheckedChange={(checked) => onChange('needs_check', checked)}
         />
       </div>
     </>

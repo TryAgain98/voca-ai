@@ -2,6 +2,10 @@ import Groq from 'groq-sdk'
 
 import { BaseAIProvider } from './base.provider'
 import {
+  buildDailyTaskChatPrompt,
+  parseDailyTasksChatResult,
+} from './daily-task-chat'
+import {
   ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
   buildPassageLookupPrompt,
@@ -19,6 +23,7 @@ import {
 } from './utils'
 
 import type {
+  DailyTaskChatItem,
   ExtractedVocabulary,
   PassageAnalysis,
   PassageWordMap,
@@ -234,5 +239,16 @@ export class GroqProvider extends BaseAIProvider {
     })
     const raw = res.choices[0]?.message?.content?.trim() ?? '{}'
     return parsePassageWordMap(raw)
+  }
+
+  async parseDailyTasksChat(message: string): Promise<DailyTaskChatItem[]> {
+    const res = await this.client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1024,
+      temperature: 0.1,
+      messages: [{ role: 'user', content: buildDailyTaskChatPrompt(message) }],
+    })
+    const raw = res.choices[0]?.message?.content?.trim() ?? '[]'
+    return parseDailyTasksChatResult(raw)
   }
 }

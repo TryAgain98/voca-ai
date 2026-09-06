@@ -2,6 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 import { BaseAIProvider } from './base.provider'
 import {
+  buildDailyTaskChatPrompt,
+  parseDailyTasksChatResult,
+} from './daily-task-chat'
+import {
   ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
   buildPassageLookupPrompt,
@@ -13,6 +17,7 @@ import {
 } from './utils'
 
 import type {
+  DailyTaskChatItem,
   ExtractedVocabulary,
   PassageAnalysis,
   PassageWordMap,
@@ -134,5 +139,19 @@ export class GeminiProvider extends BaseAIProvider {
       .text()
       .trim()
       .replace(/^["']|["']$/g, '')
+  }
+
+  async parseDailyTasksChat(message: string): Promise<DailyTaskChatItem[]> {
+    const model = this.client.getGenerativeModel({
+      model: 'gemini-3.1-flash-lite',
+      generationConfig: {
+        maxOutputTokens: 2048,
+        responseMimeType: 'application/json',
+      },
+    })
+    const result = await model.generateContent(
+      buildDailyTaskChatPrompt(message),
+    )
+    return parseDailyTasksChatResult(result.response.text())
   }
 }

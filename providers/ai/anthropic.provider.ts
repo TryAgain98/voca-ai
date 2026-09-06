@@ -2,6 +2,10 @@ import Anthropic from '@anthropic-ai/sdk'
 
 import { BaseAIProvider } from './base.provider'
 import {
+  buildDailyTaskChatPrompt,
+  parseDailyTasksChatResult,
+} from './daily-task-chat'
+import {
   ANALYZE_PASSAGE_PROMPT,
   EXTRACT_VOCABULARY_PROMPT,
   buildPassageLookupPrompt,
@@ -11,6 +15,7 @@ import {
 } from './utils'
 
 import type {
+  DailyTaskChatItem,
   ExtractedVocabulary,
   PassageAnalysis,
   PassageWordMap,
@@ -240,5 +245,15 @@ Respond with ONLY the title text, nothing else.`
       .replace(/\s*```$/, '')
       .trim()
     return JSON.parse(cleaned) as PassageWordMap
+  }
+
+  async parseDailyTasksChat(message: string): Promise<DailyTaskChatItem[]> {
+    const res = await this.client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: buildDailyTaskChatPrompt(message) }],
+    })
+    const text = res.content[0].type === 'text' ? res.content[0].text : '[]'
+    return parseDailyTasksChatResult(text)
   }
 }

@@ -9,11 +9,13 @@ import { useTranslations } from 'next-intl'
 
 import { buttonVariants } from '~/components/ui/button'
 import { useAdminUsers } from '~/hooks/use-admin-users'
+import { useDailyTasks } from '~/hooks/use-daily-tasks'
 import { useQuizPerformance } from '~/hooks/use-quiz-sessions'
 import { useStreak } from '~/hooks/use-streak'
 import { useDashboardStats, useReviewForecast } from '~/hooks/use-word-mastery'
-import { dayjs } from '~/lib/dayjs'
+import { APP_TIMEZONE, dayjs } from '~/lib/dayjs'
 
+import { DailyProgressCard } from './_components/daily-progress-card'
 import { MasteryCard } from './_components/mastery-card'
 import { ReviewForecastCard } from './_components/review-forecast-card'
 import { SmartHeroCard } from './_components/smart-hero-card'
@@ -52,6 +54,15 @@ export default function DashboardPage() {
   const { data: streak, isLoading: isStreakLoading } = useStreak(userId)
   const { data: forecast, isLoading: isForecastLoading } =
     useReviewForecast(userId)
+  const todayDate = dayjs().tz(APP_TIMEZONE).format('YYYY-MM-DD')
+  const { data: todayTasks = [], isLoading: isTodayTasksLoading } =
+    useDailyTasks(userId, todayDate)
+  const checkTasks = todayTasks.filter((task) => task.needs_check)
+  const doneTasksCount = checkTasks.filter((t) => t.status === 'done').length
+  const nextTask =
+    checkTasks.find(
+      (task) => task.status === 'pending' || task.status === 'in_progress',
+    ) ?? null
 
   const greeting = getGreeting()
   const firstName = isViewMode
@@ -106,6 +117,15 @@ export default function DashboardPage() {
           viewAs={viewAs || undefined}
         />
       </div>
+
+      {!isViewMode && (
+        <DailyProgressCard
+          doneCount={doneTasksCount}
+          totalCount={checkTasks.length}
+          nextTask={nextTask}
+          isLoading={isTodayTasksLoading}
+        />
+      )}
 
       <SmartHeroCard
         needsTestingCount={stats?.needsTestingCount ?? 0}

@@ -63,3 +63,11 @@ export interface WordLookup {
 }
 
 export type PassageWordMap = Record<string, WordLookup>
+
+export interface DailyTaskChatItem {
+  title: string
+  start_time: string
+  end_time: string
+  note: string | null
+  needs_review: boolean
+}

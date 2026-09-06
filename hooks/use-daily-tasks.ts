@@ -8,7 +8,7 @@ import { dailyTasksService } from '~/services/daily-tasks.service'
 import type { QueryClient } from '@tanstack/react-query'
 import type { DailyTask, DailyTaskInsert, DailyTaskUpdate } from '~/types'
 
-function dailyTasksKey(userId: string, date: string) {
+export function dailyTasksKey(userId: string, date: string) {
   return ['daily-tasks', userId, date]
 }
 

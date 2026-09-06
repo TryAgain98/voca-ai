@@ -1,4 +1,5 @@
 import type {
+  DailyTaskChatItem,
   ExtractedVocabulary,
   PassageAnalysis,
   PassageWordMap,
@@ -73,6 +74,12 @@ export abstract class BaseAIProvider {
   ): Promise<string> {
     return Promise.reject(
       new Error(`${this.name} does not support generateWritingTitle`),
+    )
+  }
+
+  parseDailyTasksChat(_message: string): Promise<DailyTaskChatItem[]> {
+    return Promise.reject(
+      new Error(`${this.name} does not support parseDailyTasksChat`),
     )
   }
 }

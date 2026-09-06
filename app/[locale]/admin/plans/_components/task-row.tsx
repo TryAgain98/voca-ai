@@ -10,12 +10,11 @@ import {
   useReopenTask,
   useStartTask,
 } from '~/hooks/use-daily-tasks'
+import { cn } from '~/lib/cn'
 
-import {
-  STATUS_LABEL_KEY,
-  isOverdue,
-  statusVariant,
-} from '../_utils/task-status'
+import { isCurrentTask, taskStatusDisplay } from '../_utils/task-status'
+
+import { TaskSaveAsTemplateButton } from './task-save-as-template-button'
 
 import type { DailyTask } from '~/types'
 
@@ -25,6 +24,7 @@ interface TaskRowProps {
   date: string
   planTitle: string | null
   nowMinutes: number
+  isToday: boolean
   onEdit: () => void
   onDelete: () => void
 }
@@ -35,27 +35,56 @@ export function TaskRow({
   date,
   planTitle,
   nowMinutes,
+  isToday,
   onEdit,
   onDelete,
 }: TaskRowProps) {
-  const t = useTranslations('Today')
+  const t = useTranslations('Daily')
   const startTask = useStartTask()
   const completeTask = useCompleteTask()
   const reopenTask = useReopenTask()
 
   const args = { id: task.id, userId, date }
-  const overdue = isOverdue(task, nowMinutes)
+  const status = taskStatusDisplay(task, nowMinutes)
+  const isCurrent = isToday && isCurrentTask(task, nowMinutes)
 
   return (
-    <div className="border-border bg-card flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:gap-3">
+    <div
+      className={cn(
+        'border-border bg-card flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:gap-3',
+        isCurrent &&
+          'border-indigo-500/50 bg-indigo-500/5 ring-1 ring-indigo-500/20',
+      )}
+    >
       <div className="text-muted-foreground w-28 shrink-0 text-xs tabular-nums">
         {task.start_time.slice(0, 5)} – {task.end_time.slice(0, 5)}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-foreground truncate text-sm font-[510]">
-          {task.title}
-        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {isCurrent && (
+            <span className="flex items-center gap-1 text-xs font-[510] text-indigo-500">
+              <span className="size-1.5 rounded-full bg-indigo-500" />
+              {t('now')}
+            </span>
+          )}
+          <p className="text-foreground truncate text-sm font-[510]">
+            {task.title}
+          </p>
+          {task.needs_review && (
+            <Badge
+              variant="outline"
+              className="border-amber-500/40 text-amber-600 dark:text-amber-400"
+            >
+              {t('needsReview')}
+            </Badge>
+          )}
+          {!task.needs_check && (
+            <Badge variant="outline" className="text-muted-foreground">
+              {t('autoTag')}
+            </Badge>
+          )}
+        </div>
         {planTitle && (
           <Badge variant="outline" className="mt-1">
             {planTitle}
@@ -63,15 +92,15 @@ export function TaskRow({
         )}
       </div>
 
-      <Badge
-        variant={overdue ? 'destructive' : statusVariant(task.status)}
-        className="shrink-0"
-      >
-        {t(STATUS_LABEL_KEY[task.status])}
-      </Badge>
+      {task.needs_check && (
+        <Badge variant={status.variant} className="shrink-0">
+          {t(status.labelKey)}
+        </Badge>
+      )}
 
       <div className="flex shrink-0 items-center gap-1.5">
-        {task.status === 'pending' && (
+        <TaskSaveAsTemplateButton task={task} />
+        {task.needs_check && task.status === 'pending' && (
           <Button
             size="sm"
             className="gap-1.5"
@@ -81,7 +110,7 @@ export function TaskRow({
             {t('start')}
           </Button>
         )}
-        {task.status === 'in_progress' && (
+        {task.needs_check && task.status === 'in_progress' && (
           <Button
             size="sm"
             className="gap-1.5"
@@ -91,7 +120,7 @@ export function TaskRow({
             {t('complete')}
           </Button>
         )}
-        {task.status === 'done' && (
+        {task.needs_check && task.status === 'done' && (
           <Button
             variant="outline"
             size="sm"
@@ -102,7 +131,7 @@ export function TaskRow({
             {t('undo')}
           </Button>
         )}
-        {task.status === 'missed' && (
+        {task.needs_check && task.status === 'missed' && (
           <Button
             size="sm"
             className="gap-1.5"

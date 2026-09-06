@@ -28,7 +28,7 @@ export function TaskDeleteDialog({
   onConfirm,
   onCancel,
 }: TaskDeleteDialogProps) {
-  const t = useTranslations('Today')
+  const t = useTranslations('Daily')
   const tc = useTranslations('Common')
 
   return (

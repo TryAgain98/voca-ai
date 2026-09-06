@@ -180,7 +180,7 @@ export function guessSingularForm(word: string): string | null {
   return null
 }
 
-function cleanJson(raw: string): string {
+export function cleanJson(raw: string): string {
   return raw
     .replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '')
     .trim()

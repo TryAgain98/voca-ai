@@ -46,8 +46,7 @@
     "settings": "Settings",
     "passages": "Passages",
     "writing": "Writing",
-    "plans": "Plans",
-    "today": "Today"
+    "plans": "Plans"
   },
   "Dashboard": {
     "greeting": {
@@ -181,7 +180,11 @@
         "risk": "Forgetting curve is winning — schedule a focused session."
       },
       "fadingBadge": "{count, plural, =1 {1 fading} other {# fading}}"
-    }
+    },
+    "dailyProgressTitle": "Today's tasks",
+    "dailyProgressSubtitle": "{done}/{total} done",
+    "dailyProgressLink": "Open Daily",
+    "dailyProgressNext": "Next: {title} · {start}–{end}"
   },
   "DashboardWords": {
     "back": "Back",
@@ -822,6 +825,9 @@
   "Plans": {
     "title": "Plans",
     "description": "Long-term goals broken into measurable milestones",
+    "longTermTab": "Long-term",
+    "dailyTab": "Daily",
+    "templatesTab": "Templates",
     "new": "New plan",
     "empty": "No plans yet",
     "emptyHint": "Create your first plan to start tracking progress",
@@ -849,7 +855,7 @@
     "deleted": "Plan deleted",
     "saveFailed": "Failed to save plan"
   },
-  "Today": {
+  "Daily": {
     "title": "Today",
     "description": "Your time-blocked schedule for the day",
     "addBlock": "Add block",
@@ -876,6 +882,59 @@
     "deleteBody": "Are you sure you want to delete this block?",
     "save": "Save",
     "cancel": "Cancel",
-    "saveFailed": "Failed to save block"
+    "saveFailed": "Failed to save block",
+    "groupWeekday": "Weekdays (Mon–Fri)",
+    "groupWeekend": "Weekend (Sat–Sun)",
+    "groupSpecialDate": "Special day",
+    "groupCustom": "Custom",
+    "needsReview": "Needs review",
+    "manageTemplates": "Manage templates",
+    "fieldNeedsCheck": "Needs check-in",
+    "fieldNeedsCheckHint": "Turn off for tasks that just happen on schedule, like meals or commute — no Start/Complete, and it won't count toward daily progress.",
+    "autoTag": "Auto",
+    "statusOverdue": "Overdue",
+    "now": "Now",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today",
+    "saveAsTemplate": "Save as template",
+    "saveAsTemplateHint": "Repeat this block on:"
+  },
+  "TaskTemplates": {
+    "title": "Recurring templates",
+    "pageDescription": "The recurring schedule Daily generates each day's blocks from",
+    "weekdaySection": "Weekdays (Mon–Fri)",
+    "weekendSection": "Weekend (Sat–Sun)",
+    "specialDateSection": "Special days",
+    "newTemplate": "New template",
+    "empty": "No templates yet",
+    "fieldTitle": "Title",
+    "fieldNote": "Note",
+    "fieldStartTime": "Start time",
+    "fieldEndTime": "End time",
+    "fieldSpecialDate": "Date",
+    "specialDateModeDates": "Specific dates",
+    "specialDateModeRange": "Date range",
+    "specialDatesSummary": "{count, plural, =0 {Select dates} =1 {1 date selected} other {# dates selected}}",
+    "specialDateRangePlaceholder": "Select a date range",
+    "invalidSpecialDate": "Select at least one date, or a valid date range",
+    "fieldPlan": "Plan",
+    "fieldMilestone": "Milestone",
+    "deleteTitle": "Delete template",
+    "deleteBody": "Are you sure you want to delete \"{title}\"? This cannot be undone.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "created": "Template created",
+    "updated": "Template updated",
+    "deleted": "Template deleted",
+    "saveFailed": "Failed to save template",
+    "fieldNeedsCheck": "Needs check-in",
+    "fieldNeedsCheckHint": "Turn off for tasks that just happen on schedule, like meals or commute — no Start/Complete, and it won't count toward daily progress.",
+    "chatTitle": "Ask AI to add templates",
+    "chatPlaceholder": "e.g. 7h-8h exercise, 8h-18h30 work, 20h30-21h30 study English",
+    "chatSuccess": "{count, plural, =1 {1 template added} other {# templates added}}",
+    "chatFailed": "Failed to add templates",
+    "autoTag": "Auto"
   }
 }

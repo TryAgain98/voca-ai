@@ -46,8 +46,7 @@
     "settings": "Cài đặt",
     "passages": "Đoạn văn",
     "writing": "Viết",
-    "plans": "Kế hoạch",
-    "today": "Hôm nay"
+    "plans": "Kế hoạch"
   },
   "Dashboard": {
     "greeting": {
@@ -181,7 +180,11 @@
         "risk": "Đường cong quên đang thắng — sắp xếp một buổi tập trung."
       },
       "fadingBadge": "{count, plural, =1 {1 từ đang phai} other {# từ đang phai}}"
-    }
+    },
+    "dailyProgressTitle": "Việc hôm nay",
+    "dailyProgressSubtitle": "{done}/{total} đã xong",
+    "dailyProgressLink": "Mở Hàng ngày",
+    "dailyProgressNext": "Tiếp theo: {title} · {start}–{end}"
   },
   "DashboardWords": {
     "back": "Quay lại",
@@ -822,6 +825,9 @@
   "Plans": {
     "title": "Kế hoạch",
     "description": "Mục tiêu dài hạn chia thành các cột mốc có thể đo được",
+    "longTermTab": "Dài hạn",
+    "dailyTab": "Hàng ngày",
+    "templatesTab": "Lịch lặp",
     "new": "Kế hoạch mới",
     "empty": "Chưa có kế hoạch nào",
     "emptyHint": "Tạo kế hoạch đầu tiên để bắt đầu theo dõi tiến độ",
@@ -849,7 +855,7 @@
     "deleted": "Đã xoá kế hoạch",
     "saveFailed": "Không thể lưu kế hoạch"
   },
-  "Today": {
+  "Daily": {
     "title": "Hôm nay",
     "description": "Lịch trình theo khung giờ trong ngày của bạn",
     "addBlock": "Thêm khung giờ",
@@ -876,6 +882,59 @@
     "deleteBody": "Bạn có chắc muốn xoá khung giờ này?",
     "save": "Lưu",
     "cancel": "Huỷ",
-    "saveFailed": "Không thể lưu khung giờ"
+    "saveFailed": "Không thể lưu khung giờ",
+    "groupWeekday": "Ngày thường (T2–T6)",
+    "groupWeekend": "Cuối tuần (T7–CN)",
+    "groupSpecialDate": "Ngày đặc biệt",
+    "groupCustom": "Khác",
+    "needsReview": "Cần xem lại",
+    "manageTemplates": "Quản lý lịch lặp",
+    "fieldNeedsCheck": "Cần theo dõi",
+    "fieldNeedsCheckHint": "Tắt cho các việc tự động diễn ra theo giờ, như ăn uống hoặc di chuyển — sẽ không cần bấm Start/Complete và không tính vào tiến độ trong ngày.",
+    "autoTag": "Tự động",
+    "statusOverdue": "Quá hạn",
+    "now": "Đang diễn ra",
+    "previousDay": "Ngày trước",
+    "nextDay": "Ngày sau",
+    "today": "Hôm nay",
+    "saveAsTemplate": "Lưu thành lịch lặp",
+    "saveAsTemplateHint": "Lặp lại khung giờ này vào:"
+  },
+  "TaskTemplates": {
+    "title": "Lịch lặp lại",
+    "pageDescription": "Lịch lặp lại mà trang Hàng ngày sẽ tự động dùng để tạo việc mỗi ngày",
+    "weekdaySection": "Ngày thường (T2–T6)",
+    "weekendSection": "Cuối tuần (T7–CN)",
+    "specialDateSection": "Ngày đặc biệt",
+    "newTemplate": "Thêm lịch",
+    "empty": "Chưa có lịch nào",
+    "fieldTitle": "Tiêu đề",
+    "fieldNote": "Ghi chú",
+    "fieldStartTime": "Giờ bắt đầu",
+    "fieldEndTime": "Giờ kết thúc",
+    "fieldSpecialDate": "Ngày",
+    "specialDateModeDates": "Ngày cụ thể",
+    "specialDateModeRange": "Khoảng ngày",
+    "specialDatesSummary": "{count, plural, =0 {Chọn ngày} =1 {Đã chọn 1 ngày} other {Đã chọn # ngày}}",
+    "specialDateRangePlaceholder": "Chọn khoảng ngày",
+    "invalidSpecialDate": "Chọn ít nhất 1 ngày, hoặc 1 khoảng ngày hợp lệ",
+    "fieldPlan": "Kế hoạch",
+    "fieldMilestone": "Cột mốc",
+    "deleteTitle": "Xoá lịch",
+    "deleteBody": "Bạn có chắc muốn xoá \"{title}\"? Hành động này không thể hoàn tác.",
+    "save": "Lưu",
+    "cancel": "Huỷ",
+    "delete": "Xoá",
+    "created": "Đã tạo lịch",
+    "updated": "Đã cập nhật lịch",
+    "deleted": "Đã xoá lịch",
+    "saveFailed": "Không thể lưu lịch",
+    "fieldNeedsCheck": "Cần theo dõi",
+    "fieldNeedsCheckHint": "Tắt cho các việc tự động diễn ra theo giờ, như ăn uống hoặc di chuyển — sẽ không cần bấm Start/Complete và không tính vào tiến độ trong ngày.",
+    "chatTitle": "Nhờ AI thêm lịch lặp",
+    "chatPlaceholder": "VD: 7h-8h tập thể dục, 8h-18h30 đi làm, 20h30-21h30 học tiếng Anh",
+    "chatSuccess": "{count, plural, =1 {Đã thêm 1 lịch} other {Đã thêm # lịch}}",
+    "chatFailed": "Không thể thêm lịch",
+    "autoTag": "Tự động"
   }
 }

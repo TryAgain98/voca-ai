@@ -28,7 +28,7 @@ export function TaskPlanMilestoneSelect({
   onPlanChange,
   onMilestoneChange,
 }: TaskPlanMilestoneSelectProps) {
-  const t = useTranslations('Today')
+  const t = useTranslations('Daily')
   const { data: plans = [] } = usePlans(userId)
   const { data: planDetail } = usePlanWithMilestones(
     planId === NO_PLAN_VALUE ? '' : planId,

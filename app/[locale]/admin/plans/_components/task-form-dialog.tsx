@@ -28,13 +28,20 @@ const taskSchema = z
     note: z.string().trim(),
     start_time: z.string().min(1),
     end_time: z.string().min(1),
+    needs_check: z.boolean(),
   })
   .refine((v) => v.end_time > v.start_time, { path: ['end_time'] })
 
 type TaskFormValues = z.infer<typeof taskSchema>
 
 function emptyValues(): TaskFormValues {
-  return { title: '', note: '', start_time: '', end_time: '' }
+  return {
+    title: '',
+    note: '',
+    start_time: '',
+    end_time: '',
+    needs_check: true,
+  }
 }
 
 function valuesFromTask(task: DailyTask): TaskFormValues {
@@ -43,6 +50,7 @@ function valuesFromTask(task: DailyTask): TaskFormValues {
     note: task.note ?? '',
     start_time: task.start_time.slice(0, 5),
     end_time: task.end_time.slice(0, 5),
+    needs_check: task.needs_check,
   }
 }
 
@@ -55,7 +63,7 @@ interface TaskFormProps {
 }
 
 function TaskForm({ task, userId, date, onSaved, onCancel }: TaskFormProps) {
-  const t = useTranslations('Today')
+  const t = useTranslations('Daily')
   const createTask = useCreateDailyTask()
   const updateTask = useUpdateDailyTask()
 
@@ -99,6 +107,7 @@ function TaskForm({ task, userId, date, onSaved, onCancel }: TaskFormProps) {
       end_time: result.data.end_time,
       plan_id: planId === NO_PLAN_VALUE ? null : planId,
       milestone_id: milestoneId === NO_PLAN_VALUE ? null : milestoneId,
+      needs_check: result.data.needs_check,
     }
 
     try {
@@ -109,6 +118,9 @@ function TaskForm({ task, userId, date, onSaved, onCancel }: TaskFormProps) {
           ...payload,
           user_id: userId,
           task_date: date,
+          origin_template_id: null,
+          origin_kind: 'custom',
+          needs_review: false,
         })
       }
       onSaved()

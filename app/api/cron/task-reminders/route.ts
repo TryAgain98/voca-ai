@@ -93,7 +93,9 @@ export async function GET(request: Request) {
       const openTasks = (
         await dailyTasksService.findByDate(s.user_id, local.date)
       ).filter(
-        (task) => task.status === 'pending' || task.status === 'in_progress',
+        (task) =>
+          task.needs_check &&
+          (task.status === 'pending' || task.status === 'in_progress'),
       )
 
       const notStarted: DailyTask[] = []
