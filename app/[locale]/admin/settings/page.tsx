@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Separator } from '~/components/ui/separator'
 
+import { PlanReminderCard } from './_components/plan-reminder-card'
 import { StreakReminderCard } from './_components/streak-reminder-card'
 import { TtsSettingsCard } from './_components/tts-settings-card'
 
@@ -29,6 +30,8 @@ export default async function SettingsPage() {
       </div>
 
       <StreakReminderCard />
+
+      <PlanReminderCard />
 
       <TtsSettingsCard />
 

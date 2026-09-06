@@ -254,3 +254,71 @@ export interface AppErrorLog {
 }
 
 export type AppErrorLogInsert = Omit<AppErrorLog, 'id' | 'created_at'>
+
+export type PlanStatus = 'active' | 'done' | 'archived'
+export type DailyTaskStatus = 'pending' | 'in_progress' | 'done' | 'missed'
+export type TaskNotificationKind = 'not_started' | 'not_finished'
+
+export interface Plan {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  start_date: string
+  target_date: string
+  status: PlanStatus
+  created_at: string
+  updated_at: string
+}
+export type PlanInsert = Omit<Plan, 'id' | 'created_at' | 'updated_at'>
+export type PlanUpdate = Partial<Omit<PlanInsert, 'user_id'>>
+
+export interface PlanMilestone {
+  id: string
+  plan_id: string
+  title: string
+  unit: string | null
+  target_value: number
+  current_value: number
+  due_date: string | null
+  sort_order: number
+  created_at: string
+}
+export type PlanMilestoneInsert = Omit<PlanMilestone, 'id' | 'created_at'>
+export type PlanMilestoneUpdate = Partial<Omit<PlanMilestoneInsert, 'plan_id'>>
+
+export interface PlanWithMilestones extends Plan {
+  milestones: PlanMilestone[]
+}
+
+export interface DailyTask {
+  id: string
+  user_id: string
+  plan_id: string | null
+  milestone_id: string | null
+  task_date: string
+  start_time: string
+  end_time: string
+  title: string
+  note: string | null
+  status: DailyTaskStatus
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+  updated_at: string
+}
+export type DailyTaskInsert = Omit<
+  DailyTask,
+  'id' | 'created_at' | 'updated_at' | 'started_at' | 'completed_at' | 'status'
+> & { status?: DailyTaskStatus }
+export type DailyTaskUpdate = Partial<Omit<DailyTaskInsert, 'user_id'>>
+
+export interface PlanReminderSettings {
+  user_id: string
+  email: string | null
+  timezone: string
+  grace_minutes: number
+  is_enabled: boolean
+  created_at: string
+  updated_at: string
+}
