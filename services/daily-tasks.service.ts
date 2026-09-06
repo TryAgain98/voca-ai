@@ -47,19 +47,43 @@ class DailyTasksService extends BaseService<
     return data as DailyTask[]
   }
 
-  async markStarted(id: string): Promise<void> {
+  async updateByUser(
+    id: string,
+    userId: string,
+    payload: DailyTaskUpdate,
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('daily_tasks')
+      .update(payload as never)
+      .eq('id', id)
+      .eq('user_id', userId)
+    if (error) throw error
+  }
+
+  async deleteByUser(id: string, userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('daily_tasks')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+    if (error) throw error
+  }
+
+  async markStarted(id: string, userId: string): Promise<void> {
     const { error } = await supabase
       .from('daily_tasks')
       .update({ status: 'in_progress', started_at: dayjs().toISOString() })
       .eq('id', id)
+      .eq('user_id', userId)
     if (error) throw error
   }
 
-  async markCompleted(id: string): Promise<void> {
+  async markCompleted(id: string, userId: string): Promise<void> {
     const { error } = await supabase
       .from('daily_tasks')
       .update({ status: 'done', completed_at: dayjs().toISOString() })
       .eq('id', id)
+      .eq('user_id', userId)
     if (error) throw error
   }
 
@@ -72,11 +96,12 @@ class DailyTasksService extends BaseService<
     if (error) throw error
   }
 
-  async reopen(id: string): Promise<void> {
+  async reopen(id: string, userId: string): Promise<void> {
     const { error } = await supabase
       .from('daily_tasks')
       .update({ status: 'pending', started_at: null, completed_at: null })
       .eq('id', id)
+      .eq('user_id', userId)
     if (error) throw error
   }
 

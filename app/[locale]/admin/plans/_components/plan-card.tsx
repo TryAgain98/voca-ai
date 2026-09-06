@@ -20,7 +20,7 @@ interface PlanCardProps {
 export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
   const t = useTranslations('Plans')
   const locale = useLocale()
-  const { data: withMilestones } = usePlanWithMilestones(plan.id)
+  const { data: withMilestones } = usePlanWithMilestones(plan.id, plan.user_id)
 
   const milestones = withMilestones?.milestones ?? []
   const totalTarget = milestones.reduce((sum, m) => sum + m.target_value, 0)

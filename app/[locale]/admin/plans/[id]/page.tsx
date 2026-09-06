@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@clerk/nextjs'
 import { Loader2, Plus } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -18,7 +19,9 @@ import type { PlanMilestone } from '~/types'
 export default function PlanDetailPage() {
   const t = useTranslations('Plans')
   const params = useParams<{ id: string }>()
-  const { data: plan, isLoading } = usePlanWithMilestones(params.id)
+  const { user } = useUser()
+  const userId = user?.id ?? ''
+  const { data: plan, isLoading } = usePlanWithMilestones(params.id, userId)
   const deleteMilestone = useDeleteMilestone()
 
   const [formOpen, setFormOpen] = useState(false)

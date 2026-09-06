@@ -44,8 +44,8 @@ interface UpdateDailyTaskArgs {
 export function useUpdateDailyTask() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, payload }: UpdateDailyTaskArgs) =>
-      dailyTasksService.update(id, payload),
+    mutationFn: ({ id, userId, payload }: UpdateDailyTaskArgs) =>
+      dailyTasksService.updateByUser(id, userId, payload),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: dailyTasksKey(vars.userId, vars.date) })
       toast.success('Block updated')
@@ -63,7 +63,8 @@ interface DeleteDailyTaskArgs {
 export function useDeleteDailyTask() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id }: DeleteDailyTaskArgs) => dailyTasksService.delete(id),
+    mutationFn: ({ id, userId }: DeleteDailyTaskArgs) =>
+      dailyTasksService.deleteByUser(id, userId),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: dailyTasksKey(vars.userId, vars.date) })
       toast.success('Block deleted')
@@ -95,7 +96,8 @@ async function patchStatus(
 export function useStartTask() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id }: TaskStatusArgs) => dailyTasksService.markStarted(id),
+    mutationFn: ({ id, userId }: TaskStatusArgs) =>
+      dailyTasksService.markStarted(id, userId),
     onMutate: (vars) => patchStatus(qc, vars, 'in_progress'),
     onError: (_err, _vars, context) => {
       if (context?.previous) qc.setQueryData(context.key, context.previous)
@@ -110,7 +112,8 @@ export function useStartTask() {
 export function useCompleteTask() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id }: TaskStatusArgs) => dailyTasksService.markCompleted(id),
+    mutationFn: ({ id, userId }: TaskStatusArgs) =>
+      dailyTasksService.markCompleted(id, userId),
     onMutate: (vars) => patchStatus(qc, vars, 'done'),
     onError: (_err, _vars, context) => {
       if (context?.previous) qc.setQueryData(context.key, context.previous)
@@ -125,7 +128,8 @@ export function useCompleteTask() {
 export function useReopenTask() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id }: TaskStatusArgs) => dailyTasksService.reopen(id),
+    mutationFn: ({ id, userId }: TaskStatusArgs) =>
+      dailyTasksService.reopen(id, userId),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: dailyTasksKey(vars.userId, vars.date) })
     },

@@ -15,11 +15,11 @@ export function usePlans(userId: string) {
   })
 }
 
-export function usePlanWithMilestones(planId: string) {
+export function usePlanWithMilestones(planId: string, userId: string) {
   return useQuery({
     queryKey: ['plan', planId],
-    queryFn: () => plansService.findWithMilestones(planId),
-    enabled: !!planId,
+    queryFn: () => plansService.findWithMilestones(planId, userId),
+    enabled: !!planId && !!userId,
   })
 }
 
@@ -44,8 +44,8 @@ interface UpdatePlanArgs {
 export function useUpdatePlan() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, payload }: UpdatePlanArgs) =>
-      plansService.update(id, payload),
+    mutationFn: ({ id, userId, payload }: UpdatePlanArgs) =>
+      plansService.updateByUser(id, userId, payload),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['plans', vars.userId] })
       qc.invalidateQueries({ queryKey: ['plan', vars.id] })
@@ -63,7 +63,8 @@ interface DeletePlanArgs {
 export function useDeletePlan() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id }: DeletePlanArgs) => plansService.delete(id),
+    mutationFn: ({ id, userId }: DeletePlanArgs) =>
+      plansService.deleteByUser(id, userId),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['plans', vars.userId] })
       toast.success('Plan deleted')

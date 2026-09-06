@@ -32,6 +32,7 @@ export function TaskPlanMilestoneSelect({
   const { data: plans = [] } = usePlans(userId)
   const { data: planDetail } = usePlanWithMilestones(
     planId === NO_PLAN_VALUE ? '' : planId,
+    userId,
   )
 
   return (
