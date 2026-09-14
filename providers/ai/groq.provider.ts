@@ -32,6 +32,12 @@ import type {
   WritingScoreResult,
 } from './types'
 
+// gpt-oss models on Groq spend max_tokens on reasoning first, which starves the
+// short json_object calls below, so the text model must be a non-reasoning one.
+const TEXT_MODEL = 'qwen/qwen3.8-27b'
+const TEXT_MODEL_MAX_OUTPUT = 16384
+const VISION_MODEL = 'qwen/qwen3.6-27b'
+
 export class GroqProvider extends BaseAIProvider {
   readonly name = 'Groq'
   private readonly client: Groq
@@ -46,7 +52,7 @@ export class GroqProvider extends BaseAIProvider {
     mimeType: string,
   ): Promise<ExtractedVocabulary[]> {
     const res = await this.client.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
+      model: VISION_MODEL,
       max_tokens: 4000,
       messages: [
         {
@@ -69,7 +75,7 @@ export class GroqProvider extends BaseAIProvider {
     direction: TranslationDirection,
   ): Promise<string> {
     const res = await this.client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: TEXT_MODEL,
       max_tokens: 32,
       temperature: 0.2,
       messages: [
@@ -91,7 +97,7 @@ export class GroqProvider extends BaseAIProvider {
 
   private async requestVocabularyFill(word: string): Promise<VocabularyFill> {
     const res = await this.client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: TEXT_MODEL,
       max_tokens: 256,
       temperature: 0.2,
       response_format: { type: 'json_object' },
@@ -126,8 +132,8 @@ export class GroqProvider extends BaseAIProvider {
     input: { text: string } | { base64: string; mimeType: string },
   ): Promise<PassageAnalysis> {
     const res = await this.client.chat.completions.create({
-      model: 'text' in input ? 'llama-3.3-70b-versatile' : 'qwen/qwen3.6-27b',
-      max_tokens: 'text' in input ? 8192 : 4000,
+      model: 'text' in input ? TEXT_MODEL : VISION_MODEL,
+      max_tokens: TEXT_MODEL_MAX_OUTPUT,
       messages: [
         {
           role: 'user',
@@ -158,7 +164,7 @@ export class GroqProvider extends BaseAIProvider {
     meaningB: string,
   ): Promise<boolean> {
     const res = await this.client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: TEXT_MODEL,
       max_tokens: 5,
       temperature: 0,
       messages: [
@@ -187,7 +193,7 @@ export class GroqProvider extends BaseAIProvider {
     const prompt = buildWritingScorePrompt(keywords, userSentence)
 
     const res = await this.client.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
+      model: VISION_MODEL,
       max_tokens: 1024,
       response_format: { type: 'json_object' },
       messages: [
@@ -211,7 +217,7 @@ export class GroqProvider extends BaseAIProvider {
     const prompt = buildWritingTitlePrompt(keywords)
 
     const res = await this.client.chat.completions.create({
-      model: 'qwen/qwen3.6-27b',
+      model: VISION_MODEL,
       max_tokens: 50,
       messages: [
         {
@@ -229,7 +235,7 @@ export class GroqProvider extends BaseAIProvider {
 
   async lookupPassageWords(passageText: string): Promise<PassageWordMap> {
     const res = await this.client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: TEXT_MODEL,
       max_tokens: 8192,
       temperature: 0.1,
       response_format: { type: 'json_object' },
@@ -243,7 +249,7 @@ export class GroqProvider extends BaseAIProvider {
 
   async parseDailyTasksChat(message: string): Promise<DailyTaskChatItem[]> {
     const res = await this.client.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: TEXT_MODEL,
       max_tokens: 1024,
       temperature: 0.1,
       messages: [{ role: 'user', content: buildDailyTaskChatPrompt(message) }],

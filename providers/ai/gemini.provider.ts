@@ -85,7 +85,9 @@ export class GeminiProvider extends BaseAIProvider {
     const model = this.client.getGenerativeModel({
       model: 'gemini-3.1-flash-lite',
       generationConfig: {
-        maxOutputTokens: 8192,
+        // ANALYZE_PASSAGE_PROMPT asks for every content word with 6 fields each,
+        // so a few hundred words of input can emit >8k tokens and truncate the JSON.
+        maxOutputTokens: 32768,
         responseMimeType: 'application/json',
       },
     })
